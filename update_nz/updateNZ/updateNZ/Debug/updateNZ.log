@@ -1,0 +1,10 @@
+﻿  updateNZ.cpp
+C:\Users\E.L.Jenneskens\Documents\git\e.l.-theses\update_nz\updateNZ\updateNZ\updateNZ.cpp(37,23): warning C4018: '<': signed/unsigned mismatch
+C:\Users\E.L.Jenneskens\Documents\git\e.l.-theses\update_nz\updateNZ\updateNZ\updateNZ.cpp(89,23): warning C4018: '<': signed/unsigned mismatch
+C:\Users\E.L.Jenneskens\Documents\git\e.l.-theses\update_nz\updateNZ\updateNZ\updateNZ.cpp(94,27): warning C4018: '<': signed/unsigned mismatch
+C:\Users\E.L.Jenneskens\Documents\git\e.l.-theses\update_nz\updateNZ\updateNZ\updateNZ.cpp(127,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\E.L.Jenneskens\Documents\git\e.l.-theses\update_nz\updateNZ\updateNZ\updateNZ.cpp(237,27): warning C4018: '<': signed/unsigned mismatch
+C:\Users\E.L.Jenneskens\Documents\git\e.l.-theses\update_nz\updateNZ\updateNZ\updateNZ.cpp(263,27): warning C4018: '<': signed/unsigned mismatch
+C:\Users\E.L.Jenneskens\Documents\git\e.l.-theses\update_nz\updateNZ\updateNZ\updateNZ.cpp(288,25): warning C4018: '<': signed/unsigned mismatch
+C:\Users\E.L.Jenneskens\Documents\git\e.l.-theses\update_nz\updateNZ\updateNZ\updateNZ.cpp(354,27): warning C4018: '<': signed/unsigned mismatch
+  updateNZ.vcxproj -> C:\Users\E.L.Jenneskens\Documents\git\e.l.-theses\update_nz\updateNZ\Debug\updateNZ.exe
