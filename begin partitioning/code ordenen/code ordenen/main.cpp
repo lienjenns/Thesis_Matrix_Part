@@ -13,6 +13,7 @@
 #include"./Util.h"
 #include<utility>
 
+
 int Processors=4;
 double Epsilon=0.03;
 std::set<std::vector<bool>> AllStates;
