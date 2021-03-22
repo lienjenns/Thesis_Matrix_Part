@@ -1,5 +1,6 @@
 ﻿  main.cpp
-C:\Users\E.L.Jenneskens\Documents\git\e.l.-theses\begin partitioning\code ordenen\code ordenen\main.cpp(78,35): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\e.l.-theses\begin partitioning\code ordenen\code ordenen\main.cpp(128,16): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\e.l.-theses\begin partitioning\code ordenen\code ordenen\main.cpp(160,22): warning C4018: '<': signed/unsigned mismatch
-  code ordenen.vcxproj -> C:\Users\E.L.Jenneskens\Documents\git\e.l.-theses\begin partitioning\code ordenen\Debug\code ordenen.exe
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\begin partitioning\code ordenen\code ordenen\main.cpp(82,35): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\begin partitioning\code ordenen\code ordenen\main.cpp(90,11): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\begin partitioning\code ordenen\code ordenen\main.cpp(152,16): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\begin partitioning\code ordenen\code ordenen\main.cpp(189,22): warning C4018: '<': signed/unsigned mismatch
+  code ordenen.vcxproj -> C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\begin partitioning\code ordenen\Debug\code ordenen.exe

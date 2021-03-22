@@ -36,6 +36,9 @@
     <ClCompile Include="Symmetry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Lower_bounds.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="matrix.h">
@@ -54,6 +57,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Symmetry.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Lower_bounds.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

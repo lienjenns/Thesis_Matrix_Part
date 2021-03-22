@@ -3,6 +3,7 @@
 #include <vector>
 #include<sstream>
 #include<algorithm>
+#include<string>
 
 
     matrix Read_From_File(std::string filename) {
@@ -42,12 +43,20 @@
         locations.reserve(nnz);
         datas.reserve(nnz);
 
+        //This removes the first now empty row
+        std::string line;
+        std::getline(file, line);
+       
+
         // Read the data
         for (int l = 0; l < nnz; l++)
         {
+            std::getline(file, line);
+            std::istringstream iss(line);
             int m, n;
             double data;
-            file >> m >> n >> data;
+            iss >> m >> n ;
+          
             std::pair<int, int> q(m-1, n-1);
             locations.push_back(q);
             datas.push_back(data);

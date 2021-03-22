@@ -1,0 +1,5 @@
+﻿  L2bound.cpp
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\L2bound\L2bound\L2bound.cpp(19,38): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\L2bound\L2bound\L2bound.cpp(201,27): warning C4018: '<': signed/unsigned mismatch
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\L2bound\L2bound\L2bound.cpp(266,23): warning C4018: '<': signed/unsigned mismatch
+  L2bound.vcxproj -> C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\L2bound\Debug\L2bound.exe

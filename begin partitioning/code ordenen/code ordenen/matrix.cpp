@@ -24,9 +24,9 @@ matrix::matrix(int x, int y, int z, std::vector<std::pair<int, int >> entries) {
 
     for (int i = 0; i < z; i++) {
 
-        std::cout << locations[i].first;
-        std::cout << locations[i].second;
-        std::cout << "\n";
+       // std::cout << locations[i].first;
+     //  std::cout << locations[i].second;
+      //  std::cout << "\n";
     }
     //check wordt het goed ingevuld vanuit read me functie
     //std::cout<< "aantal rijen"<<M<< '\n';
@@ -220,7 +220,7 @@ void matrix::CCS(std::vector < std::pair<int, int>> Entries, int nnz, int number
 
 
      void matrix::Initial_nzstate_vector() {
-      std::cout <<"AAntal proceesoors"<< Processors;
+     // std::cout <<"AAntal proceesoors"<< Processors;
 
          std::vector < std::pair<int, std::vector<bool>>> Vector_NZs;
          Vector_NZs.resize(nnz);

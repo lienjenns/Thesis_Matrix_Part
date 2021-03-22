@@ -9,19 +9,19 @@
 //int AAnt = 0;
 
 //Function that makes the Unassigned State
-std::vector<bool> Determine_Unassigned_State(int p);
+//std::vector<bool> Determine_Unassigned_State(int p);
 
-
+std::set<std::vector<bool>> Assigned_States(std::vector<std::vector<bool>> Set_States_nz, std::vector<bool> Unassigned_State);
 
 std::vector<int> Determine_Order_row_columns(std::vector<int> number_nz);
 
 std::vector<std::vector<bool>> Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order_rows_columns, int a, matrix Info, std::vector<int> Vrije_NZ, std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
-	int lowerbound);
+	int lowerbound, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols);
 std::set<std::vector<bool>> Possible_States(std::vector<std::vector<bool>> States_NZs, int No_Free_NZ);
 
 
 
-std::vector<int> Update_NO_Freenz(std::vector<int> No_Freenz_perRowCol, std::vector<int> Indices_intersectRowCol);
+//std::vector<int> Update_NO_Freenz(std::vector<int> No_Freenz_perRowCol, std::vector<int> Indices_intersectRowCol);
 
 
 int LowerBound1(std::vector < std::vector<bool>>The_Partition);

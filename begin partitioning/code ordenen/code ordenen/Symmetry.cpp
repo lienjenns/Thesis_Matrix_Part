@@ -1,6 +1,7 @@
 #include <iostream>
 #include<vector>
 #include<set>
+#include <algorithm>
 #include "./Global.h"
 
 
@@ -35,6 +36,8 @@ std::set<std::vector<bool>> First_Symmetry_Set() {
         std::cout << " ";
     }*/
 
+  
+
     return States_1st_rowcol_symm;
 }
 
@@ -43,7 +46,9 @@ std::set<std::vector<bool>> First_Symmetry_Check(std::set<std::vector<bool>> Sym
 
     std::set<std::vector<bool>> Feas_states_Symm;
 
-    for (auto i = Symm_Set.begin(); i != Symm_Set.end(); i++) {
+   //std::set<std::vector<bool>>::reverse_iterator i;
+
+    for ( auto i = Symm_Set.begin(); i != Symm_Set.end(); i++) {
 
         std::vector<bool> State = *i;
         std::set<std::vector<bool>>::iterator it;
@@ -57,6 +62,6 @@ std::set<std::vector<bool>> First_Symmetry_Check(std::set<std::vector<bool>> Sym
         }
 
     }
-    std::cout << Feas_states_Symm.size();
+   // std::cout << Feas_states_Symm.size();
     return Feas_states_Symm;
 }

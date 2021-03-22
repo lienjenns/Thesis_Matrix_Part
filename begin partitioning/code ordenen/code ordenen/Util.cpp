@@ -155,9 +155,9 @@ std::vector<int> Determine_Set_indices(std::vector<bool> State_Intersect_RC) {
     }
 
     //Prints the indices of the ones.
-    for (int j = 0; j < Set_Indices.size(); j++) {
+   // for (int j = 0; j < Set_Indices.size(); j++) {
         // std::cout << Set_Indices[j];
-    }
+   // }
 
     return Set_Indices;
 

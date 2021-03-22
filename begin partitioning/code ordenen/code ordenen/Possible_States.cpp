@@ -10,23 +10,16 @@
 #include<Windows.h>
 #include <tuple>
 #include"./Symmetry.h"
-
-//Gives the state of an unassigned nz , state hasnumber of zeros  equal to number of processors. 
- //So it depends on the number of processors.
-std::vector<bool> Determine_Unassigned_State(int p) {
-    std::vector<bool> Unassigned_State(p, 0);
-
-    return Unassigned_State;
-}
+#include"Lower_bounds.h"
+#include<utility>
 
 
-
-//Function that determines the order of the row and columns based on the number of nonzeros in a row/column
-
-//moet als input krijgen uit matrix.cpp" perRow_Col"
+//Function that determines the order of the row and columns based on the number of nonzeros in a rowcol.
+//The input needs to be "matrix.perRow_Col".
+//The output is the order of the rows and columns.
 std::vector<int> Determine_Order_row_columns(std::vector<int> number_nz) {
 
-    //Vector in which order is stored.
+    //Vector in which the order is stored.
     std::vector<int> Order__row_columns;
 
     int number_of_rows_columns = number_nz.size();
@@ -34,8 +27,8 @@ std::vector<int> Determine_Order_row_columns(std::vector<int> number_nz) {
 
         int Maximal_Value=*std::max_element(number_nz.begin(), number_nz.end());
 
-        
-        if (Maximal_Value < 1) {            //Makes sure that rows/col with 0 nonzeros are not taken into account.
+        //Makes sure that a rowcol with 0 nonzeros is not taken into account.
+        if (Maximal_Value < 1) {            
             break;
         }
 
@@ -46,30 +39,34 @@ std::vector<int> Determine_Order_row_columns(std::vector<int> number_nz) {
 
 
     }
-    //Prints the order of the row and columns, order is on basis of number of nz in row/column.
-    //Row/column with the most nz is first.
-    std::cout << "Volgorde rijen & kolommen";
+
+    //Prints the order of the row and columns, rowcol with the most nz is first.
+    std::cout << "Order of the row and columns: ";
     for (int j = 0; j < Order__row_columns.size(); j++) {
         std::cout << Order__row_columns[j] << "  ";
     }
+    std::cout << "\n";
+    
     return Order__row_columns;
 }
 
+//Determines based on a given state and the number of free nz in a rowcol , which states there are possible for that rowcol.
+//i.e. if state=(1,0,0), 1 free nz, then the possible states are {(1,1,0); (1,0,1)}
+
+//Input; Freeindices= processors that don't own a nonzero in this rowcol, state, number of free nz, set to hold all the possible states.
+//Output; Set with all possible states based on a starting state and the numebr of free nonzeros.
+std::set<std::vector<bool>> Possible_States_meerFreeNZ(std::vector<int> freeindices, std::vector<bool> State,
+    int number_NZ, std::set<std::vector<bool>> Begin) {
 
 
+    //If there are no free nonzeros in the rowcol or there are no unused processors,
+    //Then all possible states are found.
+    if (number_NZ == 0 || freeindices.size() == 0) {
 
 
-
-std::set<std::vector<bool>> Possible_States_meerFreeNZ(std::vector<int> freeindices, std::vector<bool> State, int number_NZ, std::set<std::vector<bool>> Begin) {
-    //maak verzameling aan waar je alle possible states in op gaat slaan
-    //std::set<std::vector<bool>> All_States;
-   // All_States = Begin;
-    //Is dit nodig?
-    int a = number_NZ;
-
-    if (a == 0 || freeindices.size() == 0) {
+        //Prints the set of all possible states
        // std::cout << "size of set: " << Begin.size() << "\n";
-        //Dit print de set van possible states; Dubbele loop nodig en auto ipv int j: j ++
+     
         //for (auto j = Begin.begin(); j != Begin.end(); j++) {
 
         //    //std::cout << "State " << j<< ": ";
@@ -86,31 +83,37 @@ std::set<std::vector<bool>> Possible_States_meerFreeNZ(std::vector<int> freeindi
     }
 
     else {
-        //aantal processoren die nog niet gebruikt
+        //Number of processors not used in the rowcol.
         int nm_free_indices = freeindices.size();
 
         std::vector<int> New_freeProcessors = freeindices;
         std::set<std::vector<bool>> Result;
         Result = Begin;
+
+        //Traverse all processors that do not own nonzeros in the rowcol.
         for (int i = 0; i < nm_free_indices; i++) {
 
             std::vector<bool> State_New = State;
 
-
-            //Poss state maken verander een 0 in een 1
+          
             int index = freeindices[i];
-            State_New[index] = 1;        //maakt de mogelijke state, kan ipv 1 ook true gebruiken
-            std::set<std::vector<bool>> All_States = Begin;
-            All_States.insert(State_New); //slaat mogelijke state op in set
+            //Make a permitted new state.
+            State_New[index] = 1;       
 
-            //Aanpassen van variabelen voor recursie
-            //a -= 1;
+            std::set<std::vector<bool>> All_States = Begin;
+
+            //Save the new state.
+            All_States.insert(State_New);
+
+            //This processor is now used, erase it from th free processors list.
             New_freeProcessors.erase(New_freeProcessors.begin());
 
 
+            //Recurse
+            //number of free nz decreases with one so number_NZ = a-1.
+            std::set<std::vector<bool>> result = Possible_States_meerFreeNZ(New_freeProcessors, State_New, number_NZ - 1, All_States);
 
-            //recursie
-            std::set<std::vector<bool>> result = Possible_States_meerFreeNZ(New_freeProcessors, State_New, a - 1, All_States);
+            //Save the found possible states in the set that holds all possible states.
             for (auto l = result.begin(); l != result.end(); l++) {
 
                 Result.insert(*l);
@@ -125,7 +128,7 @@ std::set<std::vector<bool>> Possible_States_meerFreeNZ(std::vector<int> freeindi
 
 
 //std::vector<bool> State1, std::vector<bool> State2
-std::set<std::vector<bool>> Assigned_States(std::vector<std::vector<bool>> Set_States_nz, std::vector<bool> Unassigned_State, int Size_of_Set) {
+std::set<std::vector<bool>> Assigned_States(std::vector<std::vector<bool>> Set_States_nz, std::vector<bool> Unassigned_State) {
 
     //This will be our container with all correct states for row/column, 
     //if we only look at the already assigned nz in a row/column. 
@@ -137,7 +140,7 @@ std::set<std::vector<bool>> Assigned_States(std::vector<std::vector<bool>> Set_S
     std::vector<bool> Basic_State;
     Basic_State = Unassigned_State;
     std::vector<bool> B = Unassigned_State;
-    int b = Size_of_Set;
+    int Size_of_Set = Set_States_nz.size();
 
     if (Size_of_Set == 0) {
         AllPossible_States_assignedNZ.emplace(Basic_State);
@@ -171,7 +174,7 @@ std::set<std::vector<bool>> Assigned_States(std::vector<std::vector<bool>> Set_S
             std::vector<bool> Basic_State2 = Basic_State;
             Basic_State = B;
 
-            std::set<std::vector<bool>> result = Assigned_States(NewSet_States_of_nz, Basic_State2, b - 1);
+            std::set<std::vector<bool>> result = Assigned_States(NewSet_States_of_nz, Basic_State2);
 
 
             for (auto l = result.begin(); l != result.end(); l++) {
@@ -211,10 +214,10 @@ std::set<std::vector<bool>> Possible_States(std::vector<std::vector<bool>> State
 
     //Hier nog functie om (0,...,0) vectoren uit States_Nzs te verwidjeren.
 
-    int No_Assigned_NZ = States_NZs.size();
+    int No_Assigned_NZ = States_NZs.size(); //KAn deze dan weg werd eerst bij assigned functie gebruikt ToDo
     std::vector<bool> Unassigned_State(Processors, 0); //Makes the Unassigned State (0, ..., 0)
     std::set<std::vector<bool>> Outcome_Assigned;
-    Outcome_Assigned = Assigned_States(States_NZs, Unassigned_State, No_Assigned_NZ);
+    Outcome_Assigned = Assigned_States(States_NZs, Unassigned_State);
 
 
     //All the states in the outcome set of assigend_States are feasible for this row/column
@@ -487,12 +490,28 @@ bool Check_Load_Bal(std::vector<bool> Possible_Status_rc, int rowcol, std::vecto
 
 }
 
- //This fucntion updates the Partition_size, the color_count for each rowcol, and the lowerbound.
-std::tuple<std::vector<int>, std::vector<std::vector<int>>, int> Update(int rowcol, std::vector<bool> Status_rowcol, matrix A, std::vector<std::vector<bool>> The_States, std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
-    int LB) {
+ //This function updates; the Partition_size, the color_count for each rowcol, 
+// the lowerbound for the partial partition given by "The_States", and the information for Lowerbound_2.
+std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, int, std::vector<std::pair<int, std::vector<bool>>> > Update(int rowcol,
+    std::vector<bool> Status_rowcol, matrix A, std::vector<std::vector<bool>> The_States, std::vector<int> Vector_Freenz,
+    std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
+    int LB, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols) {
 
+
+    //There are no free variables anymore in "rowcol".
+    Vector_Freenz[rowcol] = 0;
+
+    std::vector<std::pair<int, std::vector<bool>>> New_Partial_Status_rowcols = Partial_Status_rowcols;
+   
+    //First adjust the lowerbound remove for the assigned rowcol the lowerbound2 and add the lowerbound1 to Lowerbound "LB".
+
+    //Remove the L2 bound from LB for assigned rowocl.
+    LB -=Partial_Status_rowcols[rowcol].first;
+   
     int increase_LB1 = LB1(Status_rowcol);
     LB += increase_LB1;
+    
+
    // std::cout << " LB1: " << LB;
     std::vector<int> Intersecting_rowcol = A.Intersecting_RowCol(rowcol);
 
@@ -503,19 +522,46 @@ std::tuple<std::vector<int>, std::vector<std::vector<int>>, int> Update(int rowc
         std::vector<bool> State_intersect_rc = The_States[index_itersect_rc];
 
         //Je hoeft niks te updten als nieuwe states allproc state kan dit meer aanbegin dat neit for lop in?? ToDo
-        if (Status_rowcol == AllProc_State) {
-            continue;
-        }
+      
 
         //MAke the new_state of the intersecting NZ
         std::vector<bool> New_State_intersect_NZ;
         if (State_intersect_rc != Zero_State) {
             New_State_intersect_NZ = Status_rowcol && State_intersect_rc;
 
+            if (Status_rowcol == AllProc_State) {
+            continue;
+            }
+
         }
         else {
             New_State_intersect_NZ = Status_rowcol;
             //Hier update free nz??
+            Vector_Freenz[index_itersect_rc] -= 1;
+
+            if (Status_rowcol == AllProc_State) {
+                continue;
+            }
+
+           int index_newst= Binair_index(New_State_intersect_NZ);
+            int old_L2_intersectrc = Partial_Status_rowcols[index_itersect_rc].first;
+            
+          bool Partial_status_newST=  Partial_Status_rowcols[index_itersect_rc].second[index_newst];
+
+          if ((old_L2_intersectrc == (Processors - 1)) || Partial_status_newST == 1) {
+
+
+          }
+          else {
+              LB -= old_L2_intersectrc;
+             
+               New_Partial_Status_rowcols=L2bound(Status_rowcol, index_itersect_rc, Partial_Status_rowcols);
+
+              LB += New_Partial_Status_rowcols[index_itersect_rc].first;
+          }
+            //if{oude L2==Processors-1 ||binair(newstate)=1{doe niks}
+            //update L2 bound; doe minus oude update L2 en plus de nieuwe
+            //Moet int L@ bound meegeven
         }
 
         //If the state of the nz where the row and col intersect doesn't change nothing needs to be updated
@@ -538,7 +584,7 @@ std::tuple<std::vector<int>, std::vector<std::vector<int>>, int> Update(int rowc
 
             for (auto j = AllStates.begin(); j != AllStates.end(); j++) { //Moet tweede conditie wl in if statement doe je er al wat mee maar dat voorkomy hier niet dat je m toch niet afgaat in allstates denk ik ToDo
 
-                if (((New_State_intersect_NZ && *j) == New_State_intersect_NZ) && (*j != State_intersect_rc)) {
+                if (((New_State_intersect_NZ && *j) == New_State_intersect_NZ) && ((State_intersect_rc == Zero_State) || ((*j && State_intersect_rc) != State_intersect_rc)) ) { //ToDo driedubbele checl eerst had k asl 2e statement *j!= State_intersect_row ging goed vor p=2,3 niet p=4
 
                     int index_St = Binair_index(*j);
 
@@ -553,13 +599,14 @@ std::tuple<std::vector<int>, std::vector<std::vector<int>>, int> Update(int rowc
 
     }
 
+    New_Partial_Status_rowcols[rowcol].first = 0;
 
-    return std::make_tuple(Partition_size, color_count, LB);
+    return std::make_tuple(Vector_Freenz, Partition_size, color_count, LB, New_Partial_Status_rowcols);
 
 
 }
 
-
+//(( State_intersect_rc==Zero_State) || ((*j && State_intersect_rc ) != State_intersect_rc))) Dit gaat is als state intersect nog niet ingedeeld
 
 //Other UB this is a very large UB better option? ToDo
 //int UB = (Processors-1)*std::min(ab.N, ab.M)-(Processors-1);
@@ -571,26 +618,31 @@ int UB = 100;
 
 //De tree gaat eerst helemaal een zijtak af
 int AAnt = 0;
+int Aant_aborted=0;
 std::vector<std::vector<bool>> Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order_rows_columns, int a, matrix Info, std::vector<int> Vrije_NZ, std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
-    int lowerbound) {
+    int lowerbound, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols) {
 
-    //If it takes too long push escape button, then this funtion ends and the best solution so far is printed
-    //27 is the escape toets
+    //If it takes too long push escape button, then the execution of this funtion stops.
+    // The best solution so far is printed.
+    //27 refers to the  the escape button.
     if (GetKeyState(27) & 0x8000) {
-
         Stop_Partition = 1;
     }
+
     if (Stop_Partition) {
         return The_States;
     }
 
 
     if (lowerbound >= UB) {
-
+        Aant_aborted++;
+        if (Aant_aborted % 100000 == 0) {
+            std::cout << Aant_aborted << "\n";
+        }
         return The_States;
     }
 
-    std::vector<int> Vector_No_Freenz = Vrije_NZ;
+    
     
 
     int Layers_Tree =The_States.size();
@@ -637,9 +689,7 @@ std::vector<std::vector<bool>> Partition(std::vector<std::vector<bool>> The_Stat
         std::cout << std::accumulate(Partition_size.begin(), Partition_size.end(), 0) - 2 * (Partition_size[0] + Partition_size[1] + Partition_size[3]); //Dit is de formule voor p=3 moet nog dynamisch*/
      
         AAnt++;
-        if (AAnt % 100000 == 0) {
-            std::cout << AAnt<<"\n";
-        }
+       
     }
     else {
         
@@ -658,9 +708,9 @@ std::vector<std::vector<bool>> Partition(std::vector<std::vector<bool>> The_Stat
           }
           std::cout << "\n";*/
 
-        int no_Free_nzi = Vector_No_Freenz[i]; //Dit moet worden geupdate
+        int no_Free_nzi = Vrije_NZ[i]; //Dit moet worden geupdate
         //   std::cout << "aantal vrije nz: " << no_Free_nzi;
-        std::vector<int> New_vector_FreeNZ = Update_NO_Freenz(Vector_No_Freenz, IntersectingRowCol);
+       // std::vector<int> New_vector_FreeNZ = Update_NO_Freenz(Vector_No_Freenz, IntersectingRowCol);
 
 
         /// Dit geeft de correcte states vn intersecing rows/columns, maakt er een vectir van
@@ -723,34 +773,37 @@ std::vector<std::vector<bool>> Partition(std::vector<std::vector<bool>> The_Stat
             std::vector<bool> Chosen_State = *k;
 
            
-            std::tuple<std::vector<int>, std::vector<std::vector<int>>, int> updatecolor = Update(i, *k, Info, The_States, Partition_size, color_count,  lowerbound);
+            std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, int, std::vector<std::pair<int, std::vector<bool>>> > updatecolor = Update(i, *k, Info, The_States,Vrije_NZ, Partition_size, color_count,  lowerbound, Partial_Status_rowcols);
             The_States[i] = Chosen_State;
         
             //variables for the tie() fucntion used to unapck the tuple, tie() or get() wat is beter ToDo ??
+            std::vector<int> new_Free_NZ;
             std::vector<int> new_Partsize;
             std::vector<std::vector<int>> new_colorcount;
             int new_lb;
+            std::vector<std::pair<int, std::vector<bool>>> new_Partial_status;
 
-            tie(new_Partsize, new_colorcount, new_lb) = updatecolor;
+            tie(new_Free_NZ, new_Partsize, new_colorcount, new_lb, new_Partial_status) = updatecolor;
 
             int b = a - 1;
-            Partition(The_States, Order_rows_columns, b, Info, New_vector_FreeNZ, new_Partsize, new_colorcount,  new_lb);
+            Partition(The_States, Order_rows_columns, b, Info, new_Free_NZ, new_Partsize, new_colorcount,  new_lb, new_Partial_status);
         }
 
 
-
+      //  New_vector_FreeNZ,
     }
   
     return The_States;
 }
 
 
-//Geeft totaal aantal partities.
+//Gives the number of (partial) partitions that were aborted, because LB>=UB.
 int get_Aantal() {
-    return AAnt;
+    return Aant_aborted;
 }
 
-//Initialize the external variables here in cpp
+//This are 2 external variables that hold the best found  solution 
+//and the corresponding value of the communciation volume until now.
 std::vector<std::vector<bool>> Best_solution_sofar;
 int Lowest_cv_sofar;
 
@@ -762,23 +815,3 @@ void Save_best_solution_sofar(std::vector<std::vector<bool>> The_States, int com
          Lowest_cv_sofar = commvol;
     }
 }
-
-
-
-std::vector<int> Update_NO_Freenz(std::vector<int> No_Freenz_perRowCol, std::vector<int> Indices_intersectRowCol) {
-
-    std::vector<int> New_No_Freenz = No_Freenz_perRowCol;
-
-    int No_intersecting = Indices_intersectRowCol.size();
-
-    for (int i = 0; i < No_intersecting; i++) {
-
-        int  Index_RowCol = Indices_intersectRowCol[i];
-        New_No_Freenz[Index_RowCol] -= 1;
-
-
-    }
-
-    return New_No_Freenz;
-}
-

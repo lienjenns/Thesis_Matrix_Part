@@ -10,6 +10,8 @@
 #include<Windows.h>
 #include<time.h>
 #include <iomanip>  
+#include"./Util.h"
+#include<utility>
 
 int Processors=4;
 double Epsilon=0.03;
@@ -21,6 +23,8 @@ std::vector<bool> AllProc_State(Processors, 1);
 int Max_Partition_size;
 
 bool Stop_Partition = 0;
+
+std::vector <std::vector<bool>>Index_and_Status;
 
 std::set<std::vector<bool>> States(int Number_of_processors, int start, std::vector<bool> Different_States, int x) { //ToDo moet netter uiteindelik in cpp
 
@@ -80,6 +84,24 @@ int Load_Balance(int nnz) {
     return Max_part_size;
 }
 
+std::vector <std::vector<bool>> indexStatus_vs_Status() {
+    std::vector<std::vector<bool>> Index_Status;
+
+    int x = pow(2, Processors) - 2;
+    Index_Status.resize(x); //Moet naar options resize dus 2^p-2
+   
+
+    for (auto i = AllStates.begin(); i != AllStates.end(); i++) {
+        int index = Binair_index(*i);
+
+        Index_Status[index] = *i;
+
+    }
+
+    return Index_Status;
+
+}
+
 int main()
 { 
     clock_t start, end;
@@ -96,14 +118,16 @@ int main()
    //Here the set of all posibble states without the "all processors state =(1,1,1, ...,1)" is made,
     AllStates = States(Processors, 0, Zero_State, Processors);
 
+    //Here the vector of binairy indices with there status is made.
+    Index_and_Status = indexStatus_vs_Status();
    
     //Give the name of the mtx of txt file
-    matrix A(Read_From_File("cage3.mtx"));
+    matrix A(Read_From_File("GL7d10.mtx"));
 
 
-    A.Initial_nzstate_vector();
+    A.Initial_nzstate_vector();//ToDo dit geval dexe fucntie gebruik ik volgens mij niet.
     Max_Partition_size = Load_Balance(A.nnz);
-    std::cout << "Max part sieze " << Max_Partition_size << "\n";
+    std::cout << "Max partition size: " << Max_Partition_size << "\n";
 
     //matrix B();
     //A en B 2 verschillende objecten.
@@ -115,7 +139,7 @@ int main()
  //  std::cout << "\n" <<"The CMax is:"<< b;
    int max_size = Load_Balance(A.nnz);
 
-   std::cout << " Max partition size: " << max_size;
+   //std::cout << " Max partition size: " << max_size;
 
    std::vector<int> c;
    c=Determine_Order_row_columns(A.perRow_Col);
@@ -129,6 +153,7 @@ int main()
    std::vector<int> Partition_size(options, 0);
 
 
+
    std::vector<std::vector<int>> color_count;
 
    //Hier wordt color_count gemaakt ToDo moet netter cpp
@@ -139,13 +164,17 @@ int main()
 
        }
 
-     
+   //Initial container values for L2bound, 
+  std::vector<bool> initial_Partstat(options, 0);
+  std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols((A.M + A.N), std::make_pair(0, initial_Partstat));
+ 
+
        
 
    std::vector<std::vector<bool>> Partitie;
-   Partitie = Partition(TheState, c, d,A, A.perRow_Col, Partition_size, color_count, 0);
+   Partitie = Partition(TheState, c, d,A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols);
   
-   std::cout << "Aantal partities: " << get_Aantal();
+   std::cout << "Number of Partitions aborted: " << get_Aantal();
 
    end = clock();
    std::cout << "\n";
@@ -155,7 +184,7 @@ int main()
 
    std::cout << "\n" << "Time taken: " << std::setprecision(5)<< time_taken << "sec";
 
-   //Prints the best solution that is found sofar and the corresponding communicaion volume.
+   //Prints the best solution that is found so far and the corresponding communicaion volume.
    std::cout <<"\n"<< "The best solution found so far is:  ";
    for (int i = 0; i < Best_solution_sofar.size(); i++) {
        for (int j = 0; j < Processors; j++) {
