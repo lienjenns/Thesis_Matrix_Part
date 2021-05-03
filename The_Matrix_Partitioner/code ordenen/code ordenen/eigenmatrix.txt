@@ -1,0 +1,15 @@
+%% Eigen matrix om t echecken alijd minder cv voor p=2 dan p=3?
+%%%
+6 6 12
+1 5 
+1 6
+2 5
+2 6
+3 3
+3 4
+4 3
+4 4
+5 1
+5 2
+6 1
+6 2

@@ -1,0 +1,10 @@
+﻿  Possible_States.cpp
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\begin partitioning\code ordenen\code ordenen\Possible_States.cpp(45,23): warning C4018: '<': signed/unsigned mismatch
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\begin partitioning\code ordenen\code ordenen\Possible_States.cpp(112,23): warning C4018: '<': signed/unsigned mismatch
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\begin partitioning\code ordenen\code ordenen\Possible_States.cpp(902,27): warning C4018: '<': signed/unsigned mismatch
+  Generating code
+  1 of 1194 functions (<0.1%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    19 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  code ordenen.vcxproj -> C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\begin partitioning\code ordenen\Release\code ordenen.exe
