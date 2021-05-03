@@ -1,0 +1,35 @@
+Given a number of processors p, and a load-imbalance parameter epsilon, the algorithm determines
+the optimal partition of a matrix A in p parts.
+
+In the main file the number of parts/processors p, the load-imbalance parameter epsilon,
+and the filename/location of the matrix in matrix market format, are user inputs.
+
+Input (in main.cpp);
+
+r.22:Give number of processors.
+r.25 Give the value of epsilon.
+r.48 Give the Location of the mtx/txt file.
+
+Output:
+
+Every time the algorithm finds an improvement over the previous best found solution 
+it is printed in the console screen (both the solution and the communication value are printed).
+The algorithm also keeps track on the number of partitions that were aborted because LB>=UB.
+Before the improved solution is printed, it first prints the current number of aborted solutions.
+
+To keep track of what the algorithm is doing, 
+each time the number of aborted solutions is a multiple of a million, it is printed.
+
+At the end; the time it took to compute the optimal solution, the number of aborted partitions,
+an optimal solution and the corresponding optimal communication value are printed.
+
+
+For the user;
+
+Escape button; This button can be pressed in order to abort the algorithm. 
+	       It will print the best found solution and commuication value thus far.
+
+Alt button; Press the alt button to see which subtree the algorithm is currently in
+	    When the Alt button is pressed the state of the first rowcol that is partitionend
+ 	    is printed. This gives an idication how far the algorithm has progressed in the tree.
+
