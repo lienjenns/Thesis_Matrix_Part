@@ -38,7 +38,6 @@ std::vector<int> Determine_Order_row_columns(std::vector<int> number_nz) {
         Order__row_columns.push_back(Index_MaxElement);
         number_nz[Index_MaxElement] = -1;
 
-
     }
 
     //Prints the order of the row and columns, rowcol with the most nz is first.
@@ -53,33 +52,38 @@ std::vector<int> Determine_Order_row_columns(std::vector<int> number_nz) {
 
 
 
-
 //Function that determines the order of the row and columns based on the number of nonzeros in a row/column
 //In the order rows and columns alternate
-//Thw input is " matrix.perRow_Col"
+//The input is " matrix.perRow_Col"
 std::vector<int> Determine_Order_row_columns2(std::vector<int> number_nz, int M) {
 
     //Vector in which order is stored.
     std::vector<int> Order__row_columns;
 
+    //Boolean used to alternate between rows and columns.
+    //If we want to look at the rows x=0 , when x=1 we look at the the columns.
     bool x = 0;
+    //Boolean to keep track if there is still a row with no of nonzeros >=1.
     bool y = 0;
+    //Boolean to keep track if there is still a column with no of nonzeros >=1.
     bool z = 0;
 
-    int Index_Maximal_Element = std::max_element(number_nz.begin(), number_nz.end()) - number_nz.begin();
-   int Maximal_value = *std::max_element(number_nz.begin(), number_nz.begin());
+    //First determine if the rowcol with maximum no of nonzeros is a row or column.
+   int Index_Maximal_Element = std::max_element(number_nz.begin(), number_nz.end()) - number_nz.begin();
+   int Maximal_value;
     if (Index_Maximal_Element<M) {
         x = 0;
     }
     else { 
-        x = 1; }
+        x = 1; 
+    }
 
-    
-    int number_of_rows_columns = number_nz.size();
+    //Alternate between the rows and the columns, order of rowcols is found when there are no rowcols left with no nonzeros>=1,
+    // i.e. when y==1 && z==1.
     while(y==0 || z==0) {
 
-        
         int Index_MaxElement;
+
         //Find row/col with maximum number of nonzeros, and we alternate between rows and cols.
         if (x == 0 && y!=1) {
 
@@ -87,47 +91,46 @@ std::vector<int> Determine_Order_row_columns2(std::vector<int> number_nz, int M)
             Index_MaxElement = std::max_element(number_nz.begin(), number_nz.begin() + M) - (number_nz.begin());
             x = 1;
 
-            //Makes sure that rows/col with 0 nonzeros are not taken into account.
+            //Makes sure that rows with 0 nonzeros are not taken into account.
             if (Maximal_value < 1) {           
                 y = 1;
                 continue;
             }
-
-
         }
+
         else  {
             Maximal_value = *std::max_element(number_nz.begin() + M, number_nz.end());
             Index_MaxElement = std::max_element(number_nz.begin() + M, number_nz.end()) - (number_nz.begin());
             //set bool back to 0 to make sure that next rowcol is a row 
             x = 0;
 
-             //Makes sure that rows/col with 0 nonzeros are not taken into account.
+             //Makes sure that columns with 0 nonzeros are not taken into account.
             if (Maximal_value < 1) {           
                 z = 1;
                 continue;
             }
         }
 
-       
-
        // std::cout << "  " << Maximal_value << " " << Index_MaxElement;
         Order__row_columns.push_back(Index_MaxElement);
         number_nz[Index_MaxElement] = -1;
-
-
     }
+
+
     //Prints the order of the row and columns, order is on basis of number of nz in row/column.
     //Row/column with the most nz is first.
     std::cout << "Order of the row and columns, using order2: ";
     for (int j = 0; j < Order__row_columns.size(); j++) {
         std::cout << Order__row_columns[j] << "  ";
     }
+    std::cout << "\n";
+
     return Order__row_columns;
 }
 
 
 //Determines based on a given state and the number of free nz in a rowcol , which states there are possible for that rowcol.
-//i.e. if state=(1,0,0), 1 free nz, then the possible states are {(1,1,0); (1,0,1)}
+//i.e. if state=(1,0,0) & 1 free nz, then the possible states are {(1,1,0); (1,0,1)}
 
 //Input; Freeindices= processors that don't own a nonzero in this rowcol, state, number of free nz, set to hold all the possible states.
 //Output; Set with all possible states based on a starting state and the numebr of free nonzeros.
@@ -138,8 +141,6 @@ std::set<std::vector<bool>> Possible_States_meerFreeNZ(std::vector<int> freeindi
     //If there are no free nonzeros in the rowcol or there are no unused processors,
     //Then all possible states are found.
     if (number_NZ == 0 || freeindices.size() == 0) {
-
-
         //Prints the set of all possible states
        // std::cout << "size of set: " << Begin.size() << "\n";
      
@@ -186,7 +187,7 @@ std::set<std::vector<bool>> Possible_States_meerFreeNZ(std::vector<int> freeindi
 
 
             //Recurse
-            //number of free nz decreases with one so number_NZ = a-1.
+            //number of free nz decreases with one so number_NZ -= 1.
             std::set<std::vector<bool>> result = Possible_States_meerFreeNZ(New_freeProcessors, State_New, number_NZ - 1, All_States);
 
             //Save the found possible states in the set that holds all possible states.
@@ -203,53 +204,53 @@ std::set<std::vector<bool>> Possible_States_meerFreeNZ(std::vector<int> freeindi
 }
 
 
-//std::vector<bool> State1, std::vector<bool> State2
+//Function that determines the possble states for a rowcol given the states of already assigned rowcols, intersecting this rowcol in a nonzero.
+//The states of the already assigned intersecting rowcols are given as input; Set_States_nz.
 std::set<std::vector<bool>> Assigned_States(std::vector<std::vector<bool>> Set_States_nz, std::vector<bool> Unassigned_State) {
 
-    //This will be our container with all correct states for row/column, 
+    //This will be our container with all correct states for the row/column, 
     //if we only look at the already assigned nz in a row/column. 
     std::set<std::vector<bool>> AllPossible_States_assignedNZ;
 
-
-    //std::set<std::vector<bool>> AllPossibilities; 
 
     std::vector<bool> Basic_State;
     Basic_State = Unassigned_State;
     std::vector<bool> B = Unassigned_State;
     int Size_of_Set = Set_States_nz.size();
 
+    //If there are no nonzeros in the rowcol (anymore) that are already assigned to a processor(s);
     if (Size_of_Set == 0) {
         AllPossible_States_assignedNZ.emplace(Basic_State);
 
-
     }
+
     else {
 
         //Here we will determine the indices of the one's and how many one's there are of the first element in the set.
         std::vector<bool> Statenz = Set_States_nz[0];
-
 
         std::vector <int> Indices_set = Determine_Set_indices(Statenz);
         //Determine number of used processor for intersecting row/column.
         int Number_Set = Indices_set.size();
 
        
-
+        //Adjust the set, Set_States_nz for the recursion step.
         Set_States_nz.erase(Set_States_nz.begin());
         std::vector<std::vector<bool>> NewSet_States_of_nz = Set_States_nz;
 
-
-
-        //One of the indices that is one is set to 1 rest is kept zero.
+        //Loop over all the indices that are set to 1 in Statenz.
         for (int i = 0; i < Number_Set; i++) {
 
-            // std::cout <<"laag in tree is waarde b"<< b<<" Zover zijn we in for loop; "<< i<< "\n ";
 
             int A = Indices_set[i];
             Basic_State[A] = 1;
             std::vector<bool> Basic_State2 = Basic_State;
+            //For the next iteration in the loop set the value of Basic_State back to B=Unassigned_State
             Basic_State = B;
 
+            //Now recurse
+            //In the nezt recurion step we will look at the next element in Set_States_nz, 
+            //i.e. the first element in NewSet_States_of_nz.
             std::set<std::vector<bool>> result = Assigned_States(NewSet_States_of_nz, Basic_State2);
 
 
@@ -258,10 +259,8 @@ std::set<std::vector<bool>> Assigned_States(std::vector<std::vector<bool>> Set_S
                 AllPossible_States_assignedNZ.insert(*l);
             }
 
-
-
         }
-        // std::cout << "tot hier einde else";
+  
     }
     // Print the states;
     //std::cout << "\n" << "Hoeveelheid states in verzameling: " << AllPossible_States_assignedNZ.size() << "\n";
@@ -277,23 +276,21 @@ std::set<std::vector<bool>> Assigned_States(std::vector<std::vector<bool>> Set_S
     //    std::cout << "\n";
     //}
 
+
     return AllPossible_States_assignedNZ;
-
-
 }
 
+//This function combines the previous two functions; Assigned_States and Possible_States_meerFreeNZ.
+//This function determines for a rowcol, all possible states for this rowcol, based on already assigned nonzeros in this rowcol, given by States_NZs
+//and based on the free nonzeros in this rowcol, given by No_Free_NZ.
 std::set<std::vector<bool>> Possible_States(std::vector<std::vector<bool>> States_NZs, int No_Free_NZ) {
-
 
     //The container of all possible states for the chosen row/column
     std::set<std::vector<bool>> Feasible_States;
-
-    //Hier nog functie om (0,...,0) vectoren uit States_Nzs te verwidjeren.
-
-    int No_Assigned_NZ = States_NZs.size(); //KAn deze dan weg werd eerst bij assigned functie gebruikt ToDo
-    std::vector<bool> Unassigned_State(Processors, 0); //Makes the Unassigned State (0, ..., 0)
+ 
+    //Now determine and save alle possible states for this rowcol according to the assigned nonzeros in this rowcol;
     std::set<std::vector<bool>> Outcome_Assigned;
-    Outcome_Assigned = Assigned_States(States_NZs, Unassigned_State);
+    Outcome_Assigned = Assigned_States(States_NZs, Zero_State);
 
 
     //All the states in the outcome set of assigend_States are feasible for this row/column
@@ -303,20 +300,21 @@ std::set<std::vector<bool>> Possible_States(std::vector<std::vector<bool>> State
         Feasible_States.insert(*l);
     }
 
-
+    //Now traverse all states in Outcome_Assigned to take into account the free nonzeros in this rowcol.
     for (auto i = Outcome_Assigned.begin(); i != Outcome_Assigned.end(); i++) {
 
         //This info is needed for the function Possible_States_meerFreeNZ
         std::vector<bool> view_State = *i;
         std::vector<int> ZeroIndices;
         ZeroIndices = Determine_indices_zeros(view_State);
-
         std::set<std::vector<bool>> StartSet;
 
+        //For this state, view_State, in Outcome_Assigned determine all possible states with regard to the free nonzeros in this rowcol
+        // i.e. No_Free_Nz.
         std::set<std::vector<bool>> Outcome_Unass;
         Outcome_Unass = Possible_States_meerFreeNZ(ZeroIndices, view_State, No_Free_NZ, StartSet);
 
-        //Outcomesin set of Possible_States_meerFreenz are other n(new) feasible states for this row/column
+        //Outcomes in set of Possible_States_meerFreenz are other (new) feasible states for this row/column
         //So add them to the container
         for (auto k = Outcome_Unass.begin(); k != Outcome_Unass.end(); k++) {
 
@@ -324,39 +322,33 @@ std::set<std::vector<bool>> Possible_States(std::vector<std::vector<bool>> State
         }
 
     }
-    std::vector<bool> NoProcessor(Processors, 0);
-    Feasible_States.erase(NoProcessor);
+    // It is possible that Outcome_Assigned={(0, ..., 0)}, so remove the zero_state from the set Feasible_States.
+    Feasible_States.erase(Zero_State);
+
     //std::cout << Feasible_States.size();
-
-  
-    
-
     return Feasible_States;
 }
 
 
-//DE eerste lower bound bepaald in de partitite die we tot nu toe hebben heoveel cuts er in totaal zijn
-//Hoeveel comm vol er nu al is.
-//Deze functie gaat nu toch elke keer door hele vector dus rij/kolom die nog niet toegedeeld zijn moete op 000 worden gezet.
-//Uiteindelijk mooier om t getal te onthouden en elke keer als rij/kolom wordt ingedeeld dan alleen kijken naar die rij/kolom en lower bound daar (evt) mee te verhogen.
-//
 
-//
+//Given a (partial) partition of a matrix, this fucntion determines the (explicit) communication volume of the (partial) partition.
 int LowerBound1(std::vector < std::vector<bool>>The_Partition) {
 
     int size = The_Partition.size();
     int Number_of_cuts = 0;
 
+    //Traverse all the rowcols.
     for (int i = 0; i < size; i++) {
 
         std::vector<bool> State_i;
         State_i = The_Partition[i];
         int Ones_State_i = std::count(State_i.begin(), State_i.end(), true);
+
+        //Number of cuts in the rowcol i is number of ones minus one.
         int Cuts_row_column_i = Ones_State_i - 1;
 
-
-        //omadat je ook 000 kan hebben als nog niet teogedeeld krijg je  ook -1 cuts per rij voor niet gepartitioneerde rijen/kolommen
-        //dus vandaar alleen tellen als de cuts in je rij/kolom >=0
+        //A rowcol in a partial partition or a rowcol with 0 nonzeros can have status (0, ..., 0),
+        //So only count the cuts of rowcol i when Cuts_row_column_i>=0.
         if (Cuts_row_column_i >= 0) {
             Number_of_cuts += Cuts_row_column_i;
 
@@ -364,31 +356,7 @@ int LowerBound1(std::vector < std::vector<bool>>The_Partition) {
     }
     //std::cout << "\n" << "Lower bound 1 is;" << Number_of_cuts;
     return Number_of_cuts;
-
-
-
-
 }
-
-int LB1( std::vector<bool>State_rowcol) {
-
-    int Cuts_rowcol = 0;
-
-    //Determines the number of processors tow which the rowcol is assigned, == number of ones in state_rowcol.
-  int Ones_State_rowcol = std::count(State_rowcol.begin(), State_rowcol.end(), true);
-
-  //Determine the number of cuts in the state that us assigned to the rowcol.
-  Cuts_rowcol = Ones_State_rowcol - 1;
-
-  //Because we look at a state that is assigned to a rowcol, the state will contain at least one 1 so always cuts_rowcol>=0.
-  //This in contrast to cuts_row_column_i in the LowerBound1 fucntion, in that function cuts_row_column_i  can be -1.
-  //So in this case we can just return Cuts_rowcol.
-     
-
-    return Cuts_rowcol;
-
-}
-
 
 
 int Check1(std::vector<bool> Poss_Status_rc, int rowcol, std::vector<bool> color, std::vector<std::vector<int>> color_count, int no_New_C) {

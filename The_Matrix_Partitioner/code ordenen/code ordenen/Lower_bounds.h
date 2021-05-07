@@ -3,6 +3,12 @@
 #include<set>
 
 
+
+
+//This function determiens the Lowerbound1 for an assigned rowcol,
+//i.e. it determiens the number of cuts in the assigned rowcol.
+int LB1(std::vector<bool>State_rowcol);
+
 //This fucntion determines the L2 bound for a rowcol, that is the number of implicit cuts in the rowcol. 
 std::vector<std::pair<int, std::vector<bool>>> L2bound(std::vector<bool> Status_intersect_rc, int rc, std::vector<std::pair<int, std::vector<bool>>> Partial_Status_rowcols);
 

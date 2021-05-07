@@ -45,7 +45,7 @@ int main()
     std::cout << "Number of Processors: " << Processors <<"  Value epsilon : "<< Epsilon<< "\n";
 
     //Give the name of the mtx or txt file
-    matrix A(Read_From_File("0-30matrix/GL7d10.mtx"));
+    matrix A(Read_From_File("0-30matrix/Trec5.mtx"));
 
 
 

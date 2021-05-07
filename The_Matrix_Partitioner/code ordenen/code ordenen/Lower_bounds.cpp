@@ -10,6 +10,29 @@
 #include<numeric>
 #include<array>
 
+
+
+
+//Given the state of an assigned rowcol the function determines the LB1 for this rowcol.
+int LB1(std::vector<bool>State_rowcol) {
+
+    int Cuts_rowcol = 0;
+
+    //Determines the number of processors to which the rowcol is assigned, == number of ones in state_rowcol.
+    int Ones_State_rowcol = std::count(State_rowcol.begin(), State_rowcol.end(), true);
+
+    //Determine the number of cuts in the state that is assigned to the rowcol.
+    Cuts_rowcol = Ones_State_rowcol - 1;
+
+    //Because we look at a state that is assigned to a rowcol, the state will contain at least one 1 so always cuts_rowcol>=0.
+    //This in contrast to cuts_row_column_i in the LowerBound1 fucntion, in that function cuts_row_column_i  can be -1.
+    //So in this case we can just return Cuts_rowcol.
+
+    return Cuts_rowcol;
+}
+
+
+
 //This function determines the L2 bound for a rowcol.
 //So it determines the implicit number of cuts for this rowcol, that is the number of implicit cuts for rowcol "rc".
 std::vector<std::pair<int, std::vector<bool>>> L2bound(std::vector<bool> Status_intersect_rc, int rc,
