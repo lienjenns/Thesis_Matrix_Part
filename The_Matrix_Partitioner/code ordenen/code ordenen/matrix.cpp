@@ -59,7 +59,7 @@ void matrix::CRS(std::vector < std::pair<int, int>> locations, int nnz, int M) {
 
     }
     //Prints the vector j[k], the vcetor with the column indices of the nonzeros.
-    std::cout << "j[k] row;";
+    /*std::cout << "j[k] row;";
     for (int k = 0; k < nnz; k++) {
 
 
@@ -68,19 +68,19 @@ void matrix::CRS(std::vector < std::pair<int, int>> locations, int nnz, int M) {
 
     }
 
-    std::cout << "\n";
+    std::cout << "\n";*/
 
     //Prints the start vector for the row
-    std::cout << "Start_Row;";
-    for (int l = 0; l < length; l++) {
+    //std::cout << "Start_Row;";
+    //for (int l = 0; l < length; l++) {
 
 
-        std::cout << Start_Row[l] << " ";
+    //    std::cout << Start_Row[l] << " ";
 
 
-    }
+    //}
 
-    std::cout << "\n";
+    //std::cout << "\n";
 }
 
 //This fucntion makes the compressed column storage data structure.
@@ -123,7 +123,7 @@ void matrix::CCS(std::vector < std::pair<int, int>> Entries, int nnz, int number
     }
 
     //Prints the vector j[k]
-    std::cout << "j[k] Column;";
+ /*   std::cout << "j[k] Column;";
     for (int k = 0; k < nnz; k++) {
 
 
@@ -131,10 +131,10 @@ void matrix::CCS(std::vector < std::pair<int, int>> Entries, int nnz, int number
 
     }
 
-    std::cout << "\n";
+    std::cout << "\n";*/
 
     //Prints the start vector for the column.
-    std::cout<<"Start_Column;";
+   /* std::cout<<"Start_Column;";
     for (int l = 0; l < length; l++) {
 
 
@@ -142,7 +142,7 @@ void matrix::CCS(std::vector < std::pair<int, int>> Entries, int nnz, int number
 
 
     }
-    std::cout << "\n";
+    std::cout << "\n";*/
 }
 	
 //This functions determines the value of Cmax and returns this value.

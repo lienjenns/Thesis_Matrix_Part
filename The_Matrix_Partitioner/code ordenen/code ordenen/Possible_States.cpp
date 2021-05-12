@@ -358,15 +358,22 @@ int LowerBound1(std::vector < std::vector<bool>>The_Partition) {
     return Number_of_cuts;
 }
 
+//Function , a check , used in Check_Load_Bal.
+//Given a new status S ("Poss_Status_rc"), a status C ("color") s.t. S&&C=S, we want to know how many NEW nonzeros will be added to in the partition size of C,
+//if rowcol gets status Poss_Status_rc.
 
+//no_New_C is # nz's in rowcol (starting value of no_New_C that is returned by the function).
 int Check1(std::vector<bool> Poss_Status_rc, int rowcol, std::vector<bool> color, std::vector<std::vector<int>> color_count, int no_New_C) {
 
+    //All nonzeros in rowcol will fall  in partition of C, when it gets status "Poss_Status_rc".
+    //Need tod determine how many new nz will fall in partition of C.
     for (auto k = AllStates.begin(); k != AllStates.end(); k++) {
 
-
+        //The nonzeros in rowcol with status *k s.t. Proc(*k) subset of Proc(color), are already counted in the partition_size of C
+        //So these nz are not New nz belonging to partition C, so substract them from no_New_c.
         if ((*k && color) == *k) {
 
-            no_New_C -= color_count[Binair_index(*k)][rowcol]; //Ging hier mis bij (1,1,1) heeft namelijk binair index 7 maar color_count bestaat maar uit 6 vectoren, voor (1,1,1) hoef je ook niks te checken
+            no_New_C -= color_count[Binair_index(*k)][rowcol]; 
 
         }
         else {
@@ -376,87 +383,93 @@ int Check1(std::vector<bool> Poss_Status_rc, int rowcol, std::vector<bool> color
     }
 
     return no_New_C;
-
 }
 
+//Function , a check , used in Check_Load_Bal.
+//Given a new status S ("Possible_Status_rc"), a status C ("C") s.t.
+//Proc(C) n Proc(Possible_Status_rc) is not empty AND Proc(Possible_Status_rc) not subset of Proc(C).
+//We want to know how many NEW nonzeros will be added to the partition size of C, if this rowcol gets status Possible_Status_rc.
+//no_New_C has starting value 0.
 int Check2(std::vector<bool> Possible_Status_rc, int rowcol, std::vector<bool> C, std::vector<std::vector<int>> color_count, int no_New_C) {
 
-    //
+    
     for (auto k = AllStates.begin(); k != AllStates.end(); k++) {
 
-        if ((((*k && Possible_Status_rc) || C) == C) && ((C && *k) != *k)) {///Nu neem je alleen nog wel C zelf ook mee en dat moet juist niet
-            no_New_C += color_count[Binair_index(*k)][rowcol];  //Gaat goed voor p=3 maar niet voor p=4  of eigenlojk gaat niet goed voor C met 2 eneen en deze situatie komt alleen voor bij p=4
+        //So the NEW nz belonging to partition C are;
+        //Nonzeros in rowcol with status *k  that are not already counted in partiton of C, 
+        //(that is Proc(*k) not subset of Proc(C), i.e. *k && C != *k.)
+        //And the new status of these nonzeros *k && Possible_Status_rc is completely "contained" in C,
+        //(i.e. Proc(*k && Possible_Status_rc) subset of Proc(C).)
+        if ((((*k && Possible_Status_rc) || C) == C) && ((C && *k) != *k)) {
+            no_New_C += color_count[Binair_index(*k)][rowcol];  
 
         }
-
-
         else {
             continue;
         }
     }
-    //
 
     return no_New_C;
-
 }
 
 
-
+//This fucntion determines if a potential state, "Possible_Status_rc"  for a rowcol, "rowcol", is feasible given the load balance constraints.
+//So it checks if the potential state is possible given the partition_sizes, the number of nonzeros added to certain partition sizes and the maximum allowed partition size.
+//It returns a bool,if it is 1 then the potential state is feasible.
 bool Check_Load_Bal(std::vector<bool> Possible_Status_rc, int rowcol, std::vector<int> Partition_size, std::vector<std::vector<int>> color_count, matrix B) {
 
+    //Start the return bool at 1.
     bool The_Check = 1;
-    std::vector<bool> zero_state(Processors, 0);
-   
-  
 
-
-    //Dit moet in code allemaal in andere plek worden gemaakt en goed toegankelijk zijn
-   
-  
-   
-
+    //Determine how many processors are used in the potential state for this rowcol.
     int no_Proc = Determine_Set_indices(Possible_Status_rc).size();
 
   
-
+    //If 1 processor is used in  the potential state:
     if (no_Proc == 1) {
 
-       // std::cout << "check for one proc";
-        int no_new_S = B.perRow_Col[rowcol] - color_count[Binair_index(Possible_Status_rc)][rowcol];
+       //Number of nonzeros added to partition_size of "Possible_Status_rc".
+       int no_new_S = B.perRow_Col[rowcol] - color_count[Binair_index(Possible_Status_rc)][rowcol];
 
-        //Mag deze state?
-        //Check the partition size of the possible_state S for the rowcol.
+        
+        //Check if we can still add this number of nonzeros to the partition size of the "Possible_status_rc" for the rowcol.
         if (Partition_size[Binair_index(Possible_Status_rc)] + no_new_S <= Max_Partition_size) {
 
-
             The_Check = 1;
-           // std::cout << "HEt mag";
-
         }
 
+        //If # new nonzeros +Partition_size > maximum allowed partiiton size, then "Possible_status_rc" is not feasible for this rowcol.
         else {
             The_Check = 0;
             return The_Check;
-           // std::cout << "Nope";
         }
 
+       
+        //We also need to check the partiton sizes of the other states that also use this 1 processor. 
         //Here we will check the partition sizes of the states C s.t C&&S=S and C!=S.
-        //So C will have more ones than S if C&&S=S.
-
+        //So C will have more # ones than S if C&&S=S.
         for (auto l = AllStates.begin(); l != AllStates.end(); l++) {
 
+            //We look at partition size of C.
             std::vector<bool> C = *l;
-            if ((C && Possible_Status_rc) == Possible_Status_rc) { //Hier nog zorgen dat ie niet ook weeer S afgaat
 
+            if (((C && Possible_Status_rc) == Possible_Status_rc) && (C !=Possible_Status_rc)) { 
+
+                //# nonzeros in the rowcol.
                 int no_New_C = B.perRow_Col[rowcol];
 
+                //Determine # new nonzeros that will belong to partition C
                 no_New_C = Check1(Possible_Status_rc, rowcol, C, color_count, no_New_C);
 
+                //How many processors are used in state "C".
                 int x = Determine_Set_indices(C).size();
 
-                //&& dus The_Check alleen 1 als beide 1 zijn 
-                //Je wil loop nog stoppen als the check tussendoor 0 wordt of start check met 1 en dan 0 maken als het niet mag ToDo.
+                //Determine the new value of "The_Check"; 
+                //can we still add no_New_C to the partition_size of C without exceeding the max allowed partition size?
                 The_Check = The_Check && (Partition_size[Binair_index(C)] + no_New_C <= x * Max_Partition_size);
+
+
+                //If "The_Check"=0 we know that the potential state is not feasible and will never be feasible, so we can return 0.
                 if (The_Check == 0) {
                     return 0;
                 }
@@ -472,64 +485,93 @@ bool Check_Load_Bal(std::vector<bool> Possible_Status_rc, int rowcol, std::vecto
 
     }
 
+    //If # processors used in the potential state == Processors, then we know that the potential satte is (1, ..,1)
+    //This state is always feasible w.r.t. load balance.
+   //So we don't need to check anything and we can return 1.
     else if (no_Proc == Processors) {
 
-       // std::cout << "Nothing to check";
         return The_Check;
     }
+
+    //If # processors used > 1 and < p.
     else {
-      //  std::cout << "two checks needed";
+     
         for (auto l = AllStates.begin(); l != AllStates.end(); l++) {
+
+            //We look at partition size of state C.
             std::vector<bool> C = *l;
 
-            if ((C && Possible_Status_rc) == Possible_Status_rc) { //Hier nog zorgen dat ie niet ook weeer S afgaat
+            //There are 4 cases of states C to distnguish:
 
+            //1.
+            //If state Possible_Status_rc is completely contained in state C.
+            //So Proc(Possible_Status_rc) subset of Proc(C).
+            if ((C && Possible_Status_rc) == Possible_Status_rc) {
+
+                //# nonzeros in the rowcol.
                 int no_New_C = B.perRow_Col[rowcol];
-                //
+
+                //Determine # new nonzeros that will belong to partition C
                 no_New_C = Check1(Possible_Status_rc, rowcol, C,  color_count, no_New_C);
-                //
+
+                //How many processors are used in state "C".
                 int x = Determine_Set_indices(C).size();
 
-                //&& dus The_Check alleen 1 als beide 1 zijn 
-                //Je wil loop nog stoppen als the check tussendoor 0 wordt of start check met 1 en dan 0 maken als het niet mag ToDo.
+                //&& dus The_Check=1 iff The check was 1 and 
+                // if we can still add no_New_C to the partition_size of C without exceeding the max allowed partition size.
                 The_Check = The_Check && (Partition_size[Binair_index(C)] + no_New_C <= x * Max_Partition_size);
 
             }
 
+            //2.
+            //If state C is completely contained in Possible_Status_rc
+            ////So Proc(C) subset of  Proc(Possible_Status_rc).
             else if ((C && Possible_Status_rc) == C) {
 
                 int no_newC = 0;
 
+                //Determine # new nonzeros that will belong to partition C
                 no_newC = Check2(Possible_Status_rc, rowcol, C,  color_count, no_newC);
 
-
+                //How many processors are used in state "C".
                 int x = Determine_Set_indices(C).size();
+
+                //&& dus The_Check=1 iff The check was 1 and 
+                // if we can still add no_New_C to the partition_size of C without exceeding the max allowed partition size of C.
                 The_Check = The_Check && (Partition_size[Binair_index(C)] + no_newC <= x * Max_Partition_size);
             }
 
-
-            else if ((C && Possible_Status_rc) == zero_state) {
+            //3.
+            //If state C and Possible_Status_rc have no processors in common.
+            //Nothing needs to be checked, no nonzeros can be in state C in this rowcol if this rowcol gets state Possible_Status_rc.
+            else if ((C && Possible_Status_rc) == Zero_State) {
                 continue;
             }
 
-
+            //4.
+            //If state C and Possible_Sttaus_rc have some processors in common, but both states have a processor that the other one doesn't have.
             else {
+
                 int no_newC = 0;
 
+                //Determine # new nonzeros that will belong to partition C
                 no_newC = Check2(Possible_Status_rc, rowcol, C, color_count, no_newC);
 
+                //How many processors are used in state "C".
                 int x = Determine_Set_indices(C).size();
+
+                //&& dus The_Check=1 iff The check was 1 and 
+               // if we can still add no_New_C to the partition_size of C without exceeding the max allowed partition size of C.
                 The_Check = The_Check && (Partition_size[Binair_index(C)] + no_newC <= x * Max_Partition_size);
             }
 
             if (The_Check == 0) {
                 return The_Check;
             }
+
         }
 
-
         return The_Check;
-
     }
 
 }
@@ -542,8 +584,26 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
     std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
     int LB, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, int LB3_oud) {
 
+    //First update w.r.t the just assigned rowcol, "rowcol"; free nonzeros, packingsets, lowerbound.
 
-    //adjust packing set for asigned rowcol
+    //There are no free nonzeros anymore in "rowcol".
+    Vector_Freenz[rowcol] = 0;
+
+
+    //Adjust the lowerbound "LB" remove for the assigned rowcol the L2  bound and add the L1 bound to Lowerbound "LB".
+
+    //Remove the L2 bound from LB for assigned rowcol.
+    LB -= Partial_Status_rowcols[rowcol].first;
+    //Set L2 bound for "rowcol" to 0
+    Partial_Status_rowcols[rowcol].first = 0;
+
+    //Determine the L1 bound for "rowcol" and add it to the lowerbound of the partial partitioning.
+    int increase_LB1 = LB1(Status_rowcol);
+    LB += increase_LB1;
+
+
+    //Adjust the packing sets (L3 bound) for the assigned rowcol
+    //If "rowcol"< M , then rowcol= a row;
     if (rowcol < A.M) {
         int no_sets = Packing_Sets[0].size();
         //Loop ovr all the packing sets for the rows.
@@ -552,7 +612,8 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
         }
     }
 
-    //else we have intersecting columns, so index of column -M.
+    //Else we have "rowcol">=M, so rowcol=column,
+    //so index of column -M.
     else {
         int new_index_rowcol = (rowcol - A.M);
         int no_sets = Packing_Sets[1].size();
@@ -562,34 +623,29 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
         }
     }
 
-    //There are no free variables anymore in "rowcol".
-    Vector_Freenz[rowcol] = 0;
+   //Now update w.r.t. the intersecting rowcols;
+   //Update; 
 
-    std::vector<std::pair<int, std::vector<bool>>> New_Partial_Status_rowcols = Partial_Status_rowcols;
-   
-    //First adjust the lowerbound remove for the assigned rowcol the lowerbound2 and add the lowerbound1 to Lowerbound "LB".
-
-    //Remove the L2 bound from LB for assigned rowocl.
-    LB -=Partial_Status_rowcols[rowcol].first;
-   
-    int increase_LB1 = LB1(Status_rowcol);
-    LB += increase_LB1;
-    
-
-   // std::cout << " LB1: " << LB;
+    //std::vector<std::pair<int, std::vector<bool>>> New_Partial_Status_rowcols = Partial_Status_rowcols;
+ 
+    //Determine the rowcols that intersect "rowcol" in a nonzero.
     std::vector<int> Intersecting_rowcol = A.Intersecting_RowCol(rowcol);
 
+    //Traverse ovr all intersecting rowcols.
     for (auto i = Intersecting_rowcol.begin(); i != Intersecting_rowcol.end(); i++) {
 
         int index_itersect_rc = *i;
 
+        //State of the intersecting rowcol.
         std::vector<bool> State_intersect_rc = The_States[index_itersect_rc];
 
         //Je hoeft niks te updten als nieuwe states allproc state kan dit meer aanbegin dat neit for lop in?? ToDo
       
 
-        //MAke the new_state of the intersecting NZ
+        //Make the new state of the nonzero at the intersection of "rowcol" and index_itersect_rowcol".
         std::vector<bool> New_State_intersect_NZ;
+
+        //If the intersecting rowcol is already assigned.
         if (State_intersect_rc != Zero_State) {
             New_State_intersect_NZ = Status_rowcol && State_intersect_rc;
 
@@ -598,71 +654,84 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
             }
 
         }
+        //Intersect rowcol is not assigned
         else {
             New_State_intersect_NZ = Status_rowcol;
-            //Hier update free nz??
+          
+            //Number of free nonzeros in intersecting rowcol decreases by 1.    
             Vector_Freenz[index_itersect_rc] -= 1;
 
             if (Status_rowcol == AllProc_State) {
                 continue;
             }
 
-           int index_newst= Binair_index(New_State_intersect_NZ);
-            int old_L2_intersectrc = Partial_Status_rowcols[index_itersect_rc].first;
-            
+
+          //Update the L2 bound and the partial_status for this intersecting rowcol.
+
+          int index_newst= Binair_index(New_State_intersect_NZ);
+
+          //Old L2 bound for this intersecting rowcol
+          int old_L2_intersectrc = Partial_Status_rowcols[index_itersect_rc].first;
+
+          //Had the intersecting rowcol already a nonzero with status " New_State_intersect_NZ",
+          //i.e. is there already another rowcol with status " New_State_intersect_NZ"  that intersects this "intersect rowcol".
           bool Partial_status_newST=  Partial_Status_rowcols[index_itersect_rc].second[index_newst];
 
+          //If old L2 bound is maximal or the intersect rowcol already has status " New_State_intersect_NZ", nothing needs to be done for the L2 bound.
           if ((old_L2_intersectrc == (Processors - 1)) || Partial_status_newST == 1) {
 
-
           }
+
           else {
+              //Remove the old L2 bound for the intersecting rowcol from "LB".
               LB -= old_L2_intersectrc;
              
-               New_Partial_Status_rowcols=L2bound(Status_rowcol, index_itersect_rc, Partial_Status_rowcols);
+              //Determine the new L2 bound and update Partial_status for this intersecting rowcol.
+              Partial_Status_rowcols=L2bound(Status_rowcol, index_itersect_rc, Partial_Status_rowcols);
 
-              LB += New_Partial_Status_rowcols[index_itersect_rc].first;
+             //Add the new L2 bound.
+             LB += Partial_Status_rowcols[index_itersect_rc].first;
           }
-            //if{oude L2==Processors-1 ||binair(newstate)=1{doe niks}
-            //update L2 bound; doe minus oude update L2 en plus de nieuwe
-            //Moet int L@ bound meegeven
+       
 
-          //Now we update the local L3bound,= local pacing bound
-          //Update the packig sets, 
+          //Now Update the packig sets for the local L3 bound, for this intersect rowcol.
 
-          //zet alles op 0 dit oet ignelijk alleen als sum(New_Partial_Status_rowcols[index_itersect_rc].second)>1 of 0
-          //if(sum(New_Partial_Status_rowcols[index_itersect_rc].second)==1 &&  new_Partial_Status_rowcols[index_itersect_rc].second[index_newst]==1
-          
-          //packing_set[tij/col][i]= aatal vrij in rijcol.
-          ////Now update the packing_set for the local L3 bound
-           std:: vector<bool> partial_statuses_intersectRC = New_Partial_Status_rowcols[index_itersect_rc].second;
+
+          //Get the partial statuses for this intersect rowcol.
+           std:: vector<bool> partial_statuses_intersectRC = Partial_Status_rowcols[index_itersect_rc].second;
+
+           //How many partial statuses has this intersect rowcol?
           int no_Partial_statuses=std::accumulate(partial_statuses_intersectRC.begin(), partial_statuses_intersectRC.end(), 0);
+
+          //Which processors are used in the state "Status_rowcol"of the rowcol that we just assigned?
           std::vector<int> used_Proc = Determine_Set_indices(Status_rowcol);
+
+          //If there is only one processor "used" in state "Status_rowcol", used_Proc has lengt one,
+          // and element 0 gives the procesor which is used in "Status_rowcol".
           int The_Proc = used_Proc[0];
-          ////Sum larger than 1 or smaller than all values in apcking set for this rowcol must be zero.
-          ////, because this rowcol is not partially coloured in one colour.
+
+
+           //If this intersect rowcol has partial sum 1 than it has partial one state  if this one state exist of one processor .
+          //add the free nonzeros in the correct packing set.
           if (no_Partial_statuses== 1 && used_Proc.size() == 1) {
 
-
+              //If the intersceting rowcol=row.
               if (index_itersect_rc < A.M) {
-                  Packing_Sets[0][The_Proc][index_itersect_rc] = Vector_Freenz[index_itersect_rc];//ToDo goede index packing set nog meegeven
-
+                  Packing_Sets[0][The_Proc][index_itersect_rc] = Vector_Freenz[index_itersect_rc];
               }
 
+              //If the intersecting rowcol=column.
               else {
                   int new_index_intersect = (index_itersect_rc - A.M);
                   Packing_Sets[1][The_Proc][new_index_intersect] = Vector_Freenz[index_itersect_rc];
-
               }
-
-
-              
-                  
           }
-              //If this intersect rowcol has partial sum 1 than it has partial one state  if this one state exist of one processor .
-              //add the free nonzeros in the correct packing set.
+
+          ////Sum larger than 1 or smaller than, the values in packing sets for this rowcol must be zero.
+         ////, because this rowcol is not partially coloured in one colour.    
           else {
-              //If we have intersecting rows
+
+              //If the intersceting rowcol=row.
               if (index_itersect_rc < A.M) {
                   int no_sets = Packing_Sets[0].size();
                   //Loop ovr all the packing sets for the rows.
@@ -671,7 +740,7 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
                   }
               }
 
-              //else we have intersecting columns, so index of column -M.
+              //If the intersecting rowcol=column.
               else {
                   int new_index_intersect = (index_itersect_rc - A.M);
                   int no_sets = Packing_Sets[1].size();
@@ -683,30 +752,42 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
           }
         }
         
-        
+        //Now update color_count and Partition sizes.
 
+        //Now update color_count  for the intersect rowcol, this needs to be done  both if the intersect rowcol is already assigned
+        // and if it is not yet assigned.
 
-        //If the state of the nz where the row and col intersect doesn't change nothing needs to be updated
+        //If the state of the nz where the rowcol and the intersceting rowcol intersect doesn't change
+        //colour_count for both the rowcol and intersect rowcol stay the same.
+        //Also Partition_size stays the smae.
         if (New_State_intersect_NZ == State_intersect_rc) {
             continue;
         }
-
+        //If the state of the nonzero at the intersetion changes:
         else {
 
-            int index_of_newStatus = Binair_index(New_State_intersect_NZ);
+            int index_of_newStatus = Binair_index(New_State_intersect_NZ); //ToDo dit is al hierboven bepaald dit weg en 1 locake var maken voor deze fucntie?
 
+            //Both rowcol and intersect rowcol get +1 nonzero with status " New_State_intersect_NZ".
             color_count[index_of_newStatus][index_itersect_rc] += 1;
             color_count[index_of_newStatus][rowcol] += 1;
+
+            //If the previous nonzero was already assigned, i.e. State_intersect_rc !=(0,..0), and was not assigned the all Processor state,
+            //i.e. State_intersect_rc !=(1,..1), then we need to remove one count of State_interscet_rc for both rowcol and intersect rowcol.
             if ((State_intersect_rc != Zero_State) && (State_intersect_rc != AllProc_State)) {
                 color_count[Binair_index(State_intersect_rc)][index_itersect_rc] -= 1;
                 color_count[Binair_index(State_intersect_rc)][rowcol] -= 1;
             }
 
-            // Partition_size[index_of_newStatus] += 1;
+          //Update the Partition sizes
 
-            for (auto j = AllStates.begin(); j != AllStates.end(); j++) { //Moet tweede conditie wl in if statement doe je er al wat mee maar dat voorkomy hier niet dat je m toch niet afgaat in allstates denk ik ToDo
+            for (auto j = AllStates.begin(); j != AllStates.end(); j++) { 
 
-                if (((New_State_intersect_NZ && *j) == New_State_intersect_NZ) && ((State_intersect_rc == Zero_State) || ((*j && State_intersect_rc) != State_intersect_rc)) ) { //ToDo driedubbele checl eerst had k asl 2e statement *j!= State_intersect_row ging goed vor p=2,3 niet p=4
+                //If new_state is completely contained in *j, i.e. all processor used in new_state are also used in *j,
+                //and the nonzero was not already counted in partition_size of *j, because the previous state of the nonzero, state intersect,
+                //was completely contained in *j.
+                //Than add count to Partition_size of *j.
+                if (((New_State_intersect_NZ && *j) == New_State_intersect_NZ) && ((State_intersect_rc == Zero_State) || ((*j && State_intersect_rc) != State_intersect_rc)) ) { 
 
                     int index_St = Binair_index(*j);
 
@@ -721,30 +802,29 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
 
     }
 
-
-    int L3a = L3bound(Packing_Sets, Partition_size);
-    
+  //Deterine the new L3 bound for this partial partitioning
+  int L3a = L3bound(Packing_Sets, Partition_size);
+  //Detemrine the differnec between the new and old L3 bound 
   int  L3_erbij = L3a - LB3_oud;
-    LB3_oud = L3a;
+  //Adjust the old L3 bound
+  LB3_oud = L3a;
 
-   LB += L3_erbij;
+  //add the difference of L3 bound to the Lowerbound ,"LB", of the whole partial patitionend matrix.
+  LB += L3_erbij;
  
+   //prints differnec in old and new L3 bound if differnce>0.
  /*   if (L3_erbij != 0) {
         std::cout << "l3bound " << L3_erbij << " ";
     }*/
     
     
-
-
     //Sanity_Check_PartitionSize(Partition_size);
-    New_Partial_Status_rowcols[rowcol].first = 0;
-
-    return std::make_tuple(Vector_Freenz, Partition_size, color_count, LB, New_Partial_Status_rowcols,Packing_Sets, LB3_oud);
-
-
+   
+    return std::make_tuple(Vector_Freenz, Partition_size, color_count, LB, Partial_Status_rowcols,Packing_Sets, LB3_oud);
 }
 
-//(( State_intersect_rc==Zero_State) || ((*j && State_intersect_rc ) != State_intersect_rc))) Dit gaat is als state intersect nog niet ingedeeld
+
+
 
 //Other UB this is a very large UB better option? ToDo
 //int UB = (Processors-1)*std::min(ab.N, ab.M)-(Processors-1);
@@ -753,24 +833,28 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
 int UB = 100;
 
 
-//A short to store the state of the previous value of GetAsyncKeystate.
+//A short to store the state of the previous value of GetAsyncKeystate (used in the function Partition).
 short previous_State = 0;
-//TREE
 
-//De tree gaat eerst helemaal een zijtak af
+//Two integer to store informaion about number of "better" partitions found and number of partitions that were aborted because LB>=UB.
+//Used in  the B&B tree.
 int AAnt = 0;
 int Aant_aborted=0;
-std::vector<std::vector<bool>> Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order_rows_columns, int a, matrix Info, std::vector<int> Vrije_NZ, std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
+
+
+//The B&B TREE
+//The tree first traverses one branch until a leaf. (DFS)
+void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order_rows_columns,
+    int a, matrix Info, std::vector<int> Vrije_NZ, std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
     int lowerbound, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, int LB3_oud) {
 
     //If it takes too long push escape button, then the execution of this funtion stops.
-    // The best solution so far is printed.
-    //27 refers to the  the escape button.
+    // The best solution so far is printed, 27 refers to the  the escape button.
     if (GetKeyState(27) & 0x8000) {
         Stop_Partition = 1;
     }
 
-   //Code below is to check in which subtree Partition fuction currently is.
+    //Code below is to check in which subtree Partition fuction currently is.
     //When pussing the "ALT" button (in windows) the state of the first rowcol is printed. 
     short current_State=GetAsyncKeyState(18);
 
@@ -778,26 +862,27 @@ std::vector<std::vector<bool>> Partition(std::vector<std::vector<bool>> The_Stat
         std::cout << "Current Subtree:";
         for (int i = 0; i < Processors; i++) {
             std::cout << The_States[Order_rows_columns[0]][i];
-
         }
-
         std::cout << "\n";
     }
     previous_State = current_State;
   
 
     if (Stop_Partition) {
-        return The_States;
+        return;
     }
 
    
-
+    //If Lb>=UB for the partial partitionend matrix we can stop exploring this branch and prune the tree.
     if (lowerbound >= UB) {
         Aant_aborted++;
+
+        //If number of aorted partial partitions is a multiple of one million, print Aant_aborted.
         if (Aant_aborted % 1000000 == 0) {
             std::cout << Aant_aborted << "\n";
         }
-        return The_States;
+
+        return;
     }
 
     
@@ -805,25 +890,31 @@ std::vector<std::vector<bool>> Partition(std::vector<std::vector<bool>> The_Stat
 
     int Layers_Tree =The_States.size();
     
+    //If a==0, then all rowcols with more than 0 nonzeros are asssigned a state.
+    //So the whole matrix is partitioned.
     if (a == 0) {
       
-        
+        //Detemine the communication voume of this new partitioning
         int Comm_vol = LowerBound1(The_States);
-       // New_Upperbound(Comm_vol);
+
+        //Extra check if Comm_vol<=UB, this should be the case (actually comm_vol<UB), because of previous if statement(LB>=UB.)
         if (Comm_vol <= UB) {
+
+            //Save the nnew better partition and UB.
             Save_best_solution_sofar(The_States, LowerBound1(The_States));
             
-            //How many partitions where aborted before this one?
+            //How many partitions where aborted before this partition?
             std::cout << Aant_aborted << "\n";
 
-            //printes the new  and better solution.
+            //Prints the new and better solution.
             for (int j = 0; j < Layers_Tree; j++) {
                 std::vector<bool> Stateof_j = The_States[j];
 
-                /* std::vector<bool> unassign(Processors, 0);
-                 if (Stateof_j = unassign) {
+                /* ToDo Dit beter om aan te geven dat rijcol niet iegdeed is aangezien 0 nz in rijcol???
+                 if (Stateof_j = Zero_State) {
                      std::cout << " x ";
                  }*/
+
                 std::cout << "  ";
                 for (int l = 0; l < Processors; l++) {
 
@@ -831,10 +922,12 @@ std::vector<std::vector<bool>> Partition(std::vector<std::vector<bool>> The_Stat
                 }
 
             }
-            // Determine & print communication volume of the partition
-            std::cout << " CV: " << LowerBound1(The_States) << " ";
+            //Print communication volume of the partition
+            std::cout << " CV: " << Comm_vol << " ";
             std::cout << ": " << AAnt << "   ";   
             std::cout << "\n";
+
+            //Update the upperbound, the new UB is equal to the communication volume of this new partition.
             UB = Comm_vol;
         }
 
@@ -842,109 +935,108 @@ std::vector<std::vector<bool>> Partition(std::vector<std::vector<bool>> The_Stat
        /* std::cout << "The part sizes: ";
         for (int i = 0; i < Partition_size.size(); i++) {
             std::cout << Partition_size[i] << " ";
-
-
         }
         std::cout << "tot nz dmv part_size ";
-
+        //ToDo fucntie voor p=3 om te checken of alles ok  is gegaan, Sanity check maken?? 
         std::cout << std::accumulate(Partition_size.begin(), Partition_size.end(), 0) - 2 * (Partition_size[0] + Partition_size[1] + Partition_size[3]); //Dit is de formule voor p=3 moet nog dynamisch*/
      
         AAnt++;
-       
     }
+
+    //If we didn't stop the tree manually, LB<UB and a>0, then we will go deeper in the tree and partition the next rowcol
     else {
         
         int y = Order_rows_columns.size();
 
-
+        //Determine the index of the next rowcol 
         int i = Order_rows_columns[y-a];
-
-          std::vector<int> IntersectingRowCol= Info.Intersecting_RowCol(i); //Determine the indices of the intersecting rows/columns with the column/row you are now going to assigm.
+        //Determine the indices of the  rows/columns intersecting with this rowocl in a nonzero.
+        std::vector<int> IntersectingRowCol= Info.Intersecting_RowCol(i); 
         
         //Prints the indices of the intersecting rows/columns
        /*   std::cout << "Huidige indeex: " << i << " intersecting rij/kolom :" << "\n";
           for (int k = 0; k < IntersectingRowCol.size(); k++) {
               std::cout << IntersectingRowCol[k] << " ";
-
           }
           std::cout << "\n";*/
 
-        int no_Free_nzi = Vrije_NZ[i]; //Dit moet worden geupdate
+        //Determine the no of free nz in the rowcol that you're about to assign a status.
+        int no_Free_nzi = Vrije_NZ[i]; 
+
+        //Print no free nz in rowcol that you're  about to assign a status.
         //   std::cout << "aantal vrije nz: " << no_Free_nzi;
-       // std::vector<int> New_vector_FreeNZ = Update_NO_Freenz(Vector_No_Freenz, IntersectingRowCol);
+ 
 
-
-        /// Dit geeft de correcte states vn intersecing rows/columns, maakt er een vectir van
-        /// //om mee te geven aan Possible_States
+        /// This gives the states of the intersecting rowcol, and saves them in a vector
+        /// This vector is an argument for the Possible_States function.
         std::vector<std::vector<bool>> Empty;
-        for (int h = 0; h < IntersectingRowCol.size(); h++) {
+        int no_intersecting_rowcol = IntersectingRowCol.size();
+
+        for (int h = 0; h < no_intersecting_rowcol; h++) {
             int index_Intersect_RowCol = IntersectingRowCol[h];
             std::vector<bool> State_Intersect_ROWCOl = The_States[index_Intersect_RowCol];
 
-            //Only take into account the state of the intersecting rows/columns that are asssigned.
+            //Only take into account the state of the intersecting rowcol if the rowcol is assigend.
             if (accumulate(State_Intersect_ROWCOl.begin(), State_Intersect_ROWCOl.end(), 0) != 0) {
 
-                Empty.emplace_back(The_States[index_Intersect_RowCol]);
-
+                Empty.emplace_back(State_Intersect_ROWCOl);
             }
-
         }
 
+        //Now determine the posibbel states for this rowcol, given the intersecting states and the no of free nz in this rowcol.
         std::set<std::vector<bool>> FeasibleStates;
         FeasibleStates = Possible_States(Empty, no_Free_nzi);
-        int No_FeasibleStates = FeasibleStates.size();
 
+        //Print number of feasible states.
+       //int No_FeasibleStates = FeasibleStates.size();
         // std::cout<< "Aantal Feas states" << No_FeasibleStates;
         // std::cout << "\n";
 
-      //  std::set<std::vector<bool>> FeasibleStates_Symm;
-
-        
-
-        std::set<std::vector<bool>> FeasibleStates_Final;
 
         //Do the loadbalance check for every state in FeasibleStates
+        std::set<std::vector<bool>> FeasibleStates_Final;
+
         for (auto l = FeasibleStates.begin(); l != FeasibleStates.end(); l++) {
 
             std::vector<bool> State_to_Check = *l;
 
            bool Checkvalue= Check_Load_Bal(State_to_Check, i, Partition_size, color_count, Info);
 
+           //Only keep the state if it is allowed acoording to the load balance rule.
            if (Checkvalue == 1) {
 
                FeasibleStates_Final.insert(State_to_Check);
            }
-
            else { 
                continue; }
 
         }
-         //Include the first symmetry step
+
+         //Include the first symmetry step, that is remove the symmetry that occurs in assigning the first rowcol.
         if (a == y) {
             FeasibleStates_Final=First_Symmetry_Check(First_Symmetry_Set(), FeasibleStates_Final);
-
-            //Now check if we can optiize the order of the states for the first rowcol.
-           /* float saturation_1st_rowcol = ((float)Max_Partition_size / (float)Info.Cmax);
-            if ( saturation_1st_rowcol>= 0.6) {
-
-
-            }*/
         }
 
 
        // Order_rows_columns.erase(Order_rows_columns.begin());
        //ToDo if Feasible_Final==0 meteen returen als ie stuk zou gaan als  for stuk gaat als feasible_Final stuk leeg is . deze ook bijhoduen zou eigenlijk nooit kunenn dek ik feas states is 0. Sanity check??
 
+        //Now traverse all Feasible states for this rowcol.
         for (auto k = FeasibleStates_Final.begin(); k != FeasibleStates_Final.end(); k++) {
            
-
+           
             std::vector<bool> Chosen_State = *k;
 
-           
-            std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, int, std::vector<std::pair<int, std::vector<bool>>>, std::array<std::vector<std::vector<int>>, 2> ,int > updatecolor = Update(i, *k, Info, The_States,Vrije_NZ, Partition_size, color_count,  lowerbound, Partial_Status_rowcols,Packing_Sets, LB3_oud);
+           //Update all information regarding partition_sizes and Lowerbounds.
+            std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, int, std::vector<std::pair<int,
+                std::vector<bool>>>, std::array<std::vector<std::vector<int>>, 2> ,int > updatecolor = Update(i,
+                    *k, Info, The_States,Vrije_NZ, Partition_size, color_count,  lowerbound, Partial_Status_rowcols,Packing_Sets, LB3_oud);
+
+            //This rowcol=rowcol i, is now assigned state Chosen_State.
             The_States[i] = Chosen_State;
         
-            //variables for the tie() fucntion used to unapck the tuple, tie() or get() wat is beter ToDo ??
+            //variables for the tie() fucntion used to unapck the tuple returned by the Update function
+            //tie() or get() wat is beter ToDo ??
             std::vector<int> new_Free_NZ;
             std::vector<int> new_Partsize;
             std::vector<std::vector<int>> new_colorcount;
@@ -955,15 +1047,16 @@ std::vector<std::vector<bool>> Partition(std::vector<std::vector<bool>> The_Stat
 
             tie(new_Free_NZ, new_Partsize, new_colorcount, new_lb, new_Partial_status, new_Packing_Sets, new_LB3_oud) = updatecolor;
 
+            //Number of rowcols that still need to be assigne is now a-1.
             int b = a - 1;
+
+            //Recurse, go to the next layer in the tree.
             Partition(The_States, Order_rows_columns, b, Info, new_Free_NZ, new_Partsize, new_colorcount,  new_lb, new_Partial_status, new_Packing_Sets, new_LB3_oud);
         }
 
-
-      //  New_vector_FreeNZ,
     }
   
-    return The_States;
+    return;
 }
 
 

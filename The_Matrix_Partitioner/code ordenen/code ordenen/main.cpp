@@ -19,7 +19,7 @@
 //Initialize some of the exertnal variables of Global.h.
 
 //Give the number of Processsors
-int Processors = 4;
+int Processors = 3;
 
 //Give the value of Epsilon 3% load imbalance means Epsilon=0.03
 double Epsilon=0.03;
@@ -45,7 +45,7 @@ int main()
     std::cout << "Number of Processors: " << Processors <<"  Value epsilon : "<< Epsilon<< "\n";
 
     //Give the name of the mtx or txt file
-    matrix A(Read_From_File("0-30matrix/Trec5.mtx"));
+    matrix A(Read_From_File("0-30matrix/cage4.mtx"));
 
 
 
@@ -73,11 +73,13 @@ int main()
 
    std::vector<int> order2;
    order2 = Determine_Order_row_columns2(A.perRow_Col, A.M);
-   int size_order2 = order2.size();
+   
 
    //The length of the vector that contans the order of rowcols is needed for the "Partition"function.
    //Note this length can be smaller than m+n because some rowcols may not contain any nonzeros.
    int d = c.size();
+   int size_order2 = order2.size();
+
 
    //The starting "Partition" is made.
    //Every rowcol is not yet assigned a status so the state of every rowcol is (0,..0,).
@@ -108,8 +110,7 @@ int main()
   int LB3_First = 0;
 
   //Give the "Partition" function = the tree all the information it needs and execute it.
-   std::vector<std::vector<bool>> Partitie;
-   Partitie = Partition(TheState, order2, size_order2,A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols, Packing_Sets, LB3_First);
+   Partition(TheState, order2, size_order2,A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols, Packing_Sets, LB3_First);
 
    //When the partition function is executed the number of partial partitions that where aborted,
    //because of LB>=UB is printed.

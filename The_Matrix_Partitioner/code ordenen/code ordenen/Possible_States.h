@@ -27,21 +27,9 @@ std::set<std::vector<bool>> Possible_States(std::vector<std::vector<bool>> State
 int LowerBound1(std::vector < std::vector<bool>>The_Partition);
 
 
-//This function makes the B&B tree
-std::vector<std::vector<bool>> Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order_rows_columns, int a, matrix Info, std::vector<int> Vrije_NZ, std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
+//This function makes the B&B tree, (DFS).
+void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order_rows_columns, int a, matrix Info, std::vector<int> Vrije_NZ, std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
 	int lowerbound, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, int LB3_oud);
-
-
-
-
-
-//ToDo gebruikte eerst deze functie nu zit deze in update functie.
-//std::vector<int> Update_NO_Freenz(std::vector<int> No_Freenz_perRowCol, std::vector<int> Indices_intersectRowCol);
-
-
-
-
-int Load_Balance(int nnz);
 
 
 //This fucntion gives the number of partial partitions that were aborted, beacause LB>=UB.

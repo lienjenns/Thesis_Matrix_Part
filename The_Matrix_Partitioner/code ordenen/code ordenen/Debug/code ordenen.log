@@ -3,9 +3,8 @@ C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\
   Possible_States.cpp
 C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\Possible_States.cpp(45,23): warning C4018: '<': signed/unsigned mismatch
 C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\Possible_States.cpp(123,23): warning C4018: '<': signed/unsigned mismatch
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\Possible_States.cpp(880,27): warning C4018: '<': signed/unsigned mismatch
   main.cpp
 C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\main.cpp(88,16): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\main.cpp(127,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\main.cpp(126,22): warning C4018: '<': signed/unsigned mismatch
   Generating Code...
   code ordenen.vcxproj -> C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\Debug\code ordenen.exe
