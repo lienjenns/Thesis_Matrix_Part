@@ -3,6 +3,8 @@
 #include<algorithm>
 #include<vector>
 #include <math.h>
+#include<string>
+#include<fstream>
 
 //This file contains # variables that need to be accessible everywhere.
 
@@ -42,4 +44,10 @@ extern int Max_Partition_size;
 extern bool Stop_Partition;
 
 
+//Name of output stream and the file to store all information about a matrix new upperbounds etc. in a file
+extern std::ofstream Solution_and_info;
+extern std::string filename_Sol_info;
 
+
+//Some parameters to turn some features on and off.
+extern bool PQ;

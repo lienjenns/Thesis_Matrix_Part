@@ -21,7 +21,8 @@
             std::cout << file.rdbuf();*/
 
         if (file.fail()) {
-            std::cout << "Not able to read the file.";
+            std::cerr << "Not able to read the file.";
+            exit(2);
         }
 
        

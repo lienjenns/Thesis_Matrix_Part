@@ -142,6 +142,7 @@
     <ClCompile Include="Lower_bounds.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="matrix.cpp" />
+    <ClCompile Include="output.cpp" />
     <ClCompile Include="Possible_States.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="Symmetry.cpp" />
@@ -150,6 +151,7 @@
   <ItemGroup>
     <ClInclude Include="Global.h" />
     <ClInclude Include="Lower_bounds.h" />
+    <ClInclude Include="output.h" />
     <ClInclude Include="Symmetry.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="matrix.h" />

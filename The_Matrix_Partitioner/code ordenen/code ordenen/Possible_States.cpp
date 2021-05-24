@@ -13,6 +13,7 @@
 #include"Lower_bounds.h"
 #include<utility>
 #include<array>
+#include<fstream>
 
 //Function that determines the order of the row and columns based on the number of nonzeros in a rowcol.
 //No distinction between rows and columns.
@@ -848,6 +849,11 @@ void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order
     int a, matrix Info, std::vector<int> Vrije_NZ, std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
     int lowerbound, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, int LB3_oud) {
 
+
+    //Open the file n which we store all new ub and corresponding partitions for the matrix
+    std::ofstream Solution_and_info;;
+    Solution_and_info.open(filename_Sol_info, std::ios::out | std::ios::app);
+
     //If it takes too long push escape button, then the execution of this funtion stops.
     // The best solution so far is printed, 27 refers to the  the escape button.
     if (GetKeyState(27) & 0x8000) {
@@ -855,13 +861,17 @@ void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order
     }
 
     //Code below is to check in which subtree Partition fuction currently is.
-    //When pussing the "ALT" button (in windows) the state of the first rowcol is printed. 
+    //When pussing the "ALT" button (in windows) the state of the first rowcol and the second rowcol is printed. 
     short current_State=GetAsyncKeyState(18);
 
     if ((previous_State != current_State) &&  previous_State==0) {
         std::cout << "Current Subtree:";
         for (int i = 0; i < Processors; i++) {
             std::cout << The_States[Order_rows_columns[0]][i];
+        }
+        std::cout << " , ";
+        for (int j = 0; j < Processors; j++) {
+            std::cout << The_States[Order_rows_columns[1]][j];
         }
         std::cout << "\n";
     }
@@ -878,7 +888,7 @@ void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order
         Aant_aborted++;
 
         //If number of aorted partial partitions is a multiple of one million, print Aant_aborted.
-        if (Aant_aborted % 1000000 == 0) {
+        if (Aant_aborted % 10000000 == 0) {
             std::cout << Aant_aborted << "\n";
         }
 
@@ -904,9 +914,12 @@ void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order
             Save_best_solution_sofar(The_States, LowerBound1(The_States));
             
             //How many partitions where aborted before this partition?
+            //(Also in file)
             std::cout << Aant_aborted << "\n";
+            Solution_and_info << Aant_aborted << "\n";
 
             //Prints the new and better solution.
+            //(Also in file)
             for (int j = 0; j < Layers_Tree; j++) {
                 std::vector<bool> Stateof_j = The_States[j];
 
@@ -916,16 +929,23 @@ void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order
                  }*/
 
                 std::cout << "  ";
+                Solution_and_info << "  ";
                 for (int l = 0; l < Processors; l++) {
 
                     std::cout << Stateof_j[l];
+                    Solution_and_info << Stateof_j[l];
                 }
 
             }
             //Print communication volume of the partition
+            //(Also in file)
             std::cout << " CV: " << Comm_vol << " ";
             std::cout << ": " << AAnt << "   ";   
             std::cout << "\n";
+
+            Solution_and_info << " CV: " << Comm_vol << " ";
+            Solution_and_info << ": " << AAnt << "   ";
+            Solution_and_info << "\n";
 
             //Update the upperbound, the new UB is equal to the communication volume of this new partition.
             UB = Comm_vol;
@@ -1017,8 +1037,21 @@ void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order
             FeasibleStates_Final=First_Symmetry_Check(First_Symmetry_Set(), FeasibleStates_Final);
         }
 
+       // std::vector<std::vector<bool>> FeasibleStates_Final;
 
-       // Order_rows_columns.erase(Order_rows_columns.begin());
+        //Possibly for the first rowcol change the order in which we traverse the feasible states
+        //Do this only when PRiority Queue is activated (i.e. PQ=1), and using priority is only possible when the number of processors is 3 or 4.
+       /* if (a == y && PQ==1 && (Processors==3 || Processors==4)) {
+
+           int no_nz_rc0= Info.perRow_Col[i];
+           float ratio = (float)Max_Partition_size / (float)no_nz_rc0;
+           FeasibleStates_Final= Priority_Queue(FeasibleStates_Final, ratio);
+
+
+        }*/
+
+
+       
        //ToDo if Feasible_Final==0 meteen returen als ie stuk zou gaan als  for stuk gaat als feasible_Final stuk leeg is . deze ook bijhoduen zou eigenlijk nooit kunenn dek ik feas states is 0. Sanity check??
 
         //Now traverse all Feasible states for this rowcol.

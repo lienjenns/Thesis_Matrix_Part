@@ -14,6 +14,9 @@
 #include<utility>
 #include"./Lower_bounds.h"
 #include<array>
+#include<fstream>
+#include <string> 
+#include"./output.h"
 
 
 //Initialize some of the exertnal variables of Global.h.
@@ -34,20 +37,35 @@ std::set<std::vector<bool>> AllStates;
 int Max_Partition_size;
 std::vector <std::vector<bool>>Index_and_Status;
 
+//Define the outputstream and file name in order to store all info about the aprtiitoning of this matrix.
+std::ofstream Solution_and_info;
+//Give the name of the matrix you want to partition.
+std::string nameMatrix = "klein-b2";
+std::string filename_Sol_info = "p=" + std::to_string(Processors) + " " + nameMatrix + ".txt";
 
+
+//Do we want to use the priority Queue, for p=3 / p=4.
+bool PQ = 1;
 
 int main()
-{ 
+{
+    
     clock_t start, end;
     start = clock();
 
-     //Prints the number of processors and the chosen value of Epsilon.
+    //Prints the number of processors and the chosen value of Epsilon.
     std::cout << "Number of Processors: " << Processors <<"  Value epsilon : "<< Epsilon<< "\n";
 
-    //Give the name of the mtx or txt file
-    matrix A(Read_From_File("0-30matrix/cage4.mtx"));
+    //Give the name of the mtx or txt file ToDo (now enetr name in r.42)
+    std::string Location_matrix = "0-30matrix/" + nameMatrix+ ".mtx";
+    matrix A(Read_From_File(Location_matrix));
 
-
+    //File to store all information about one matirx
+    //It stores all  new upperbounds, corresponding partitions  and new ub value
+    Solution_and_info.open(filename_Sol_info, std::ios::out | std::ios::app);
+    Solution_and_info << nameMatrix << "\n";
+    Solution_and_info<< "Number of Processors: " << Processors << "  Value epsilon : " << Epsilon << "\n";
+    
 
  //Now make/determine some variables for the "Partition" function = The Tree:
    
@@ -64,6 +82,7 @@ int main()
     //Here the Maximal partition size is determined.
     Max_Partition_size = Load_Balance(A.nnz);
     std::cout << "Max partition size: " << Max_Partition_size << "\n";
+    Solution_and_info << "Max partition size: " << Max_Partition_size << "\n";
 
    int b=A.Determine_Cmax();
    
@@ -110,11 +129,12 @@ int main()
   int LB3_First = 0;
 
   //Give the "Partition" function = the tree all the information it needs and execute it.
-   Partition(TheState, order2, size_order2,A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols, Packing_Sets, LB3_First);
+   Partition(TheState, c, d,A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols, Packing_Sets, LB3_First);
 
    //When the partition function is executed the number of partial partitions that where aborted,
    //because of LB>=UB is printed.
    std::cout << "Number of Partitions aborted: " << get_Aantal();
+   Solution_and_info << "\n"<<"Number of Partitions aborted: " << get_Aantal();
 
    end = clock();
    std::cout << "\n";
@@ -122,17 +142,59 @@ int main()
    //Determine execution time and print it
    double time_taken = double(end - start) / double(CLOCKS_PER_SEC);
    std::cout << "\n" << "Time taken: " << std::setprecision(5)<< time_taken << "sec";
+   Solution_and_info << "\n" << "Time taken: " << std::setprecision(5) << time_taken << "sec"<<"\n";
 
    //Prints the best solution that is found so far and the corresponding communication volume.
+   //(It also prints the solution in the file)
    std::cout <<"\n"<< "The best solution found so far is:  ";
+   Solution_and_info << "\n" << "The best solution found so far is:  ";
    for (int i = 0; i < Best_solution_sofar.size(); i++) {
        for (int j = 0; j < Processors; j++) {
 
            std::cout << Best_solution_sofar[i][j];
+           Solution_and_info << Best_solution_sofar[i][j];
        }
 
        std::cout << " ";
+      Solution_and_info << " ";
    }
    std::cout <<" With Comm. Vol:  "<< Lowest_cv_sofar<<"\n";
+   Solution_and_info << "\n"<<"With Comm. Vol:  " << Lowest_cv_sofar << "\n";
+
+   //Close the file with all information about the partitioning of this  matrix
+   Solution_and_info.close();
+
+
+   //Make a file to store the optimal solution for every matrix, in a format that makes a table in latex.
+   //file name depends on number of processors.
+    std::ofstream OptSol;
+    //name of file
+    std::string filename_Opt = "p=" + std::to_string( Processors) + ",first30, L3.txt";
+
+    OptSol.open(filename_Opt, std::ios::out | std::ios::app);
+    OptSol << nameMatrix<<" & " << A.M << " & "<< A.N << " & " << A.nnz<< " & "<< Lowest_cv_sofar << " & " << time_taken << " s"<< " \\\\ \\\hline " <<"\n";
+    OptSol.close();
+
+    //Make a file with information about the number of cuts in the first rowcol.
+    //Use this to make a priority queue for first rowcol.
+    std::ofstream Prior_queue;
+
+    std::string filename_PriorQueue = "p=" + std::to_string(Processors) + ",priorQueue.txt";
+
+    //Determine number of cuts in the first rowcol, in the optimal solution.
+    std::vector<bool> State0=Best_solution_sofar[order2[0]];
+    int Cut_rc_0= std::accumulate(State0.begin(), State0.end(), 0) - 1;
+
+
+    Prior_queue.open(filename_PriorQueue, std::ios::out | std::ios::app);
+    Prior_queue << nameMatrix <<  " & " << A.nnz << " & " << Max_Partition_size << " & " << A.perRow_Col[order2[0]] <<" & " << Cut_rc_0 << " & "
+        << "\n";
+    Prior_queue.close();
+
+
+
+
+    //output_States_nzs(A);
+
 }
 

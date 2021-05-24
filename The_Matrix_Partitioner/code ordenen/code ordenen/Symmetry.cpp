@@ -4,6 +4,7 @@
 #include <algorithm>   //Necessary for find() function
 #include "./Global.h"
 #include "./Util.h"
+#include "./matrix.h"
 
 
 //This function makes the set containing the states that must be taken into account when assigning the first rowcol a state.
@@ -72,10 +73,170 @@ std::set<std::vector<bool>> First_Symmetry_Check(std::set<std::vector<bool>> Sym
     return Feas_states_Symm;
 }
 
-//  
+
+//std::vector<std::vector<bool>> Priority_Queue(std::set<std::vector<bool>> Feasible_rowcol0, float The_ratio) {
+//
+//    //The vector with the states for the first rowcol in order of priotity. 
+//    std::vector<std::vector<bool>> Feas_and_Prior;
+//
+//    // This is the  priority queue for the different situations
+//    std::vector<std::vector<bool>> Prior_Queue;
+//
+//    if (Processors == 3) {
+//
+//        std::vector<bool> Proc1{1,0,0 };
+//        std::vector<bool> Proc2{ 1,1,0 };
+//        std::vector<bool> Proc3{ 1,1,1 };
+//
+//       
+//
+//        if (The_ratio > 0.5 && The_ratio <= 1.0) {
+//
+//            Prior_Queue={ Proc2,Proc1, Proc3 };
+//
+//            for (int i = 0; i < Prior_Queue.size(); i++) {
+//
+//                std::set<std::vector<bool>>::iterator it;
+//
+//                //Look if the state of the in the priority queue also appears in the feasible set.
+//                it = Feasible_rowcol0.find(Prior_Queue[i]);
+//
+//
+//                //If the state appears in the feasible set, push it back.
+//                if (it != Feasible_rowcol0.end()) {     //To do deze controle verbodig ?
+//
+//                    Feas_and_Prior.push_back(Prior_Queue[i]);
+//
+//                }
+//            }
+//        }
+//
+//        else if (The_ratio > 1) {
+//
+//            Prior_Queue = { Proc2, Proc3 };
+//            for (int i = 0; i < Prior_Queue.size(); i++) {
+//
+//                std::set<std::vector<bool>>::iterator it;
+//
+//                //Look if the state of the in the priority queue also appears in the feasible set.
+//                it = Feasible_rowcol0.find(Prior_Queue[i]);
+//
+//
+//                //If the state appears in the feasible set, push it back.
+//                if (it != Feasible_rowcol0.end()) {     //To do deze controle verbodig ?
+//
+//                    Feas_and_Prior.push_back(Prior_Queue[i]);
+//
+//                }
+//            }
+//        }
+//
+//        else {
+//
+//            Prior_Queue = { Proc1,Proc2, Proc3 };
+//
+//            for (int i = 0; i < Prior_Queue.size(); i++) {
+//
+//                std::set<std::vector<bool>>::iterator it;
+//
+//                //Look if the state of the in the priority queue also appears in the feasible set.
+//                it = Feasible_rowcol0.find(Prior_Queue[i]);
+//
+//
+//                //If the state appears in the feasible set, push it back.
+//                if (it != Feasible_rowcol0.end()) {     //To do deze controle verbodig ?
+//
+//                    Feas_and_Prior.push_back(Prior_Queue[i]);
+//
+//                }
+//            }
+//        }
+//        return Feas_and_Prior;
+//
+//
+//    }
+//
+//    else {
+//
+//        std::vector<bool> Proc1{ 1,0,0,0 };
+//        std::vector<bool> Proc2{ 1,1,0 ,0};
+//        std::vector<bool> Proc3{ 1,1,1 ,0};
+//        std::vector<bool> Proc4{ 1,1,1 ,1 };
+//
+//
+//        if (The_ratio > 0.35 && The_ratio <= 1.0) {
+//
+//            Prior_Queue = { Proc2,Proc1, Proc3, Proc4 };
+//
+//            for (int i = 0; i < Prior_Queue.size(); i++) {
+//
+//                std::set<std::vector<bool>>::iterator it;
+//
+//                //Look if the state of the in the priority queue also appears in the feasible set.
+//                it = Feasible_rowcol0.find(Prior_Queue[i]);
+//
+//
+//                //If the state appears in the feasible set, push it back.
+//                if (it != Feasible_rowcol0.end()) {     //To do deze controle verbodig ?
+//
+//                    Feas_and_Prior.push_back(Prior_Queue[i]);
+//
+//                }
+//            }
+//        }
+//
+//        else if (The_ratio > 1) {
+//
+//            Prior_Queue = { Proc2, Proc3, Proc4 };
+//            for (int i = 0; i < Prior_Queue.size(); i++) {
+//
+//                std::set<std::vector<bool>>::iterator it;
+//
+//                //Look if the state of the in the priority queue also appears in the feasible set.
+//                it = Feasible_rowcol0.find(Prior_Queue[i]);
+//
+//
+//                //If the state appears in the feasible set, push it back.
+//                if (it != Feasible_rowcol0.end()) {     //To do deze controle verbodig ?
+//
+//                    Feas_and_Prior.push_back(Prior_Queue[i]);
+//
+//                }
+//            }
+//        }
+//
+//        else {
+//
+//            Prior_Queue = { Proc1,Proc2, Proc3, Proc4 };
+//
+//            for (int i = 0; i < Prior_Queue.size(); i++) {
+//
+//                std::set<std::vector<bool>>::iterator it;
+//
+//                //Look if the state of the in the priority queue also appears in the feasible set.
+//                it = Feasible_rowcol0.find(Prior_Queue[i]);
+//
+//
+//                //If the state appears in the feasible set, push it back.
+//                if (it != Feasible_rowcol0.end()) {     //To do deze controle verbodig ?
+//
+//                    Feas_and_Prior.push_back(Prior_Queue[i]);
+//
+//                }
+//            }
+//        }
+//        return Feas_and_Prior;
+//    }
+//
+//}
+
+
+// //This function makes the information needed for the sanity check of the (just calculated)
+////Partition sizes. 
+////Returns a vector with at index i the maximum allowed size of partition i.
 //std::vector<int>  Info_sanity_1() {
 //
-//std::vector<int> MaxPArt_size_Vector;
+//    std::vector<int> MaxPArt_size_Vector;
 //  
 //    int x = pow(2, Processors) - 2;
 //    MaxPArt_size_Vector.resize(x);
@@ -109,18 +270,30 @@ std::set<std::vector<bool>> First_Symmetry_Check(std::set<std::vector<bool>> Sym
 ////}
 //
 //
-//void Sanity_Check_PartitionSize(std::vector<int> Current_PArtition_sizes) {
+//void Sanity_Check_PartitionSize(std::vector<int> Current_Partition_sizes) {
 //
-//    int options = Current_PArtition_sizes.size();
+//    int options = Current_Partition_sizes.size();
 //
 //    for (int i = 0; i < options; i++) {
 //
-//        if (Current_PArtition_sizes[i] > MaxValue_PartSize_vector[i]) {
+//        if (Current_Partition_sizes[i] > MaxValue_PartSize_vector[i]) {
 //
 //            std::cerr << "Error in determining the Partition size of State: " << i;
 //            break;
 //        }
 //
 //    }
-
+//
+//}
+//
+//void Sanity_Check_usefullness(matrix Inform) {
+//
+//    if(Inform.nnz < Processors) {
+//
+//        std::cerr << "Not very Usefull to Partition this matrix in "<< Processors<< " processors.  (matrix contains less nonzeros than no. of Processors)";
+//
+//    }
+//
+//
+//
 //}

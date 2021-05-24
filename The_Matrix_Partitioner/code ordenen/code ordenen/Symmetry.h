@@ -13,6 +13,11 @@ std::set<std::vector<bool>> First_Symmetry_Set();
 std::set<std::vector<bool>> First_Symmetry_Check(std::set<std::vector<bool>> Symm_Set, std::set<std::vector<bool>>Feas_set);
 
 
+//Function to make a priority queue for the state for the first rowcol
+//(This is only used when activated, i.e. PQ=1)
+//std::vector<std::vector<bool>> Priority_Queue(std::set<std::vector<bool>> Feasible_rowcol0, float The_ratio);
+
+
 //The sanity check to check the partition sizes
 //This check is used in the Update function.
 //void Sanity_Check_PartitionSize(std::vector<int> Current_PArtition_sizes);
