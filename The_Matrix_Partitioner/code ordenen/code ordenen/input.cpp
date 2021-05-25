@@ -22,7 +22,7 @@
 
         if (file.fail()) {
             std::cerr << "Not able to read the file.";
-            exit(2);
+            exit(3);
         }
 
        

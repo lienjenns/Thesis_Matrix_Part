@@ -40,7 +40,7 @@ std::vector <std::vector<bool>>Index_and_Status;
 //Define the outputstream and file name in order to store all info about the aprtiitoning of this matrix.
 std::ofstream Solution_and_info;
 //Give the name of the matrix you want to partition.
-std::string nameMatrix = "klein-b2";
+std::string nameMatrix = "relat3";
 std::string filename_Sol_info = "p=" + std::to_string(Processors) + " " + nameMatrix + ".txt";
 
 
@@ -64,7 +64,7 @@ int main()
     //It stores all  new upperbounds, corresponding partitions  and new ub value
     Solution_and_info.open(filename_Sol_info, std::ios::out | std::ios::app);
     Solution_and_info << nameMatrix << "\n";
-    Solution_and_info<< "Number of Processors: " << Processors << "  Value epsilon : " << Epsilon << "\n";
+    Solution_and_info<<"\n"<< "Number of Processors: " << Processors << "  Value epsilon : " << Epsilon << "\n";
     
 
  //Now make/determine some variables for the "Partition" function = The Tree:
@@ -129,7 +129,7 @@ int main()
   int LB3_First = 0;
 
   //Give the "Partition" function = the tree all the information it needs and execute it.
-   Partition(TheState, c, d,A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols, Packing_Sets, LB3_First);
+   Partition(TheState, order2, size_order2,A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols, Packing_Sets, LB3_First);
 
    //When the partition function is executed the number of partial partitions that where aborted,
    //because of LB>=UB is printed.
@@ -143,6 +143,14 @@ int main()
    double time_taken = double(end - start) / double(CLOCKS_PER_SEC);
    std::cout << "\n" << "Time taken: " << std::setprecision(5)<< time_taken << "sec";
    Solution_and_info << "\n" << "Time taken: " << std::setprecision(5) << time_taken << "sec"<<"\n";
+
+   //Check if partition was stopped before finishing, If so print this in file with all the info about partitioning this matrix.
+   if (Stop_Partition == 1) {
+       Solution_and_info << " \n" << "STOPPED BEFORE PARTITION WAS FINISHED" << "\n"
+           << "SOLUTION MAY NOT BE OPTIMAL"<< "\n";
+
+   }
+
 
    //Prints the best solution that is found so far and the corresponding communication volume.
    //(It also prints the solution in the file)

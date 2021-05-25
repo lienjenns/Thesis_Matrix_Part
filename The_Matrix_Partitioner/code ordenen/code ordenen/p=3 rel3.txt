@@ -1,0 +1,28 @@
+0
+  101  101  101  110  110  110  000  000  000  000  000  000  000  100  000  011  011 CV: 8 : 0   
+4932
+  001  001  010  010  100  100  000  000  000  000  000  000  000  111  000  111  111 CV: 6 : 1   
+rel3
+
+Number of Processors: 3  Value epsilon : 0.03
+Max partition size: 6
+
+Number of Partitions aborted: 5437
+Time taken: 26.595sec
+
+The best solution found so far is:  001 001 010 010 100 100 000 000 000 000 000 000 000 111 000 111 111 
+With Comm. Vol:  6
+0
+  101  101  101  110  110  110  000  000  000  000  000  000  000  100  000  011  011 CV: 8 : 0   
+4932
+  001  001  010  010  100  100  000  000  000  000  000  000  000  111  000  111  111 CV: 6 : 1   
+rel3
+
+Number of Processors: 3  Value epsilon : 0.03
+Max partition size: 6
+
+Number of Partitions aborted: 5437
+Time taken: 1.968sec
+
+The best solution found so far is:  001 001 010 010 100 100 000 000 000 000 000 000 000 111 000 111 111 
+With Comm. Vol:  6

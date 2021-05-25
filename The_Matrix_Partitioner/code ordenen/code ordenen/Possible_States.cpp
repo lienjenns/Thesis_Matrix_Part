@@ -607,7 +607,7 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
     //If "rowcol"< M , then rowcol= a row;
     if (rowcol < A.M) {
         int no_sets = Packing_Sets[0].size();
-        //Loop ovr all the packing sets for the rows.
+        //Loop over all the packing sets for the rows.
         for (int i = 0; i < no_sets; i++) {
             Packing_Sets[0][i][rowcol] = 0;
         }
@@ -654,6 +654,27 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
             continue;
             }
 
+           
+            //If the state of the nonzero at the intersetion changes:
+           
+
+                int index_of_newStatus = Binair_index(New_State_intersect_NZ); //ToDo dit is al hierboven bepaald dit weg en 1 locake var maken voor deze fucntie?
+
+                //Both rowcol and intersect rowcol get +1 nonzero with status " New_State_intersect_NZ".
+                color_count[index_of_newStatus][index_itersect_rc] += 1;
+                color_count[index_of_newStatus][rowcol] += 1;
+
+                //If the previous nonzero was already assigned, i.e. State_intersect_rc !=(0,..0), and was not assigned the all Processor state,
+                //i.e. State_intersect_rc !=(1,..1), then we need to remove one count of State_interscet_rc for both rowcol and intersect rowcol.
+                if ((State_intersect_rc != Zero_State) && (State_intersect_rc != AllProc_State)) {
+                    color_count[Binair_index(State_intersect_rc)][index_itersect_rc] -= 1;
+                    color_count[Binair_index(State_intersect_rc)][rowcol] -= 1;
+                }
+
+            
+
+          
+
         }
         //Intersect rowcol is not assigned
         else {
@@ -665,6 +686,12 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
             if (Status_rowcol == AllProc_State) {
                 continue;
             }
+
+            int index_of_newStatus = Binair_index(New_State_intersect_NZ); //ToDo dit is al hierboven bepaald dit weg en 1 locake var maken voor deze fucntie?
+
+            //Both rowcol and intersect rowcol get +1 nonzero with status " New_State_intersect_NZ".
+            color_count[index_of_newStatus][index_itersect_rc] += 1;
+            color_count[index_of_newStatus][rowcol] += 1;
 
 
           //Update the L2 bound and the partial_status for this intersecting rowcol.
@@ -697,34 +724,41 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
 
           //Now Update the packig sets for the local L3 bound, for this intersect rowcol.
 
-
-          //Get the partial statuses for this intersect rowcol.
+           //Get the partial statuses for this intersect rowcol.
            std:: vector<bool> partial_statuses_intersectRC = Partial_Status_rowcols[index_itersect_rc].second;
+           //Get the L2 bound for this rowcol
+           int L2_bound_intersectrc = Partial_Status_rowcols[index_itersect_rc].first;
 
-           //How many partial statuses has this intersect rowcol?
-          int no_Partial_statuses=std::accumulate(partial_statuses_intersectRC.begin(), partial_statuses_intersectRC.end(), 0);
+           int sum_1Proc_Partial_status = 0;
+           int index_Partial_status;
+           int index_packingset;
 
-          //Which processors are used in the state "Status_rowcol"of the rowcol that we just assigned?
-          std::vector<int> used_Proc = Determine_Set_indices(Status_rowcol);
+           //Check  how many 1proc states this intersecting rowccolumn has 
+          for (int i = 0; i < Processors; i++) {
+              int view_index=Info_L3[i];
 
-          //If there is only one processor "used" in state "Status_rowcol", used_Proc has lengt one,
-          // and element 0 gives the procesor which is used in "Status_rowcol".
-          int The_Proc = used_Proc[0];
+              sum_1Proc_Partial_status += partial_statuses_intersectRC[view_index];
 
+              if (partial_statuses_intersectRC[view_index] == 1) {
+                  index_Partial_status = view_index;
+                  index_packingset = i;
+              }
+          }
 
            //If this intersect rowcol has partial sum 1 than it has partial one state  if this one state exist of one processor .
           //add the free nonzeros in the correct packing set.
-          if (no_Partial_statuses== 1 && used_Proc.size() == 1) {
+          if (L2_bound_intersectrc== 0 && sum_1Proc_Partial_status == 1) {
 
               //If the intersceting rowcol=row.
               if (index_itersect_rc < A.M) {
-                  Packing_Sets[0][The_Proc][index_itersect_rc] = Vector_Freenz[index_itersect_rc];
+                  //Number of nonzeros assigned to proc "index_Partial_Status" is; # nz in row- # nz already assiged to proc in this row.
+                  Packing_Sets[0][index_packingset][index_itersect_rc] = A.perRow_Col[index_itersect_rc] - color_count[index_Partial_status][index_itersect_rc];
               }
 
               //If the intersecting rowcol=column.
               else {
                   int new_index_intersect = (index_itersect_rc - A.M);
-                  Packing_Sets[1][The_Proc][new_index_intersect] = Vector_Freenz[index_itersect_rc];
+                  Packing_Sets[1][index_packingset][new_index_intersect] = A.perRow_Col[index_itersect_rc] - color_count[index_Partial_status][index_itersect_rc];
               }
           }
 
@@ -769,16 +803,16 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
 
             int index_of_newStatus = Binair_index(New_State_intersect_NZ); //ToDo dit is al hierboven bepaald dit weg en 1 locake var maken voor deze fucntie?
 
-            //Both rowcol and intersect rowcol get +1 nonzero with status " New_State_intersect_NZ".
-            color_count[index_of_newStatus][index_itersect_rc] += 1;
-            color_count[index_of_newStatus][rowcol] += 1;
+            ////Both rowcol and intersect rowcol get +1 nonzero with status " New_State_intersect_NZ".
+            //color_count[index_of_newStatus][index_itersect_rc] += 1;
+            //color_count[index_of_newStatus][rowcol] += 1;
 
-            //If the previous nonzero was already assigned, i.e. State_intersect_rc !=(0,..0), and was not assigned the all Processor state,
-            //i.e. State_intersect_rc !=(1,..1), then we need to remove one count of State_interscet_rc for both rowcol and intersect rowcol.
-            if ((State_intersect_rc != Zero_State) && (State_intersect_rc != AllProc_State)) {
-                color_count[Binair_index(State_intersect_rc)][index_itersect_rc] -= 1;
-                color_count[Binair_index(State_intersect_rc)][rowcol] -= 1;
-            }
+            ////If the previous nonzero was already assigned, i.e. State_intersect_rc !=(0,..0), and was not assigned the all Processor state,
+            ////i.e. State_intersect_rc !=(1,..1), then we need to remove one count of State_interscet_rc for both rowcol and intersect rowcol.
+            //if ((State_intersect_rc != Zero_State) && (State_intersect_rc != AllProc_State)) {
+            //    color_count[Binair_index(State_intersect_rc)][index_itersect_rc] -= 1;
+            //    color_count[Binair_index(State_intersect_rc)][rowcol] -= 1;
+            //}
 
           //Update the Partition sizes
 

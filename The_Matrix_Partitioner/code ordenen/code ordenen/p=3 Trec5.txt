@@ -1,0 +1,60 @@
+0
+  010  110  011  000  110  010  101  101  101  001 CV: 6 : 0   
+90
+  100  110  011  000  100  101  010  011  011  001 CV: 5 : 1   
+0
+  010  110  011  000  110  010  101  101  101  001 CV: 6 : 0   
+90
+  100  110  011  000  100  101  010  011  011  001 CV: 5 : 1   
+0
+  010  110  011  000  110  010  101  101  101  001 CV: 6 : 0   
+90
+  100  110  011  000  100  101  010  011  011  001 CV: 5 : 1   
+0
+  010  110  011  000  110  010  101  101  101  001 CV: 6 : 0   
+90
+  100  110  011  000  100  101  010  011  011  001 CV: 5 : 1   
+323
+  100  111  011  000  100  101  001  010  010  001 CV: 4 : 2   
+Trec5
+
+Number of Processors: 3  Value epsilon : 0.03
+Max partition size: 4
+
+Number of Partitions aborted: 358
+Time taken: 2.293sec
+
+The best solution found so far is:  100 111 011 000 100 101 001 010 010 001 
+With Comm. Vol:  4
+0
+  110  110  011  000  100  010  011  101  101  001 CV: 6 : 0   
+80
+  010  110  101  000  010  011  100  101  101  001 CV: 5 : 1   
+339
+  010  111  101  000  010  011  001  100  100  001 CV: 4 : 2   
+Trec5
+
+Number of Processors: 3  Value epsilon : 0.03
+Max partition size: 4
+
+Number of Partitions aborted: 370
+Time taken: 2.429sec
+
+The best solution found so far is:  010 111 101 000 010 011 001 100 100 001 
+With Comm. Vol:  4
+0
+  110  110  011  000  100  010  011  101  101  001 CV: 6 : 0   
+80
+  010  110  101  000  010  011  100  101  101  001 CV: 5 : 1   
+339
+  010  111  101  000  010  011  001  100  100  001 CV: 4 : 2   
+Trec5
+
+Number of Processors: 3  Value epsilon : 0.03
+Max partition size: 4
+
+Number of Partitions aborted: 370
+Time taken: 2.515sec
+
+The best solution found so far is:  010 111 101 000 010 011 001 100 100 001 
+With Comm. Vol:  4

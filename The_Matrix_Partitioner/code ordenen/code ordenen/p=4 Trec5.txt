@@ -1,0 +1,12 @@
+0
+  0101  1100  0011  0000  0100  0101  1001  1010  1010  0010 CV: 7 : 0   
+Trec5
+
+Number of Processors: 4  Value epsilon : 0.03
+Max partition size: 3
+
+Number of Partitions aborted: 8395
+Time taken: 145.25sec
+
+The best solution found so far is:  0101 1100 0011 0000 0100 0101 1001 1010 1010 0010 
+With Comm. Vol:  7

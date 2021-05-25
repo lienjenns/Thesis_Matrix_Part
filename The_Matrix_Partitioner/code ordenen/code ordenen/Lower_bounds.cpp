@@ -127,9 +127,9 @@ std::vector<int> Info_L3;
 void Basic_L3_info() {
    
     for (int j = 0; j < Processors; j++) {
-        std::vector<bool> Status = Zero_State;
-        Status[j] = 1;
-        Info_L3.push_back(Binair_index(Status));
+
+       int  index = pow(2, j)-1;
+        Info_L3.push_back(index);
     }
 }
 
