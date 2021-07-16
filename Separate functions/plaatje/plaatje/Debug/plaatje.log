@@ -1,0 +1,5 @@
+﻿  plaatje.cpp
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\Separate functions\plaatje\plaatje\plaatje.cpp(16,22): warning C4129: 'd': unrecognized character escape sequence
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\Separate functions\plaatje\plaatje\plaatje.cpp(18,18): warning C4129: 'd': unrecognized character escape sequence
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\Separate functions\plaatje\plaatje\plaatje.cpp(20,18): warning C4129: 'e': unrecognized character escape sequence
+  plaatje.vcxproj -> C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\Separate functions\plaatje\Debug\plaatje.exe

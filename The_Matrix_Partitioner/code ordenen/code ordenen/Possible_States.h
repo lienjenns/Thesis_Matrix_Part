@@ -4,6 +4,7 @@
 #include<set>
 #include "./Global.h"
 #include<numeric>
+#include"./Lower_bounds.h"
 
 
 
@@ -15,6 +16,8 @@ std::vector<int> Determine_Order_row_columns(std::vector<int> number_nz);
 //A second fucntion to determine the order of row and columns.
 //Again the orer is based on the number of nonzeros in a rowcol, but now rows and columns are alternated.
 std::vector<int> Determine_Order_row_columns2(std::vector<int> number_nz, int M);
+
+std::vector<int> Determine_Order_row_columns3(std::vector<int> number_nz, matrix A);
 
 //Function that determines the possible states for a rowcol given the states of already assigned rowcols that intersect this rowcol in a nonzero.
 std::set<std::vector<bool>> Assigned_States(std::vector<std::vector<bool>> Set_States_nz, std::vector<bool> Unassigned_State);
@@ -28,8 +31,8 @@ int LowerBound1(std::vector < std::vector<bool>>The_Partition);
 
 
 //This function makes the B&B tree, (DFS).
-void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order_rows_columns, int a, matrix Info, std::vector<int> Vrije_NZ, std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
-	int lowerbound, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, int LB3_oud);
+void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order_rows_columns, int a, matrix * Info, std::vector<int> Vrije_NZ, std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
+	int lowerbound, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, int LB3_oud, std::vector<int>Value_Partial_status, Bi_Graph bigraph);
 
 
 //This fucntion gives the number of partial partitions that were aborted, beacause LB>=UB.

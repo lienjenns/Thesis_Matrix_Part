@@ -5,6 +5,7 @@
 #include<set>
 #include <iostream>
 #include "./Global.h"
+#include "./matrix.h"
 
 //This function determines the index of a state by using binary arithmetric .
 //So index of state (0,1,1) is 2^1+2^2 -1=4. The minus one at the end is in order to start at index 0.
@@ -21,6 +22,13 @@ int Binair_index(std::vector<bool> State) {
     return index;
 }
 
+
+//This function detemrines the inititial upperbound used in the B &B tree
+void init_UB(matrix *info) {
+
+   UB= std::min(info->M, info->N)* (Processors - 1) + Processors - 1;
+    
+}
 
 //Given p Processors this function determines the set of all possible states.
 //Input; at the first step; start=0, Different_States=Zero_State, x= # Processors.

@@ -175,11 +175,7 @@ void matrix::CCS(std::vector < std::pair<int, int>> Entries, int nnz, int number
          }
 
          //Determines Cmax.
-         int Cmax = *max_element(perRow_Col.begin(), perRow_Col.end());
-
-         //Prints the value of Cmax.
-         std::cout << "\n "<< "CMax value: " << Cmax;
-         std::cout << "\n";
+          Cmax = *max_element(perRow_Col.begin(), perRow_Col.end());
 
          return(Cmax);
 

@@ -1,0 +1,13 @@
+IG5-7
+
+Number of Processors: 2  Value epsilon : 0.03
+Max partition size: 283
+
+Number of Partitions aborted: 18455658
+Time taken: 10220sec
+ 
+STOPPED BEFORE PARTITION WAS FINISHED
+SOLUTION MAY NOT BE OPTIMAL
+
+The best solution found so far is:  
+With Comm. Vol:  0

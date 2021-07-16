@@ -2,6 +2,7 @@
 #include<algorithm>
 #include<vector>
 #include<set>
+#include"./matrix.h"
 
 
 
@@ -29,3 +30,5 @@ std::set<std::vector<bool>> States( int start, std::vector<bool> Different_State
 //This function links the binary index of a status from the set AllStates with the status.
 std::vector <std::vector<bool>> indexStatus_vs_Status();
 
+//This function detemrines the inititial upperbound used in the B &B tree
+void init_UB(matrix * info);

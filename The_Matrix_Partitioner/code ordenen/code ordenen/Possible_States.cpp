@@ -42,7 +42,7 @@ std::vector<int> Determine_Order_row_columns(std::vector<int> number_nz) {
     }
 
     //Prints the order of the row and columns, rowcol with the most nz is first.
-    std::cout << "Order of the row and columns, using order1: ";
+    std::cout <<"\n"<< "Order of the row and columns, using order1: ";
     for (int j = 0; j < Order__row_columns.size(); j++) {
         std::cout << Order__row_columns[j] << "  ";
     }
@@ -51,6 +51,61 @@ std::vector<int> Determine_Order_row_columns(std::vector<int> number_nz) {
     return Order__row_columns;
 }
 
+std::vector<int> Determine_Order_row_columns3(std::vector<int> number_nz, matrix A) {
+
+    //Vector in which the order is stored.
+    std::vector<int> Order__row_columns;
+
+    int number_of_rows_columns = number_nz.size();
+
+
+    for (int k = 0; k < number_of_rows_columns; k++) {
+
+        if (number_nz[k] == 0) {
+            number_nz[k] = -1;
+        }
+
+        else { 
+            continue; 
+        }
+    }
+
+    for (int i = 0; i < number_of_rows_columns; i++) {
+
+        int Maximal_Value = *std::max_element(number_nz.begin(), number_nz.end());
+
+        //Makes sure that a rowcol with 0 nonzeros is not taken into account.
+        if (Maximal_Value < 0) {
+            break;
+        }
+
+        int Index_MaxElement = std::max_element(number_nz.begin(), number_nz.end()) - number_nz.begin();
+
+        Order__row_columns.push_back(Index_MaxElement);
+        number_nz[Index_MaxElement] = -1;
+
+    
+
+        std::vector<int> intersecting_rc_maxrc = A.Intersecting_RowCol(Index_MaxElement);
+        int no_intersecting = intersecting_rc_maxrc.size();
+        for (int j = 0; j < no_intersecting; j++) {
+
+            int rowcol = intersecting_rc_maxrc[j];
+            number_nz[rowcol] -= 1;
+
+        }
+
+
+    }
+    //Prints the order of the row and columns, rowcol with the most nz is first.
+    std::cout << "Order of the row and columns, using order3: ";
+    for (int j = 0; j < Order__row_columns.size(); j++) {
+        std::cout << Order__row_columns[j] << "  ";
+    }
+    std::cout << "\n";
+
+    return Order__row_columns;
+}
 
 
 //Function that determines the order of the row and columns based on the number of nonzeros in a row/column
@@ -580,16 +635,21 @@ bool Check_Load_Bal(std::vector<bool> Possible_Status_rc, int rowcol, std::vecto
 
  //This function updates; the Partition_size, the color_count for each rowcol, 
 // the lowerbound for the partial partition given by "The_States", and the information for Lowerbound_2.
-std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, int, std::vector<std::pair<int, std::vector<bool>>>, std::array<std::vector<std::vector<int>>, 2> , int > Update(int rowcol,
-    std::vector<bool> Status_rowcol, matrix A, std::vector<std::vector<bool>> The_States, std::vector<int> Vector_Freenz,
+std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, int, std::vector<std::pair<int, std::vector<bool>>>, std::array<std::vector<std::vector<int>>, 2> , int , std::vector<int>, Bi_Graph > Update(int rowcol,
+    std::vector<bool> Status_rowcol, matrix * A, std::vector<std::vector<bool>> The_States, std::vector<int> Vector_Freenz,
     std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
-    int LB, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, int LB3_oud) {
+    int LB, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, int LB3_oud, std::vector<int>Value_Partial_status, Bi_Graph bigraph) {
+
+    //Define two containers to keep track of the rowcols that need to be reoved or added to the graph in lowerbound 4.
+    std::vector<int> add_vertices;
+    std::vector<int> remove_vertices;
 
     //First update w.r.t the just assigned rowcol, "rowcol"; free nonzeros, packingsets, lowerbound.
 
     //There are no free nonzeros anymore in "rowcol".
     Vector_Freenz[rowcol] = 0;
 
+  
 
     //Adjust the lowerbound "LB" remove for the assigned rowcol the L2  bound and add the L1 bound to Lowerbound "LB".
 
@@ -605,7 +665,7 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
 
     //Adjust the packing sets (L3 bound) for the assigned rowcol
     //If "rowcol"< M , then rowcol= a row;
-    if (rowcol < A.M) {
+    if (rowcol < A -> M) {
         int no_sets = Packing_Sets[0].size();
         //Loop over all the packing sets for the rows.
         for (int i = 0; i < no_sets; i++) {
@@ -616,7 +676,7 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
     //Else we have "rowcol">=M, so rowcol=column,
     //so index of column -M.
     else {
-        int new_index_rowcol = (rowcol - A.M);
+        int new_index_rowcol = (rowcol - A -> M);
         int no_sets = Packing_Sets[1].size();
         //Loop over all packing sets of the columns.
         for (int i = 0; i < no_sets; i++) {
@@ -624,13 +684,18 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
         }
     }
 
+
+    //Update value partial status of the "rowcol" we set it back to -1 meaning this rowcol has no partial status
+    Value_Partial_status[rowcol] = -1;
+   
+
    //Now update w.r.t. the intersecting rowcols;
    //Update; 
 
     //std::vector<std::pair<int, std::vector<bool>>> New_Partial_Status_rowcols = Partial_Status_rowcols;
  
     //Determine the rowcols that intersect "rowcol" in a nonzero.
-    std::vector<int> Intersecting_rowcol = A.Intersecting_RowCol(rowcol);
+    std::vector<int> Intersecting_rowcol = A -> Intersecting_RowCol(rowcol);
 
     //Traverse ovr all intersecting rowcols.
     for (auto i = Intersecting_rowcol.begin(); i != Intersecting_rowcol.end(); i++) {
@@ -749,16 +814,24 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
           //add the free nonzeros in the correct packing set.
           if (L2_bound_intersectrc== 0 && sum_1Proc_Partial_status == 1) {
 
+              //This rowcol needs to be added as a vretex in the graph of lowerbound 4.
+              add_vertices.push_back(index_itersect_rc);
+              //Adjust/confirm/save the value of the partial status of the intersecting rowcol
+              
+
+             
+              Value_Partial_status[index_itersect_rc] = index_packingset;
+
               //If the intersceting rowcol=row.
-              if (index_itersect_rc < A.M) {
+              if (index_itersect_rc < A -> M) {
                   //Number of nonzeros assigned to proc "index_Partial_Status" is; # nz in row- # nz already assiged to proc in this row.
-                  Packing_Sets[0][index_packingset][index_itersect_rc] = A.perRow_Col[index_itersect_rc] - color_count[index_Partial_status][index_itersect_rc];
+                  Packing_Sets[0][index_packingset][index_itersect_rc] = A -> perRow_Col[index_itersect_rc] - color_count[index_Partial_status][index_itersect_rc];
               }
 
               //If the intersecting rowcol=column.
               else {
-                  int new_index_intersect = (index_itersect_rc - A.M);
-                  Packing_Sets[1][index_packingset][new_index_intersect] = A.perRow_Col[index_itersect_rc] - color_count[index_Partial_status][index_itersect_rc];
+                  int new_index_intersect = (index_itersect_rc - A -> M);
+                  Packing_Sets[1][index_packingset][new_index_intersect] = A -> perRow_Col[index_itersect_rc] - color_count[index_Partial_status][index_itersect_rc];
               }
           }
 
@@ -766,8 +839,13 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
          ////, because this rowcol is not partially coloured in one colour.    
           else {
 
+              //This rowcol needs to be removed from the graph of lowerbound 4.
+              remove_vertices.push_back(index_itersect_rc);
+              //Remove the partial status of this intersecting row/column
+              Value_Partial_status[index_itersect_rc] = -1;
+
               //If the intersceting rowcol=row.
-              if (index_itersect_rc < A.M) {
+              if (index_itersect_rc < A-> M) {
                   int no_sets = Packing_Sets[0].size();
                   //Loop ovr all the packing sets for the rows.
                   for (int i = 0; i < no_sets; i++) {
@@ -777,7 +855,7 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
 
               //If the intersecting rowcol=column.
               else {
-                  int new_index_intersect = (index_itersect_rc - A.M);
+                  int new_index_intersect = (index_itersect_rc - A -> M);
                   int no_sets = Packing_Sets[1].size();
                   //Loop over all packing sets of the columns.
                   for (int i = 0; i < no_sets; i++) {
@@ -835,37 +913,101 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
 
         }
 
+       
+
     }
 
+
+  
   //Deterine the new L3 bound for this partial partitioning
   int L3a = L3bound(Packing_Sets, Partition_size);
-  //Detemrine the differnec between the new and old L3 bound 
-  int  L3_erbij = L3a - LB3_oud;
-  //Adjust the old L3 bound
-  LB3_oud = L3a;
 
-  //add the difference of L3 bound to the Lowerbound ,"LB", of the whole partial patitionend matrix.
-  LB += L3_erbij;
+
+  //if (Value_Partial_status[27] == 1) {
+
+  //    std::cout << "ok";
+  //}
+
+  //if (Value_Partial_status[27] == -1) {
+  //    std::cout << "hmm";
+  //}
+
+  //if (Value_Partial_status[27] == 0) {
+  //    std::cout << "hmm";
+  //}
+
+  //Determine the new local L4 bound
+  bigraph.Set_rowcol(rowcol, add_vertices, remove_vertices, &(A->M), &(A->N),A, Value_Partial_status);
+/*if (bigraph.no_Matched == 1  && bigraph.Match[103] !=103 && rowcol==86) {
+
+      std::cout << "moe";
+  }*/
+  //The value of the L4 bound
+  int new_L4 = bigraph.no_Matched;
+
+  //Determine max of L3 and L4 bound
+  int max_L3_L4;
+   //max_L3_L4 = std::max(const T& L3a, const T& new_L4);
+  if(new_L4 > L3a) {
+      max_L3_L4 = new_L4;
+  }
+
+  else { 
+  max_L3_L4 = L3a;
+  }
+  std::vector<bool> zucht = { 1,0 };
+  //if (Lowest_cv_sofar==2  ) {
+  //    std::cout << "waarom ";
+  //}
+  //Determine difference between old an new L3/L4 bound
+  int add_L3_L4 = max_L3_L4 - LB3_oud;
+
+  ////Detemrine the differnec between the new and old L3 bound 
+  //int  L3_erbij = L3a - LB3_oud;
+  ////Adjust the old L3 bound
+  //LB3_oud = L3a;
+
+  ////add the difference of L3 bound to the Lowerbound ,"LB", of the whole partial patitionend matrix.
+  //LB += L3_erbij;
+
+  //Adjust the old L3/L4 bound
+
+  LB3_oud = max_L3_L4;
+  LB +=add_L3_L4;
  
    //prints differnec in old and new L3 bound if differnce>0.
  /*   if (L3_erbij != 0) {
         std::cout << "l3bound " << L3_erbij << " ";
     }*/
     
+ 
     
     //Sanity_Check_PartitionSize(Partition_size);
-   
-    return std::make_tuple(Vector_Freenz, Partition_size, color_count, LB, Partial_Status_rowcols,Packing_Sets, LB3_oud);
+ 
+    return std::make_tuple(Vector_Freenz, Partition_size, color_count, LB, Partial_Status_rowcols,Packing_Sets, LB3_oud, Value_Partial_status, bigraph);
 }
 
 
 
 
-//Other UB this is a very large UB better option? ToDo
-//int UB = (Processors-1)*std::min(ab.N, ab.M)-(Processors-1);
+//Sort function used to alternate between processors
+struct Alt_color1 {
 
-//ToDo the first ub now fixed must be flexible.
-int UB = 100;
+    Alt_color1(int index) { this->index = index; }
+
+
+    bool operator () (const std::vector<bool>& a, const std::vector<bool>& b) {
+
+
+       
+
+        return((a[index] > b[index]) && std::accumulate(a.begin(), a.end(), 0) != Processors || (a[index] == b[index] && std::accumulate(a.begin(), a.end(), 0) < std::accumulate(b.begin(), b.end(), 0)) ||
+            std::accumulate(b.begin(), b.end(), 0) == Processors);
+    }
+    int index;
+};
+
+
 
 
 //A short to store the state of the previous value of GetAsyncKeystate (used in the function Partition).
@@ -877,11 +1019,13 @@ int AAnt = 0;
 int Aant_aborted=0;
 
 
+
+
 //The B&B TREE
 //The tree first traverses one branch until a leaf. (DFS)
 void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order_rows_columns,
-    int a, matrix Info, std::vector<int> Vrije_NZ, std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
-    int lowerbound, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, int LB3_oud) {
+    int a, matrix * Info, std::vector<int> Vrije_NZ, std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
+    int lowerbound, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, int LB3_oud, std::vector<int> value_partialstatus, Bi_Graph bigraph) {
 
 
     //Open the file n which we store all new ub and corresponding partitions for the matrix
@@ -890,9 +1034,9 @@ void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order
 
     //If it takes too long push escape button, then the execution of this funtion stops.
     // The best solution so far is printed, 27 refers to the  the escape button.
-    if (GetKeyState(27) & 0x8000) {
+ /*   if (GetKeyState(27) & 0x8000) {
         Stop_Partition = 1;
-    }
+    }*/
 
     //Code below is to check in which subtree Partition fuction currently is.
     //When pussing the "ALT" button (in windows) the state of the first rowcol and the second rowcol is printed. 
@@ -1005,7 +1149,7 @@ void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order
         //Determine the index of the next rowcol 
         int i = Order_rows_columns[y-a];
         //Determine the indices of the  rows/columns intersecting with this rowocl in a nonzero.
-        std::vector<int> IntersectingRowCol= Info.Intersecting_RowCol(i); 
+        std::vector<int> IntersectingRowCol= Info -> Intersecting_RowCol(i); 
         
         //Prints the indices of the intersecting rows/columns
        /*   std::cout << "Huidige indeex: " << i << " intersecting rij/kolom :" << "\n";
@@ -1054,7 +1198,7 @@ void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order
 
             std::vector<bool> State_to_Check = *l;
 
-           bool Checkvalue= Check_Load_Bal(State_to_Check, i, Partition_size, color_count, Info);
+           bool Checkvalue= Check_Load_Bal(State_to_Check, i, Partition_size, color_count, *Info);
 
            //Only keep the state if it is allowed acoording to the load balance rule.
            if (Checkvalue == 1) {
@@ -1071,33 +1215,52 @@ void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order
             FeasibleStates_Final=First_Symmetry_Check(First_Symmetry_Set(), FeasibleStates_Final);
         }
 
-       // std::vector<std::vector<bool>> FeasibleStates_Final;
+        if (a == (y - 1) && s2==1) {
+           FeasibleStates_Final= Second_Symmetry_Check(Symmetry2(The_States[Order_rows_columns[0]]), FeasibleStates_Final);
+        }
+
+        std::vector<std::vector<bool>> FeasibleStates_FinalOrder(FeasibleStates_Final.begin(), FeasibleStates_Final.end());
 
         //Possibly for the first rowcol change the order in which we traverse the feasible states
         //Do this only when PRiority Queue is activated (i.e. PQ=1), and using priority is only possible when the number of processors is 3 or 4.
-       /* if (a == y && PQ==1 && (Processors==3 || Processors==4)) {
+        if (a == y && PQ==1 && (Processors==3 || Processors==4)) {
 
-           int no_nz_rc0= Info.perRow_Col[i];
-           float ratio = (float)Max_Partition_size / (float)no_nz_rc0;
-           FeasibleStates_Final= Priority_Queue(FeasibleStates_Final, ratio);
+           int no_nz_rc0= Info -> perRow_Col[i];
+           float ratio =  (float)no_nz_rc0 / (float)Max_Partition_size ;
+           FeasibleStates_FinalOrder= Priority_Queue(FeasibleStates_Final, ratio);
 
 
-        }*/
+        }
 
+      
 
        
        //ToDo if Feasible_Final==0 meteen returen als ie stuk zou gaan als  for stuk gaat als feasible_Final stuk leeg is . deze ook bijhoduen zou eigenlijk nooit kunenn dek ik feas states is 0. Sanity check??
 
-        //Now traverse all Feasible states for this rowcol.
-        for (auto k = FeasibleStates_Final.begin(); k != FeasibleStates_Final.end(); k++) {
-           
-           
-            std::vector<bool> Chosen_State = *k;
+       
+        
+        //Alternating the processors, Determine the processor that owns the least nonzeros
+        //Traverse first the states that contain this processor for the current rowcol.
+        //To do this change the order of the vector.
 
+        if (a != y) {
+            int index_lowest_partition = std::min_element(Partition_size.begin(), Partition_size.end()) - Partition_size.begin();
+            int Proc_lowest_partition = log2(index_lowest_partition + 1);
+
+            std::sort(FeasibleStates_FinalOrder.begin(), FeasibleStates_FinalOrder.end(), Alt_color1(Proc_lowest_partition));
+        }
+
+        //Now traverse all Feasible states for this rowcol.
+        for (auto k = FeasibleStates_FinalOrder.begin(); k != FeasibleStates_FinalOrder.end(); k++) {
+           
+
+            
+            std::vector<bool> Chosen_State = *k;
+          
            //Update all information regarding partition_sizes and Lowerbounds.
             std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, int, std::vector<std::pair<int,
-                std::vector<bool>>>, std::array<std::vector<std::vector<int>>, 2> ,int > updatecolor = Update(i,
-                    *k, Info, The_States,Vrije_NZ, Partition_size, color_count,  lowerbound, Partial_Status_rowcols,Packing_Sets, LB3_oud);
+                std::vector<bool>>>, std::array<std::vector<std::vector<int>>, 2> ,int , std::vector<int>, Bi_Graph> updatecolor = Update(i,
+                    *k, Info, The_States,Vrije_NZ, Partition_size, color_count,  lowerbound, Partial_Status_rowcols,Packing_Sets, LB3_oud, value_partialstatus ,  bigraph);
 
             //This rowcol=rowcol i, is now assigned state Chosen_State.
             The_States[i] = Chosen_State;
@@ -1111,14 +1274,17 @@ void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order
             std::vector<std::pair<int, std::vector<bool>>> new_Partial_status;
             std::array<std::vector<std::vector<int>>, 2> new_Packing_Sets;
             int new_LB3_oud;
+            std::vector<int> new_val_partstatus;
+            Bi_Graph New_bigrph(&(Info->M), &(Info->N));
+           
 
-            tie(new_Free_NZ, new_Partsize, new_colorcount, new_lb, new_Partial_status, new_Packing_Sets, new_LB3_oud) = updatecolor;
+            tie(new_Free_NZ, new_Partsize, new_colorcount, new_lb, new_Partial_status, new_Packing_Sets, new_LB3_oud, new_val_partstatus, New_bigrph) = updatecolor;
 
             //Number of rowcols that still need to be assigne is now a-1.
             int b = a - 1;
 
             //Recurse, go to the next layer in the tree.
-            Partition(The_States, Order_rows_columns, b, Info, new_Free_NZ, new_Partsize, new_colorcount,  new_lb, new_Partial_status, new_Packing_Sets, new_LB3_oud);
+            Partition(The_States, Order_rows_columns, b, Info, new_Free_NZ, new_Partsize, new_colorcount,  new_lb, new_Partial_status, new_Packing_Sets, new_LB3_oud, new_val_partstatus, New_bigrph);
         }
 
     }

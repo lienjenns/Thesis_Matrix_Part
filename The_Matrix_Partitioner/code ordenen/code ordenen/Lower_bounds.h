@@ -25,3 +25,46 @@ extern std::vector<int> Info_L3;
 //that are partial one color, consequently it  only takes into account partition sizes of  single processors.
 //This function calculates the "local" L3 bound = local packing bound.
 int L3bound(std::array<std::vector<std::vector<int>>, 2> Packing_Sets, std::vector<int> Partition_Size);
+
+
+
+//A struct that contains all the information necessary for the Local L4 bound.
+//It is essntially a bipartite graph, with a matching
+class Bi_Graph
+{
+public:
+    //Adjacency list of the vertices
+    std::vector<std::vector<int>>  adj;
+
+    //This vector keeps track of which rowcols are in the graph
+    //In_graph[i]=1 means rowcol i is in the graph.
+    std::vector<bool> In_graph;
+
+
+    //Match of the vertices, if vertex i is unmatched Match[i]=[i], if i is matched to j (and j to i)
+    // then Match[i]=j & Match[j]=i;
+    std::vector<int> Match;
+
+    //Size of the matching in the bipartite graph
+    int no_Matched;
+
+    //Max number of vertices possible in the graph (will never happen)
+    int Max_V;
+
+    
+    //Constructor Bigraph ellende 
+    Bi_Graph(int* M, int* N);
+
+    //This function adds the vertices corresponding to rowcol "index_rc" to the graph.
+    void add_vertex(int index_rc, std::vector<int> intersect_rc, int* M, int* N, std::vector<int> PartialStatus);
+
+    //This function  removes the vertices corresponding to rowcol "rc_i" to the graph.
+    void remove_vertex(int rc_i, int* M, int* N);
+
+    //Determines if there is an augmenting path in the graph starting from vertex v_i. If this is the case the matching will increase by 1.
+    void Augment_Path(int v_i);
+
+    //This function updates the graph after assigning rowcol "rc_i" a state.
+    void Set_rowcol(int rc_i, std::vector<int> add_rc, std::vector<int> remove_rc, int* M, int* N, matrix* info, std::vector<int> PartialStatus); //Pointer matrix A megeven voor interscet rowcol kan nu evt. met vector<vector<int
+
+};

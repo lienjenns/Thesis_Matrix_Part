@@ -34,6 +34,8 @@ extern std::vector<bool> AllProc_State;
 //This depends on the number of nnz, Processors and Epsilon.
 extern int Max_Partition_size;
 
+//The Upperbound used in the branch and bound tree
+extern int UB;
 
 
 
@@ -51,3 +53,4 @@ extern std::string filename_Sol_info;
 
 //Some parameters to turn some features on and off.
 extern bool PQ;
+extern bool s2;

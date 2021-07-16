@@ -9,6 +9,7 @@
 #include "./Util.h"
 #include<numeric>
 #include<array>
+#include"./Lower_bounds.h"
 
 
 
@@ -188,4 +189,253 @@ int L3bound(std::array<std::vector<std::vector<int>>, 2> Packing_Sets, std::vect
         }
     }
     return L3bound;
+}
+
+
+// This function updates the graph after assigning rowcol "rc_i" a state.
+void Bi_Graph::Set_rowcol(int rc_i, std::vector <int> add_rc, std::vector<int> remove_rc, int* M, int* N, matrix * info, std::vector<int> PartialStatus) {  //Pointer matrix A megeven voor interscet rowcol kan nu evt. met vector<vector<int, als dit doet da n hoef je niet M en N los mee te gevn
+
+    if (In_graph[rc_i] == 1) {
+        remove_vertex(rc_i, M, N);
+    }
+
+    int no_to_remove = remove_rc.size();
+    int no_to_add = add_rc.size();
+
+
+    for (int j = 0; j < no_to_remove; j++) {
+
+        int rcj = remove_rc[j];
+
+        if (In_graph[rcj] == 1) {
+
+            remove_vertex(rcj, M, N);
+        }
+    }
+
+    for (int i = 0; i < no_to_add; i++) {
+
+        int rck = add_rc[i];
+
+        if (In_graph[rck] == 0) {
+
+           
+            add_vertex(rck, info -> Intersecting_RowCol(rck) , M, N, PartialStatus); ///Intersecting rijcol meot meegegeven worden dmv matrix struct.
+        }
+    }
+
+}
+
+
+//Constructor of the bipartite graph. 
+//Because we use split vertices, we add p-1 vertices to the graph for every rowcol that gets added to the graph .
+Bi_Graph::Bi_Graph(int* x, int* y) {
+
+    adj.resize((Processors - 1) * (*x + *y));
+    In_graph.resize(*x + *y);
+    Match.resize((Processors - 1) * (*x + *y));
+
+    //Initialize Match vector, ie. match[i]=i.
+    std::iota(Match.begin(), Match.end(), 0);
+
+    no_Matched = 0;
+
+    Max_V = (Processors - 1) * (*x + *y);
+}
+
+//Function that determines if there is an augmenting path for vertex v_i, given the current matching in the Bi_Graph.
+void Bi_Graph::Augment_Path(int v_i) {
+
+    if (Match[v_i] != v_i) {
+        std::cout << "al gematched";
+
+    }
+
+    // Will be set to 1 when augmented path is found
+    bool augm = 0;
+
+    //Vector used to store vertices
+    std::vector<int> queue;
+
+    //Vector used to see if a vertex is visited in the BFS tree, initialized as false.
+    std::vector<bool> visited(Max_V, 0);
+
+    //Vector that stores the parent of a vertex i the BFS tree, starts at -1 to indicate that no veretx has a parent in bfs.
+    // -1 indicates that a veretx has no parent in the BFS tree.
+    std::vector<int> parent(Max_V, -1);
+
+    int v_k, match_k;
+    int v_j, old_match_j;
+    int v_l;
+
+    queue.push_back(v_i);
+    visited[v_i] = 1;
+
+    while (augm == 0 && !queue.empty()) {
+
+        v_j = queue.front();
+        queue.erase(queue.begin(), queue.begin() + 1);
+
+        for (auto l = adj[v_j].begin(); l != adj[v_j].end(); l++) {
+
+            v_k = *l;
+
+            if (visited[v_k]==1) {
+                continue;
+            }
+
+            else {
+                //v_k unmatched, so match v_k! 
+                //We have found and augmenting path.
+                if (Match[v_k] == v_k) {
+
+                    parent[v_k] = v_j;
+
+                    visited[v_k] = 1; //Niet perse nodig ka voor volledigheid
+
+                    //v_k will be mathched to v_j
+                    Match[v_k] = v_j;
+
+
+                    while (v_j != v_i) {
+
+                        old_match_j = Match[v_j];
+                        Match[v_j] = v_k;
+                        v_l = parent[old_match_j];
+
+                        Match[old_match_j] = v_l;
+
+                        v_j = v_l;
+                        v_k = old_match_j;
+
+
+                    }
+
+                    Match[v_i] = v_k; //v_i van gemaakt was eerst v_j maakt niet uit als goed is
+                    no_Matched += 1;
+                    augm = 1;
+
+                    break;
+
+
+                }
+
+                //If v_k is alrady matched, extend the BFS tree
+                else {
+                    match_k = Match[v_k];
+                    parent[v_k] = v_j;
+                    parent[match_k] = v_k;
+
+                    visited[v_k] = 1;
+                    visited[match_k] = 1;
+
+                    queue.push_back(match_k);
+                }
+
+            }
+        }
+    }
+}
+
+//This function adds the  p-1 vertices corresponding to rowcol "rc_i" to the graph.
+void Bi_Graph::add_vertex(int rc_i, std::vector<int> intersect_rc, int* M, int* N, std::vector<int> PartialStatus) { //ToDo hoe intersectrc meegeven? pointer en m+n 1 keer berekeeknen? of zo houden
+
+  //rowcol i is now in the graph
+    In_graph[rc_i] = 1;
+
+
+    int no = intersect_rc.size();
+
+    //Traverse all rowcols that intersect rowcol "rc_i".
+    for (int j = 0; j < no; j++) {
+
+        int k = intersect_rc[j];
+
+        //If rowcol k is in the graph && has an other partial status then rowcol rc_i, add rowcol k to the adjacency list of rowcol rc_i , 
+        //and vice-versa.
+        if (In_graph[k] == 1 && PartialStatus[k] !=-1 && PartialStatus[rc_i] != PartialStatus[k]) {
+
+            //Determine the index of the vertex that corresponds to rowcol rc_i & can have edges to rowcols that have partial status PartialStatus[k].
+            //Determine also the index of the correct split vertex of rowcol k.
+            int index_Splitvertex_rci;
+            int index_Splitvertex_k;
+
+            if (PartialStatus[k] > PartialStatus[rc_i]) {
+                index_Splitvertex_rci = (PartialStatus[k] - 1) * (*M + *N) + rc_i;
+                index_Splitvertex_k = (PartialStatus[rc_i]) * (*M + *N) + k;
+            }
+            else {
+                index_Splitvertex_rci = (PartialStatus[k]) * (*M + *N) + rc_i;
+                index_Splitvertex_k = (PartialStatus[rc_i] - 1) * (*M + *N) + k;
+            }
+
+            //PartialStatus[rc_i] > PartialStatus[k]) 
+
+            adj[index_Splitvertex_rci].push_back(index_Splitvertex_k);
+            adj[index_Splitvertex_k].push_back(index_Splitvertex_rci);
+        }
+
+    }
+
+    //For every vertex corresponding to rowcol "rc_i" we need to chech if there in augmenting path starting in that vertex.
+    //So if p=3, we need to check for p-1=2 vertices if there is an augmenting path starting in that vertex.
+    for (int j = 0; j < Processors - 1; j++) {
+
+        int index_Splitvertex_rci = rc_i + (*M + *N) * j;
+        Augment_Path(index_Splitvertex_rci);
+    }
+
+    
+}
+
+//This function removes the  p-1 vertices corresponding to rowcol "rc_i" to the graph.
+void Bi_Graph::remove_vertex(int rc_i, int* M, int* N) {
+
+    //In this container the matches of the spit vertices of vertex i are stored.
+    std::vector<int> Previous_matches_to_i;
+    //rowcol rc_i is no longer in the graph.
+    In_graph[rc_i] = 0;
+
+    //Ga alle split vertices af 
+    for (int j = 0; j < Processors - 1; j++) {
+
+        int index_Splitvertex_rci = rc_i + (*M + *N) * j;
+
+        for (auto l = adj[index_Splitvertex_rci].begin(); l != adj[index_Splitvertex_rci].end(); l++) {
+
+            int vertex_k = *l;
+            
+
+            std::vector<int>::iterator it;
+            it = std::find(adj[vertex_k].begin(), adj[vertex_k].end(), index_Splitvertex_rci);
+
+            if (it != adj[vertex_k].end()) {
+
+                adj[vertex_k].erase(it); //Gaat dit goed?
+            }
+        }
+
+        //Now remove the adjacency list of this split vertex of vertex rc_i that is been removed.
+        adj[index_Splitvertex_rci].erase(adj[index_Splitvertex_rci].begin(), adj[index_Splitvertex_rci].end());
+
+        //Check if the splitvertex was matched.
+        if (Match[index_Splitvertex_rci] != index_Splitvertex_rci) {
+
+            int vertex_v = Match[index_Splitvertex_rci];
+
+            Previous_matches_to_i.push_back(vertex_v);
+
+            //Reset the matches of this split vertex corresponding to rc_i
+            Match[vertex_v] = vertex_v;
+            Match[index_Splitvertex_rci] = index_Splitvertex_rci;
+            no_Matched--;
+        }
+    }
+
+    int size_prevMatches = Previous_matches_to_i.size();
+    //We need to check for every vertex v, that was previously matched to a split veretx of rowcol rc_i, if there is an augmenting path starting at vertex v.
+    for (int i = 0; i < size_prevMatches; i++) {
+
+        Augment_Path(Previous_matches_to_i[i]);
+    }
 }

@@ -22,7 +22,7 @@
 //Initialize some of the exertnal variables of Global.h.
 
 //Give the number of Processsors
-int Processors = 3;
+int Processors = 4;
 
 //Give the value of Epsilon 3% load imbalance means Epsilon=0.03
 double Epsilon=0.03;
@@ -36,16 +36,20 @@ bool Stop_Partition = 0;
 std::set<std::vector<bool>> AllStates;
 int Max_Partition_size;
 std::vector <std::vector<bool>>Index_and_Status;
+int UB;
+
 
 //Define the outputstream and file name in order to store all info about the aprtiitoning of this matrix.
 std::ofstream Solution_and_info;
 //Give the name of the matrix you want to partition.
-std::string nameMatrix = "relat3";
+std::string nameMatrix = "jgl009";
 std::string filename_Sol_info = "p=" + std::to_string(Processors) + " " + nameMatrix + ".txt";
 
 
 //Do we want to use the priority Queue, for p=3 / p=4.
-bool PQ = 1;
+bool PQ = 0;
+//Do we want to use symmetry for the 2nd row/column
+bool s2 = 1;
 
 int main()
 {
@@ -60,6 +64,9 @@ int main()
     std::string Location_matrix = "0-30matrix/" + nameMatrix+ ".mtx";
     matrix A(Read_From_File(Location_matrix));
 
+    matrix* pointA;
+    pointA = &A;
+
     //File to store all information about one matirx
     //It stores all  new upperbounds, corresponding partitions  and new ub value
     Solution_and_info.open(filename_Sol_info, std::ios::out | std::ios::app);
@@ -69,6 +76,8 @@ int main()
 
  //Now make/determine some variables for the "Partition" function = The Tree:
    
+    //Determine the initial value of the UB.
+    init_UB(pointA);
 
    //Here the set of all posibble states without the "all processors state =(1,1,1, ...,1)" is made,
     AllStates = States( 0, Zero_State, Processors);
@@ -80,7 +89,7 @@ int main()
     Basic_L3_info();
 
     //Here the Maximal partition size is determined.
-    Max_Partition_size = Load_Balance(A.nnz);
+    Max_Partition_size = Load_Balance(pointA -> nnz);
     std::cout << "Max partition size: " << Max_Partition_size << "\n";
     Solution_and_info << "Max partition size: " << Max_Partition_size << "\n";
 
@@ -88,16 +97,18 @@ int main()
    
    //Below the order of the rows and columns is determined:
    std::vector<int> c;
-   c=Determine_Order_row_columns(A.perRow_Col);
+   c=Determine_Order_row_columns(pointA -> perRow_Col);
 
    std::vector<int> order2;
-   order2 = Determine_Order_row_columns2(A.perRow_Col, A.M);
+   order2 = Determine_Order_row_columns2(pointA -> perRow_Col, pointA -> M);
    
+   std::vector<int>order3=Determine_Order_row_columns3(pointA->perRow_Col, A);
 
    //The length of the vector that contans the order of rowcols is needed for the "Partition"function.
    //Note this length can be smaller than m+n because some rowcols may not contain any nonzeros.
    int d = c.size();
    int size_order2 = order2.size();
+   int size_order3 = order3.size();
 
 
    //The starting "Partition" is made.
@@ -115,21 +126,27 @@ int main()
 
   //Initial container values for L2bound, 
   std::vector<bool> initial_Partstat(options, 0);
-  std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols((A.M + A.N), std::make_pair(0, initial_Partstat));  
+  std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols((pointA -> M + pointA ->N), std::make_pair(0, initial_Partstat));  
 
 
   //Initialize packing sets for L3 bound.
-  std::vector<int> Rows(A.M, 0);
-  std::vector<int> Cols(A.N, 0);
+  std::vector<int> Rows(pointA ->M, 0);
+  std::vector<int> Cols(pointA -> N, 0);
   std::vector < std::vector<int>>PAck_row(Processors, Rows);
   std::vector < std::vector<int>>PAck_col(Processors, Cols);
   std::array<std::vector<std::vector<int>>, 2> Packing_Sets = { PAck_row, PAck_col };
 
+  //initialize partial status
+  std::vector<int>Value_Partial_status(pointA->M + pointA->N, -1);
+
   //Initialize LB3bound at zero
   int LB3_First = 0;
 
+  //Initialize the bipartite graph necessary for the local L4 bound
+  Bi_Graph graph(&A.M, &A.N);
+
   //Give the "Partition" function = the tree all the information it needs and execute it.
-   Partition(TheState, order2, size_order2,A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols, Packing_Sets, LB3_First);
+   Partition(TheState,order2,size_order2,&A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols, Packing_Sets, LB3_First, Value_Partial_status, graph);
 
    //When the partition function is executed the number of partial partitions that where aborted,
    //because of LB>=UB is printed.
@@ -177,10 +194,10 @@ int main()
    //file name depends on number of processors.
     std::ofstream OptSol;
     //name of file
-    std::string filename_Opt = "p=" + std::to_string( Processors) + ",first30, L3.txt";
+    std::string filename_Opt = "p=" + std::to_string( Processors) + ",31-50, L3.txt";
 
     OptSol.open(filename_Opt, std::ios::out | std::ios::app);
-    OptSol << nameMatrix<<" & " << A.M << " & "<< A.N << " & " << A.nnz<< " & "<< Lowest_cv_sofar << " & " << time_taken << " s"<< " \\\\ \\\hline " <<"\n";
+    OptSol << nameMatrix<<" & " << A.M << " & "<< A.N << " & " << A.nnz<< "  &"<< Lowest_cv_sofar << " & " << time_taken << " s"<< " \\\\ \\\hline " <<"\n";
     OptSol.close();
 
     //Make a file with information about the number of cuts in the first rowcol.
