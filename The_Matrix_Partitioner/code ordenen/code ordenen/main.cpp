@@ -22,14 +22,20 @@
 //Initialize some of the exertnal variables of Global.h.
 
 //Give the number of Processsors
-int Processors = 4;
+int Processors;
 
 //Give the value of Epsilon 3% load imbalance means Epsilon=0.03
-double Epsilon=0.03;
+double Epsilon;
+
+//Give the name of the matrix you want to partition.
+std::string nameMatrix;
+std::string filename_Sol_info;
+std::string Location_matrix;
+
 
 //Initial value for some other external variables of Global.h
-std::vector<bool> Zero_State(Processors, 0);
-std::vector<bool> AllProc_State(Processors, 1);
+std::vector<bool> Zero_State;
+std::vector<bool> AllProc_State;
 bool Stop_Partition = 0;
 
 //Define some of the exetrnal variables of Global.h.
@@ -41,9 +47,7 @@ int UB;
 
 //Define the outputstream and file name in order to store all info about the aprtiitoning of this matrix.
 std::ofstream Solution_and_info;
-//Give the name of the matrix you want to partition.
-std::string nameMatrix = "jgl009";
-std::string filename_Sol_info = "p=" + std::to_string(Processors) + " " + nameMatrix + ".txt";
+
 
 
 //Do we want to use the priority Queue, for p=3 / p=4.
@@ -51,9 +55,26 @@ bool PQ = 0;
 //Do we want to use symmetry for the 2nd row/column
 bool s2 = 1;
 
-int main()
+int main(int argc, char* argv[])
 {
-    
+    if (argc < 2) {
+        nameMatrix = "cage3";
+        Processors = 3;
+        Epsilon = 0.03;
+        Location_matrix = "0-30matrix/" + nameMatrix + ".mtx";
+    }
+    else {
+
+        nameMatrix = argv[1];
+        Processors = std::stoi(argv[2]);
+        Epsilon    = std::stod(argv[3]);
+        Location_matrix = "matrix/" + nameMatrix + ".mtx";
+    }
+    std::cout << nameMatrix;
+
+    Zero_State = std::vector<bool>(Processors, 0);
+    AllProc_State = std::vector<bool>(Processors, 1);
+
     clock_t start, end;
     start = clock();
 
@@ -61,7 +82,7 @@ int main()
     std::cout << "Number of Processors: " << Processors <<"  Value epsilon : "<< Epsilon<< "\n";
 
     //Give the name of the mtx or txt file ToDo (now enetr name in r.42)
-    std::string Location_matrix = "0-30matrix/" + nameMatrix+ ".mtx";
+  
     matrix A(Read_From_File(Location_matrix));
 
     matrix* pointA;

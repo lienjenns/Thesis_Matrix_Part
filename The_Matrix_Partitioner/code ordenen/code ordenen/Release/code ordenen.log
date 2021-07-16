@@ -1,10 +1,1 @@
-﻿  main.cpp
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\main.cpp(120,16): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\main.cpp(176,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\main.cpp(200,132): warning C4129: 'h': unrecognized character escape sequence
-  Generating code
-  1 of 1349 functions (<0.1%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    1 functions had inline decision re-evaluated but remain unchanged
-  Finished generating code
-  code ordenen.vcxproj -> C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\Release\code ordenen.exe
+﻿  code ordenen.vcxproj -> C:\Users\leojenns\Documents\zus\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\Release\code ordenen.exe
