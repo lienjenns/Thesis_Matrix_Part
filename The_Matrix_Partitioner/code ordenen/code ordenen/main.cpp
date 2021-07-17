@@ -19,6 +19,7 @@
 #include"./output.h"
 
 
+
 //Initialize some of the exertnal variables of Global.h.
 
 //Give the number of Processsors
@@ -70,6 +71,8 @@ int main(int argc, char* argv[])
         Epsilon    = std::stod(argv[3]);
         Location_matrix = "matrix/" + nameMatrix + ".mtx";
     }
+
+    filename_Sol_info = "p=" + std::to_string(Processors) + " " + nameMatrix + ".txt";
     std::cout << nameMatrix;
 
     Zero_State = std::vector<bool>(Processors, 0);

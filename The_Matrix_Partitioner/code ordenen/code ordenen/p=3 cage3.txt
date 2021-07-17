@@ -1,0 +1,18 @@
+0
+  100  101  011  010  011  110  111  101  110  111 CV: 10 : 0   
+33
+  100  010  101  010  101  110  110  101  111  111 CV: 9 : 1   
+180
+  100  010  011  011  101  110  110  101  110  101 CV: 8 : 2   
+706
+  110  011  001  011  110  101  010  101  010  101 CV: 7 : 3   
+cage3
+
+Number of Processors: 3  Value epsilon : 0.03
+Max partition size: 7
+
+Number of Partitions aborted: 3881
+Time taken: 0.524sec
+
+The best solution found so far is:  110 011 001 011 110 101 010 101 010 101 
+With Comm. Vol:  7
