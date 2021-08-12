@@ -1,5 +1,6 @@
 ﻿  main.cpp
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\main.cpp(120,16): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\main.cpp(176,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\main.cpp(200,132): warning C4129: 'h': unrecognized character escape sequence
-  code ordenen.vcxproj -> C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\Debug\code ordenen.exe
+C:\Users\E.L.Jenneskens\Documents\git\new\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\main.cpp(144,16): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\new\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\main.cpp(180,18): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\new\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\main.cpp(210,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\E.L.Jenneskens\Documents\git\new\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\main.cpp(234,132): warning C4129: 'h': unrecognized character escape sequence
+  code ordenen.vcxproj -> C:\Users\E.L.Jenneskens\Documents\git\new\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\Debug\code ordenen.exe

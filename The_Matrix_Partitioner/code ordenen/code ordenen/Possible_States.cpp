@@ -1301,7 +1301,7 @@ int get_Aantal() {
 //This are 2 external variables that hold the best found  solution 
 //and the corresponding value of the communciation volume until now.
 std::vector<std::vector<bool>> Best_solution_sofar;
-int Lowest_cv_sofar;
+//int Lowest_cv_sofar;
 
 //This function saves the best solution found sofar and the corresponding communication volume of this solution.
 void Save_best_solution_sofar(std::vector<std::vector<bool>> The_States, int commvol ) {

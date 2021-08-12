@@ -27,7 +27,7 @@ int Binair_index(std::vector<bool> State) {
 void init_UB(matrix *info) {
 
    UB= std::min(info->M, info->N)* (Processors - 1) + Processors - 1;
-    
+   
 }
 
 //Given p Processors this function determines the set of all possible states.

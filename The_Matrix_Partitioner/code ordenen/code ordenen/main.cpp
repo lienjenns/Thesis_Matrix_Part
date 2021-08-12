@@ -17,7 +17,7 @@
 #include<fstream>
 #include <string> 
 #include"./output.h"
-
+#include<math.h>
 
 
 //Initialize some of the exertnal variables of Global.h.
@@ -43,8 +43,8 @@ bool Stop_Partition = 0;
 std::set<std::vector<bool>> AllStates;
 int Max_Partition_size;
 std::vector <std::vector<bool>>Index_and_Status;
-int UB;
-
+int UB=1;
+int Lowest_cv_sofar= -1;
 
 //Define the outputstream and file name in order to store all info about the aprtiitoning of this matrix.
 std::ofstream Solution_and_info;
@@ -59,7 +59,7 @@ bool s2 = 1;
 int main(int argc, char* argv[])
 {
     if (argc < 2) {
-        nameMatrix = "cage3";
+        nameMatrix = "rel3";
         Processors = 3;
         Epsilon = 0.03;
         Location_matrix = "0-30matrix/" + nameMatrix + ".mtx";
@@ -71,8 +71,8 @@ int main(int argc, char* argv[])
         Epsilon    = std::stod(argv[3]);
         Location_matrix = "matrix/" + nameMatrix + ".mtx";
     }
-
     filename_Sol_info = "p=" + std::to_string(Processors) + " " + nameMatrix + ".txt";
+
     std::cout << nameMatrix;
 
     Zero_State = std::vector<bool>(Processors, 0);
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
  //Now make/determine some variables for the "Partition" function = The Tree:
    
     //Determine the initial value of the UB.
-    init_UB(pointA);
+   // init_UB(pointA);
 
    //Here the set of all posibble states without the "all processors state =(1,1,1, ...,1)" is made,
     AllStates = States( 0, Zero_State, Processors);
@@ -169,8 +169,18 @@ int main(int argc, char* argv[])
   //Initialize the bipartite graph necessary for the local L4 bound
   Bi_Graph graph(&A.M, &A.N);
 
-  //Give the "Partition" function = the tree all the information it needs and execute it.
-   Partition(TheState,order2,size_order2,&A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols, Packing_Sets, LB3_First, Value_Partial_status, graph);
+  int count_rondes = 0;
+  float UB_factor = 1.25;
+  while (Lowest_cv_sofar == -1) {
+      std::cout << "Nu in ronde: " << count_rondes << "UB: " << UB<< "\n";
+      //Give the "Partition" function = the tree all the information it needs and execute it.
+      Partition(TheState, order3, size_order3, &A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols, Packing_Sets, LB3_First, Value_Partial_status, graph);
+
+
+      int new_UB = ceil(UB * UB_factor);
+      UB = new_UB;
+      count_rondes++;
+  }
 
    //When the partition function is executed the number of partial partitions that where aborted,
    //because of LB>=UB is printed.
