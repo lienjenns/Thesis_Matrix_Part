@@ -1,0 +1,24 @@
+28430
+  100  010  010  010  001  001  010  101  110  101  101  100  011  011  011  011  011  100  100  100  110  110 CV: 11 : 0   
+jgl011
+
+Number of Processors: 3  Value epsilon : 0.03
+Max partition size: 26
+
+Number of Partitions aborted: 177068
+Time taken: 59.308sec
+
+The best solution found so far is:  100 010 010 010 001 001 010 101 110 101 101 100 011 011 011 011 011 100 100 100 110 110 
+With Comm. Vol:  11
+28430
+  100  010  010  010  001  001  010  101  110  101  101  100  011  011  011  011  011  100  100  100  110  110 CV: 11 : 0   
+jgl011
+
+Number of Processors: 3  Value epsilon : 0.03
+Max partition size: 26
+
+Number of Partitions aborted: 177272
+Time taken: 63.312sec
+
+The best solution found so far is:  100 010 010 010 001 001 010 101 110 101 101 100 011 011 011 011 011 100 100 100 110 110 
+With Comm. Vol:  11

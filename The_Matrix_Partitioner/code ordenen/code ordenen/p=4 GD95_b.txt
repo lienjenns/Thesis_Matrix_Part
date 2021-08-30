@@ -1,0 +1,4 @@
+GD95_b
+
+Number of Processors: 4  Value epsilon : 0.03
+Max partition size: 24

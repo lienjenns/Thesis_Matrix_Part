@@ -638,7 +638,7 @@ bool Check_Load_Bal(std::vector<bool> Possible_Status_rc, int rowcol, std::vecto
 std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, int, std::vector<std::pair<int, std::vector<bool>>>, std::array<std::vector<std::vector<int>>, 2> , int , std::vector<int>, Bi_Graph > Update(int rowcol,
     std::vector<bool> Status_rowcol, matrix * A, std::vector<std::vector<bool>> The_States, std::vector<int> Vector_Freenz,
     std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
-    int LB, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, int LB3_oud, std::vector<int>Value_Partial_status, Bi_Graph bigraph) {
+    int LB, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, int LB3_oud, std::vector<int>Value_Partial_status , Bi_Graph bigraph) {
 
     //Define two containers to keep track of the rowcols that need to be reoved or added to the graph in lowerbound 4.
     std::vector<int> add_vertices;
@@ -685,8 +685,8 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
     }
 
 
-    //Update value partial status of the "rowcol" we set it back to -1 meaning this rowcol has no partial status
-    Value_Partial_status[rowcol] = -1;
+    //Update value partial status of the "rowcol" we set it to-3 meaning that this rowcol is assigned
+    Value_Partial_status[rowcol] = -3;
    
 
    //Now update w.r.t. the intersecting rowcols;
@@ -841,8 +841,8 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
 
               //This rowcol needs to be removed from the graph of lowerbound 4.
               remove_vertices.push_back(index_itersect_rc);
-              //Remove the partial status of this intersecting row/column
-              Value_Partial_status[index_itersect_rc] = -1;
+              //Remove the partial status of this intersecting row/column, set it to -2 meaning rowcol is partially assigne dto more than 1 processor.
+              Value_Partial_status[index_itersect_rc] = -2;
 
               //If the intersceting rowcol=row.
               if (index_itersect_rc < A-> M) {
@@ -921,23 +921,14 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
   
   //Deterine the new L3 bound for this partial partitioning
   int L3a = L3bound(Packing_Sets, Partition_size);
+  int GL4 = 0;
+  if (GL4_on) {
+      GL4 = BFS_Global_L4(Value_Partial_status, A->M, A->N, A);
+  }
 
-
-  //if (Value_Partial_status[27] == 1) {
-
-  //    std::cout << "ok";
-  //}
-
-  //if (Value_Partial_status[27] == -1) {
-  //    std::cout << "hmm";
-  //}
-
-  //if (Value_Partial_status[27] == 0) {
-  //    std::cout << "hmm";
-  //}
 
   //Determine the new local L4 bound
-  bigraph.Set_rowcol(rowcol, add_vertices, remove_vertices, &(A->M), &(A->N),A, Value_Partial_status);
+  bigraph.Set_rowcol(rowcol, add_vertices, remove_vertices, &(A->M), &(A->N),A, Value_Partial_status, Packing_Sets, Partition_size);
 /*if (bigraph.no_Matched == 1  && bigraph.Match[103] !=103 && rowcol==86) {
 
       std::cout << "moe";
@@ -945,17 +936,78 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
   //The value of the L4 bound
   int new_L4 = bigraph.no_Matched;
 
+  int probeer=BFS2_Global_L4(bigraph.Match,bigraph.no_Matched, Value_Partial_status, A->M, A->N, A);
+
+  if (probeer > new_L4) {
+      GL42 += 1;
+
+  }
+
+  if (GL4 > new_L4) {
+      
+     GL4groter+=1;
+    
+
+  }
+  
+
+  if (GL4 - probeer>0)
+  {
+      //std::cout << "nieuw "<<GL4 - probeer<< " ";
+  }
+
+  if (probeer > GL4) {
+      std::cout << "oud "<< probeer-GL4<< " ";
+  }
+
+  if (GL4 > probeer) {
+     // std::cout << "mweh ";
+  }
+
+  if (new_L4 > GL4) {
+     L4groter += 1;
+
+  }
+  if (new_L4 == GL4) {
+
+      gelijk += 1;
+  }
+
+  if (CombL3_L4) {
+      new_L4 += bigraph.L4_combL3;
+     /* if (bigraph.L4_combL3 == 0 )
+      {
+          std::cout << " 0 ";
+      }*/
+      if (L3a != bigraph.L4_combL3) {
+      //    std::cout << "verschil packing: " << L3a - bigraph.L4_combL3;
+      }
+  }
+
+  
+  /*if (new_L4 - GL4 > 13) {
+      std::cout << new_L4 - GL4 << " ";
+  }*/
+
+ 
   //Determine max of L3 and L4 bound
   int max_L3_L4;
    //max_L3_L4 = std::max(const T& L3a, const T& new_L4);
-  if(new_L4 > L3a) {
+  if(new_L4 >= L3a && new_L4 >= GL4) {
       max_L3_L4 = new_L4;
+      combolocal += 1;
   }
-
+  else if (GL4 >= L3a && GL4 >= new_L4) {
+      max_L3_L4 = GL4;
+    aantalGL4 += 1;
+  }
   else { 
   max_L3_L4 = L3a;
+
+  L3gr +=1;
+ // std::cout << " hm ";
   }
-  std::vector<bool> zucht = { 1,0 };
+ // std::vector<bool> zucht = { 1,0 };
   //if (Lowest_cv_sofar==2  ) {
   //    std::cout << "waarom ";
   //}
@@ -983,6 +1035,8 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
  
     
     //Sanity_Check_PartitionSize(Partition_size);
+
+
  
     return std::make_tuple(Vector_Freenz, Partition_size, color_count, LB, Partial_Status_rowcols,Packing_Sets, LB3_oud, Value_Partial_status, bigraph);
 }

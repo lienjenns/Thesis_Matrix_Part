@@ -1,0 +1,36 @@
+88
+  10  10  01  10  01  01  01  01  10  11  10  11  01  11 CV: 3 : 0   
+b1_ss
+
+Number of Processors: 2  Value epsilon : 0.03
+Max partition size: 8
+
+Number of Partitions aborted: 167
+Time taken: 0.094sec
+
+The best solution found so far is:  10 10 01 10 01 01 01 01 10 11 10 11 01 11 
+With Comm. Vol:  3
+88
+  10  10  01  10  01  01  01  01  10  11  10  11  01  11 CV: 3 : 0   
+b1_ss
+
+Number of Processors: 2  Value epsilon : 0.03
+Max partition size: 8
+
+Number of Partitions aborted: 167
+Time taken: 0.606sec
+
+The best solution found so far is:  10 10 01 10 01 01 01 01 10 11 10 11 01 11 
+With Comm. Vol:  3
+88
+  10  10  01  10  01  01  01  01  10  11  10  11  01  11 CV: 3 : 0   
+b1_ss
+
+Number of Processors: 2  Value epsilon : 0.03
+Max partition size: 8
+
+Number of Partitions aborted: 167
+Time taken: 0.528sec
+
+The best solution found so far is:  10 10 01 10 01 01 01 01 10 11 10 11 01 11 
+With Comm. Vol:  3

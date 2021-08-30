@@ -1,0 +1,24 @@
+1363
+  010  010  001  001  001  010  010  010  010  001  100  100  100  100  100  001  001  100  010  010  010  001  011  001  010  010  001  001  001  100  100  100  100  101  001  100 CV: 2 : 0   
+GD01_b
+
+Number of Processors: 3  Value epsilon : 0.03
+Max partition size: 13
+
+Number of Partitions aborted: 1934
+Time taken: 0.79sec
+
+The best solution found so far is:  010 010 001 001 001 010 010 010 010 001 100 100 100 100 100 001 001 100 010 010 010 001 011 001 010 010 001 001 001 100 100 100 100 101 001 100 
+With Comm. Vol:  2
+1363
+  010  010  001  001  001  010  010  010  010  001  100  100  100  100  100  001  001  100  010  010  010  001  011  001  010  010  001  001  001  100  100  100  100  101  001  100 CV: 2 : 0   
+GD01_b
+
+Number of Processors: 3  Value epsilon : 0.03
+Max partition size: 13
+
+Number of Partitions aborted: 1934
+Time taken: 0.841sec
+
+The best solution found so far is:  010 010 001 001 001 010 010 010 010 001 100 100 100 100 100 001 001 100 010 010 010 001 011 001 010 010 001 001 001 100 100 100 100 101 001 100 
+With Comm. Vol:  2

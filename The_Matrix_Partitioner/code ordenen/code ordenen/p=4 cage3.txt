@@ -1,0 +1,16 @@
+70457
+  1000  0010  0001  0100  0011  1111  1110  1001  1110  1101 CV: 11 : 0   
+71647
+  1000  0110  0001  0110  0101  1011  1010  1001  1100  1101 CV: 10 : 1   
+95457
+  1100  1100  0001  1010  0011  0111  1000  0101  0110  1001 CV: 9 : 2   
+cage3
+
+Number of Processors: 4  Value epsilon : 0.03
+Max partition size: 5
+
+Number of Partitions aborted: 151944
+Time taken: 85.465sec
+
+The best solution found so far is:  1100 1100 0001 1010 0011 0111 1000 0101 0110 1001 
+With Comm. Vol:  9

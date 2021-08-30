@@ -1,0 +1,24 @@
+547
+  100  100  100  010  011  001  010  011  001  100  100  100  010  010  001  010  010  001  110  101  001  010 CV: 4 : 0   
+lpi_itest2
+
+Number of Processors: 3  Value epsilon : 0.03
+Max partition size: 9
+
+Number of Partitions aborted: 679
+Time taken: 0.284sec
+
+The best solution found so far is:  100 100 100 010 011 001 010 011 001 100 100 100 010 010 001 010 010 001 110 101 001 010 
+With Comm. Vol:  4
+547
+  100  100  100  010  011  001  010  011  001  100  100  100  010  010  001  010  010  001  110  101  001  010 CV: 4 : 0   
+lpi_itest2
+
+Number of Processors: 3  Value epsilon : 0.03
+Max partition size: 9
+
+Number of Partitions aborted: 679
+Time taken: 4.226sec
+
+The best solution found so far is:  100 100 100 010 011 001 010 011 001 100 100 100 010 010 001 010 010 001 110 101 001 010 
+With Comm. Vol:  4

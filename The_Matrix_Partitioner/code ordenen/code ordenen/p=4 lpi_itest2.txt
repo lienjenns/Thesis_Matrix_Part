@@ -1,0 +1,24 @@
+42139
+  1000  1100  1000  0001  0001  0010  0101  0110  0010  1000  0100  1000  0001  0001  0010  0100  0100  0010  1100  1010  0011  0001 CV: 6 : 0   
+lpi_itest2
+
+Number of Processors: 4  Value epsilon : 0.03
+Max partition size: 7
+
+Number of Partitions aborted: 79402
+Time taken: 37.792sec
+
+The best solution found so far is:  1000 1100 1000 0001 0001 0010 0101 0110 0010 1000 0100 1000 0001 0001 0010 0100 0100 0010 1100 1010 0011 0001 
+With Comm. Vol:  6
+42139
+  1000  1100  1000  0001  0001  0010  0101  0110  0010  1000  0100  1000  0001  0001  0010  0100  0100  0010  1100  1010  0011  0001 CV: 6 : 0   
+lpi_itest2
+
+Number of Processors: 4  Value epsilon : 0.03
+Max partition size: 7
+
+Number of Partitions aborted: 79402
+Time taken: 40.421sec
+
+The best solution found so far is:  1000 1100 1000 0001 0001 0010 0101 0110 0010 1000 0100 1000 0001 0001 0010 0100 0100 0010 1100 1010 0011 0001 
+With Comm. Vol:  6

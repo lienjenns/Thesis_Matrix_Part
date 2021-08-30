@@ -1,0 +1,14 @@
+208557
+  010  010  010  001  110  001  001  110  101  011  110  011  101  101  101  110  100  110 CV: 11 : 0   
+211766
+  110  101  110  001  001  010  010  110  101  011  100  011  011  011  011  100  100  100 CV: 10 : 1   
+jgl009
+
+Number of Processors: 3  Value epsilon : 0.03
+Max partition size: 17
+
+Number of Partitions aborted: 252025
+Time taken: 78.128sec
+
+The best solution found so far is:  110 101 110 001 001 010 010 110 101 011 100 011 011 011 011 100 100 100 
+With Comm. Vol:  10

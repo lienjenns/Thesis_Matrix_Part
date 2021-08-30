@@ -115,7 +115,9 @@ std::vector<std::string> tokenize(const std::string& line) {
         //    }
         //    std::cout << std::endl;
         //}
-
+        //Because of possible symmetry determine new value nnz
+        nnz = locations.size();
+        std::cout << "no nnz" << nnz<< "\n";
         return matrix(M, N, nnz, locations);
     }
 

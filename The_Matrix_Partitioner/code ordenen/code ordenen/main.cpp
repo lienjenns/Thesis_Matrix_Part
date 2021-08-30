@@ -46,23 +46,39 @@ std::vector <std::vector<bool>>Index_and_Status;
 int UB=1;
 int Lowest_cv_sofar= -1;
 
-//Define the outputstream and file name in order to store all info about the aprtiitoning of this matrix.
+//Define the outputstream and file name in order to store all info about the partitioning of this matrix.
 std::ofstream Solution_and_info;
 
 
 
 //Do we want to use the priority Queue, for p=3 / p=4.
 bool PQ = 0;
-//Do we want to use symmetry for the 2nd row/column
+//Do we want to use symmetry for the 2nd row/column?
 bool s2 = 1;
+//Do we want to combine L3 and L3 bound, and calculate the L3 after L4 is detemrined?
+bool CombL3_L4 = 1;
+//Do we want to use the Global L4 bound?
+bool GL4_on = 1;
+//Give the maximum length of path in BFS of global L4 bound
+int length_path = 7;
+
+
+int combolocal = 0;
+int aantalGL4 = 0;
+ int L4groter=0;
+ int GL4groter=0;
+ int L3gr=0;
+ int gelijk = 0;
+ int GL42 = 0;
+
 
 int main(int argc, char* argv[])
 {
     if (argc < 2) {
-        nameMatrix = "rel3";
-        Processors = 3;
+        nameMatrix = "Hamrle1";
+        Processors = 2;
         Epsilon = 0.03;
-        Location_matrix = "0-30matrix/" + nameMatrix + ".mtx";
+        Location_matrix = "31-50matrix/" + nameMatrix + ".mtx";
     }
     else {
 
@@ -73,7 +89,7 @@ int main(int argc, char* argv[])
     }
     filename_Sol_info = "p=" + std::to_string(Processors) + " " + nameMatrix + ".txt";
 
-    std::cout << nameMatrix;
+    std::cout << nameMatrix<<"\n";
 
     Zero_State = std::vector<bool>(Processors, 0);
     AllProc_State = std::vector<bool>(Processors, 1);
@@ -90,6 +106,7 @@ int main(int argc, char* argv[])
 
     matrix* pointA;
     pointA = &A;
+  
 
     //File to store all information about one matirx
     //It stores all  new upperbounds, corresponding partitions  and new ub value
@@ -166,13 +183,14 @@ int main(int argc, char* argv[])
   //Initialize LB3bound at zero
   int LB3_First = 0;
 
+
   //Initialize the bipartite graph necessary for the local L4 bound
   Bi_Graph graph(&A.M, &A.N);
 
   int count_rondes = 0;
   float UB_factor = 1.25;
   while (Lowest_cv_sofar == -1) {
-      std::cout << "Nu in ronde: " << count_rondes << "UB: " << UB<< "\n";
+      std::cout << "Nu in ronde: " << count_rondes << " UB: " << UB<< "\n";
       //Give the "Partition" function = the tree all the information it needs and execute it.
       Partition(TheState, order3, size_order3, &A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols, Packing_Sets, LB3_First, Value_Partial_status, graph);
 
@@ -228,7 +246,7 @@ int main(int argc, char* argv[])
    //file name depends on number of processors.
     std::ofstream OptSol;
     //name of file
-    std::string filename_Opt = "p=" + std::to_string( Processors) + ",31-50, L3.txt";
+    std::string filename_Opt = "p=" + std::to_string( Processors) + ",latex_table.txt";
 
     OptSol.open(filename_Opt, std::ios::out | std::ios::app);
     OptSol << nameMatrix<<" & " << A.M << " & "<< A.N << " & " << A.nnz<< "  &"<< Lowest_cv_sofar << " & " << time_taken << " s"<< " \\\\ \\\hline " <<"\n";
@@ -253,7 +271,9 @@ int main(int argc, char* argv[])
 
 
 
-    //output_States_nzs(A);
+    output_States_nzs(A);
+
+    std::cout << "GL4: " << aantalGL4 << " , combo : " << combolocal << " ,GL4 groter: " << GL4groter << " ,L4 groter " << L4groter << " , L3 " << L3gr<< " ,gelijk "<< gelijk << " ,GL42 groter dan l4 "<<GL42;
 
 }
 

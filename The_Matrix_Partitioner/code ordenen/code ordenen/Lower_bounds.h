@@ -48,11 +48,13 @@ public:
     //Size of the matching in the bipartite graph
     int no_Matched;
 
+    int L4_combL3;
+
     //Max number of vertices possible in the graph (will never happen)
     int Max_V;
 
     
-    //Constructor Bigraph ellende 
+    //Constructor Bigraph  
     Bi_Graph(int* M, int* N);
 
     //This function adds the vertices corresponding to rowcol "index_rc" to the graph.
@@ -65,6 +67,17 @@ public:
     void Augment_Path(int v_i);
 
     //This function updates the graph after assigning rowcol "rc_i" a state.
-    void Set_rowcol(int rc_i, std::vector<int> add_rc, std::vector<int> remove_rc, int* M, int* N, matrix* info, std::vector<int> PartialStatus); //Pointer matrix A megeven voor interscet rowcol kan nu evt. met vector<vector<int
+    void Set_rowcol(int rc_i, std::vector<int> add_rc, std::vector<int> remove_rc, int* M, int* N, matrix* info, std::vector<int> PartialStatus, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, std::vector<int> Partition_Size); //Pointer matrix A megeven voor interscet rowcol kan nu evt. met vector<vector<int
 
+    
 };
+
+
+//Function for Global L4 bond, uses bfs
+int BFS_Global_L4( std::vector<int> Partial_Status, int M, int N, matrix * A);
+
+
+//Function for Global L4 bond, starts with the solution of the local L4 bound and uses bfs to find remaining matches,
+//via paths of length at maximum of length_path.
+int BFS2_Global_L4(std::vector<int> Matches_L4, int no_matched, std::vector<int> Partial_Status, int M, int N, matrix* A);
+

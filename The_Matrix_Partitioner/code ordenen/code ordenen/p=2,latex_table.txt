@@ -1,0 +1,9 @@
+b1_ss & 7 & 7 & 15  &3 & 0.094 s \\ \hline 
+b1_ss & 7 & 7 & 15  &3 & 0.606 s \\ \hline 
+b1_ss & 7 & 7 & 15  &3 & 0.528 s \\ \hline 
+klein-b1 & 30 & 10 & 60  &5 & 6.576 s \\ \hline 
+klein-b2 & 20 & 30 & 60  &6 & 28.751 s \\ \hline 
+klein-b2 & 20 & 30 & 60  &6 & 25.391 s \\ \hline 
+wheel_3_1 & 21 & 25 & 74  &8 & 11.37 s \\ \hline 
+Hamrle1 & 32 & 32 & 98  &5 & 2.589 s \\ \hline 
+Hamrle1 & 32 & 32 & 98  &5 & 3.345 s \\ \hline 

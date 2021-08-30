@@ -1,0 +1,12 @@
+25060
+  010  010  010  101  101  101  101  110  010  010  010  100  001  001  001  010  011  011  011  100  100  100  100  010 CV: 8 : 0   
+kleemin
+
+Number of Processors: 3  Value epsilon : 0.03
+Max partition size: 15
+
+Number of Partitions aborted: 65390
+Time taken: 32.681sec
+
+The best solution found so far is:  010 010 010 101 101 101 101 110 010 010 010 100 001 001 001 010 011 011 011 100 100 100 100 010 
+With Comm. Vol:  8

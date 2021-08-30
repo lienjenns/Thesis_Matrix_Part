@@ -1,0 +1,12 @@
+5277
+  10000  00100  00010  00001  01100  01010  01001  01000  10100  10010  10001  00100  00010  00001 CV: 6 : 0   
+b1_ss
+
+Number of Processors: 5  Value epsilon : 0.03
+Max partition size: 3
+
+Number of Partitions aborted: 39783
+Time taken: 43.07sec
+
+The best solution found so far is:  10000 00100 00010 00001 01100 01010 01001 01000 10100 10010 10001 00100 00010 00001 
+With Comm. Vol:  6

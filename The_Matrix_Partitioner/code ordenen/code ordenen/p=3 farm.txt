@@ -1,0 +1,14 @@
+688827
+  110  110  101  101  010  001  001  100  010  001  001  001  100  100  010  100  010  100  011  011  011  011  001  001 CV: 8 : 0   
+1325152
+  111  111  101  110  001  100  010  001  001  100  100  010  001  100  001  010  001  010  100  100  011  010  001  010 CV: 7 : 1   
+farm
+
+Number of Processors: 3  Value epsilon : 0.03
+Max partition size: 14
+
+Number of Partitions aborted: 1328886
+Time taken: 410.43sec
+
+The best solution found so far is:  111 111 101 110 001 100 010 001 001 100 100 010 001 100 001 010 001 010 100 100 011 010 001 010 
+With Comm. Vol:  7
