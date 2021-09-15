@@ -1,15 +1,17 @@
 ﻿  Lower_bounds.cpp
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\Lower_bounds.cpp(56,17): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\Lower_bounds.cpp(132,19): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\Lower_bounds.cpp(58,17): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\Lower_bounds.cpp(134,19): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\Lower_bounds.cpp(793,9): warning C4101: 'max3': unreferenced local variable
   Possible_States.cpp
 C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\Possible_States.cpp(46,23): warning C4018: '<': signed/unsigned mismatch
 C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\Possible_States.cpp(102,23): warning C4018: '<': signed/unsigned mismatch
 C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\Possible_States.cpp(179,23): warning C4018: '<': signed/unsigned mismatch
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\Possible_States.cpp(1301,39): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\Possible_States.cpp(1360,39): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\Possible_States.cpp(1369,28): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
   main.cpp
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\main.cpp(161,16): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\main.cpp(198,18): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\main.cpp(228,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\main.cpp(252,132): warning C4129: 'h': unrecognized character escape sequence
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\main.cpp(169,16): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\main.cpp(208,22): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\main.cpp(252,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\code ordenen\main.cpp(276,132): warning C4129: 'h': unrecognized character escape sequence
   Generating Code...
   code ordenen.vcxproj -> C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\Debug\code ordenen.exe

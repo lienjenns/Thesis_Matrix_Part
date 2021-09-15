@@ -6,6 +6,7 @@
 #include <iostream>
 #include "./Global.h"
 #include "./matrix.h"
+#include<numeric>
 
 //This function determines the index of a state by using binary arithmetric .
 //So index of state (0,1,1) is 2^1+2^2 -1=4. The minus one at the end is in order to start at index 0.
@@ -26,8 +27,8 @@ int Binair_index(std::vector<bool> State) {
 //This function detemrines the inititial upperbound used in the B &B tree
 void init_UB(matrix *info) {
 
-   UB= std::min(info->M, info->N)* (Processors - 1) + Processors - 1;
-   
+  UB= std::min(info->M, info->N)* (Processors - 1) + Processors - 1;
+   // UB = 15;
 }
 
 //Given p Processors this function determines the set of all possible states.
@@ -112,6 +113,32 @@ std::vector <std::vector<bool>> indexStatus_vs_Status() {
     return Index_Status;
 }
 
+std::set<int> Determine_2states(){
+
+    std::set<int> setof_2states;
+    int x=pow(2, Processors) - 2;
+    
+
+    for (int i = 0; i < x; i++) {
+    
+       int sumproc= std::accumulate(Index_and_Status[i].begin(), Index_and_Status[i].end(), 0);
+
+       if (sumproc == 2) {
+           
+           setof_2states.insert(i);
+
+       }
+
+    }
+    std::cout << "\n" << "2 procstates; ";
+    for (auto i = setof_2states.begin(); i != setof_2states.end(); i++) {
+      
+        std::cout << *i << " ";
+
+    }
+    std::cout <<"\n";
+    return setof_2states;
+}
 
 //This fucntion determines and returns all the entries of the state that are 0.
 //These entries coreespond with processors that are not used in this particular state.

@@ -32,7 +32,7 @@ std::vector<std::string> tokenize(const std::string& line) {
 
         if (file.fail()) {
             std::cerr << "Not able to read the file."<<"\n";
-            exit(3);
+            exit(EXIT_FAILURE);
         }
 
        //The first line is the header line it contains information about the matrix
@@ -45,6 +45,7 @@ std::vector<std::string> tokenize(const std::string& line) {
 
         if (tokens.size() != 5)
             std::cerr<<"first line is not a valid typecode.";
+
         if (tokens[0] != "%%MatrixMarket")
             std::cerr << "first line did not start with a typecode.";
         if (tokens[1] != "matrix")
@@ -115,6 +116,7 @@ std::vector<std::string> tokenize(const std::string& line) {
         //    }
         //    std::cout << std::endl;
         //}
+
         //Because of possible symmetry determine new value nnz
         nnz = locations.size();
         std::cout << "no nnz" << nnz<< "\n";

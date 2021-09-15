@@ -1,2 +1,0 @@
-\begin{tikzpicture}\draw [very thin] (0, 0.1) rectangle (1.4, 0.9) ; 
-\end{tikzpicture}

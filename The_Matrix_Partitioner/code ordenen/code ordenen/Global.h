@@ -25,6 +25,8 @@ extern std::set<std::vector<bool>> AllStates;
 //So for every binairy index the corresponding state is easy to find by using this vector.
 extern std::vector <std::vector<bool>>Index_and_Status;
 
+extern std::set<int> Indices_2proc_states;
+
 //The all zero state (0,..,0).
 extern std::vector<bool> Zero_State; 
 //The all one state (1,...,1).
@@ -36,6 +38,10 @@ extern int Max_Partition_size;
 
 //The Upperbound used in the branch and bound tree
 extern int UB;
+
+//The overall Lowerbound used in the branch and bound tree.
+//If a solution is found equal to this lowerbound we know it must be optimal.
+extern int Overall_LB;
 
 //Maximum length of path in bfs in Global L4 bound.
 extern int length_path;
@@ -58,6 +64,8 @@ extern bool PQ;
 extern bool s2;
 extern bool GL4_on;
 extern bool CombL3_L4;
+extern bool Overall_LB_on;
+extern bool Iterative_UB;
 
 extern int aantalGL4;
 extern int combolocal;

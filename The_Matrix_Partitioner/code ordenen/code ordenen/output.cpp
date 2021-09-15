@@ -151,6 +151,7 @@ output_NZ.open(filename_output, std::ios::out | std::ios::app);
 			if (color_count_solution[k] > Max_Partition_size) {
 
 				std::cerr << "The partitioning failed, size of part " << k << " larger than max partition size allows."<< color_count_solution[k]<< "\n";
+				exit(EXIT_FAILURE);
 			}
 		}
 		else {
@@ -169,6 +170,7 @@ output_NZ.open(filename_output, std::ios::out | std::ios::app);
 			if (no_nz_inPart > (no_used_proc * Max_Partition_size)) {
 
 				std::cerr<< "The partitioning failed, size of part " << k << " larger than max partition size allows.";
+				exit(EXIT_FAILURE);
 			}
 		}
 	}
@@ -184,20 +186,20 @@ output_NZ.open(filename_output, std::ios::out | std::ios::app);
 	output_NZ <<"\n";
 
 	//Print the entries and the state (color) of the nonzeros.
-	//for (int j = 0; j < Solution_nz.size(); j++) {
-	//	
-	//	std::cout << Info_matrix.locations[j].first+ 1<<" "<< Info_matrix.locations[j].second + 1<< " ";
+	/*for (int j = 0; j < Solution_nz.size(); j++) {
+		
+		std::cout << Info_matrix.locations[j].first+ 1<<" "<< Info_matrix.locations[j].second + 1<< " ";
 
-	//	std::vector<bool> State = Solution_nz[j];
+		std::vector<bool> State = Solution_nz[j];
 
-	//	for (int k = 0; k < Processors; k++) {
+		for (int k = 0; k < Processors; k++) {
 
-	//		std::cout << State[k];
+			std::cout << State[k];
 
-	//	}
+		}
 
-	//	std::cout << "\n";
-	//}
+		std::cout << "\n";
+	}*/
 	
 	//Sort the solutionvector by the state of the nonzeros.
 	std::sort(Solution.begin(), Solution.end());
@@ -215,6 +217,82 @@ output_NZ.open(filename_output, std::ios::out | std::ios::app);
 
 	output_NZ.close();
 
+
+
+
+
+
+
+	//std::vector<std::tuple<int, int, int>> Solution2;
+
+	//std::vector<int> oneProc_indices;
+	//std::vector<int> OneProc_sizes;
+	//OneProc_sizes.resize(Processors);
+	//int allProc_index = pow(2, Processors) - 1;
+	//for (int j = 0; j < Processors; j++) {
+
+	//	int  index = pow(2, j) - 1;
+	//	oneProc_indices.push_back(index);
+	//	OneProc_sizes[j] = color_count_solution[index];
+	//}
+
+	//for (auto i = Solution.begin(); i != Solution.end(); i++) {
+
+	//	std::tuple<int, int, int> nz_and_state = *i;
+	//	int index_nz = std::get<2>(nz_and_state);
+	//	int row = std::get<0>(nz_and_state);
+	//	int column = std::get<1>(nz_and_state);
+	//	
+
+	//	if (std::find(oneProc_indices.begin(), oneProc_indices.end(), index_nz) != oneProc_indices.end()) {
+	//		Solution2.push_back(std::make_tuple(row, column, index_nz));
+	//		continue;
+	//	}
+	//	else if ( index_nz == allProc_index ) {
+
+
+	//	}
+
+	//	else {
+	//		std::vector<bool> state = Index_and_Status[index_nz];
+	//		std::vector<int> set_indices = Determine_Set_indices(state);
+	//		int  minNZ=-1;
+	//		int Proc_minNz=-1;
+
+	//		for (auto j = set_indices.begin(); j != set_indices.end(); j++) {
+
+	//			if (OneProc_sizes[*j] < minNZ && minNZ > 0) {
+	//				minNZ = OneProc_sizes[*j];
+	//				Proc_minNz = *j;
+	//			}
+	//			else if (minNZ == -1) {
+
+	//				minNZ = OneProc_sizes[*j];
+	//				Proc_minNz = *j;
+	//			}
+	//			else { 
+	//				continue; }
+	//			
+	//		}
+
+	//		OneProc_sizes[Proc_minNz] += 1;
+	//		int  index = pow(2, Proc_minNz) - 1;
+	//		Solution2.push_back(std::make_tuple(row, column, index));
+
+
+	//	}
+
+	//}
+
+	//for (int l = 0; l < Processors; l++) {
+	//	if (OneProc_sizes[l] > Max_Partition_size) {
+
+	//		std::cerr << " error in making tikz pic";
+	//	}
+	//}
+
+	//std::sort(Solution2.begin(), Solution2.end(), Sort_by_third);
+	std::sort(Solution.begin(), Solution.end(), Sort_by_third);
 	Tikz_picture(Solution, Info_matrix.M, Info_matrix.N);
 }
 

@@ -10,6 +10,8 @@
 #include<numeric>
 #include<array>
 #include"./Lower_bounds.h"
+#include <stack>
+# include<deque>
 
 
 
@@ -173,9 +175,8 @@ int L3bound(std::array<std::vector<std::vector<int>>, 2> Packing_Sets, std::vect
                 //Cut rows(columns) in this packing set in descending order of no of free nonzeros per row(column).
                 while (sum > still_allowed) {
 
-                    int max_entry = *std::max_element(present_Packing_Set.begin(), present_Packing_Set.end());
                     int Index_MaxElement = std::max_element(present_Packing_Set.begin(), present_Packing_Set.end()) - present_Packing_Set.begin();
-
+                    int max_entry = present_Packing_Set[Index_MaxElement];
                     //We set the max element now at -1, so we will certainly not indicate this rowcol as having maxvalue again.
                     present_Packing_Set[Index_MaxElement] = -1;
 
@@ -475,7 +476,154 @@ void Bi_Graph::remove_vertex(int rc_i, int* M, int* N) {
 }
 
 
-int BFS_Global_L4( std::vector<int> Partial_Status, int M, int N, matrix * A) {
+//This function determines the Gobal L3 bound, given the global packingsets and the sizes of every part.
+int Compute_value_GL3(std::vector<std::vector<int>> Global_PackingSets, std::vector<int> Partition_sizes) {
+
+    int Value_GL3 = 0;
+
+    for (int i = 0; i < Processors; i++) {
+
+        std::vector<int> PackingSet_i = Global_PackingSets[i];
+
+        int still_allowed = Max_Partition_size - Partition_sizes[Info_L3[i]]; 
+        int sum = std::accumulate(PackingSet_i.begin(), PackingSet_i.end(), 0);
+
+        if (sum <= still_allowed) {
+            continue;
+        }
+        else {
+
+            while (sum > still_allowed) {
+                int index_max, maxVal;
+                index_max = std::max_element(PackingSet_i.begin(), PackingSet_i.end()) - PackingSet_i.begin();
+                maxVal = PackingSet_i[index_max];
+
+                sum -= maxVal;
+                PackingSet_i[index_max] = -1;
+
+                Value_GL3 += 1;
+            }
+        }
+    }
+    return Value_GL3;
+}
+
+//This function grows the subgraphs for the global packing bound, i.e. GL3 bound.
+//The start point of the subgraphs are partially assigned rowcols (partially assigned to  1 proc) that are not on a matching path in the GL4 bound. 
+int GL3_bound(std::vector<bool> Matched_GL4, std::vector<bool> visited_GL4, std::vector<int> Partial_status, int no_rc, matrix * A, std::vector<int> Partition_size) {
+
+    int GL3 = 0;
+
+    //Store the index of the partially assigned rowcol in this container. 
+    std::deque<int> order_subgraphs;                //This queue gives the order in which we traverse the subgraphs.
+    std::vector<std::stack<int>> subgraph_stacks;   //Keeps track of the stack of rowcol i.
+    std::vector<int> subgraph_sizes(no_rc,0);       //keeps track of the size of each subgraph.
+    std::vector<int> index_subgraphs;               //Contains the first vertex of every subgraph.
+    std::vector<int> Startindex_intersect(no_rc,0); //For row/column i it gives the number of the intersecting column/row we will look at.
+    std::vector<bool> Claimed(no_rc, 0);            //Used for the unassigned rowcols, to signal if they are claimed by another subgraph and to signal that partial rowcol is starting point subgraph. ToDo
+
+    subgraph_stacks.resize(no_rc);
+   
+    
+    //First determine which partially assigned rowcols are not matched in the GL4 bound.
+    //Note: We only take into account partially assigned rowcols, that are partially assigned to one processor, i.e partial status >=0.
+    for (int i = 0; i < no_rc; i++) {
+        if (Matched_GL4[i] == 0 && Partial_status[i] >= 0) {
+
+            order_subgraphs.push_back(i);
+            subgraph_stacks[i].push(i);
+            index_subgraphs.push_back(i);
+            Claimed[i] = 1;
+        }
+    }
+
+   //Now do DFS for every subgraph simultaneously.
+    while (!order_subgraphs.empty() ) {
+
+        //We will now try to expand the subgraph of vertex/rowcol rc.
+        int rc = order_subgraphs.front();
+        std::stack<int> stack_v = subgraph_stacks[rc];
+
+        //If stack of veretx v is empty then we cannot expand the subgraph of v, so we go to the next subgraph.
+        if (stack_v.empty()) {
+
+            order_subgraphs.pop_front();
+            continue;
+        }
+
+        //Signals if we are succesfull in expanding the subgraph of rc.
+        bool nonzero_claimed = 0;
+
+        int v_i = stack_v.top();
+
+        //Start expanding subgraph from veretx v_i, if not possible we pop v_i from the stack of subgraph rc.
+         while (!nonzero_claimed){
+ 
+            int Start_intersect=Startindex_intersect[v_i];
+            std::vector<int> intersect_rc_vi =A -> Intersecting_RowCol(v_i);  
+            
+            if (Start_intersect == intersect_rc_vi.size()) {
+
+                subgraph_stacks[rc].pop();
+                break;
+            }
+                
+            Startindex_intersect[v_i] += 1;
+
+            int v_k = intersect_rc_vi[Start_intersect];
+
+            //If the vertex v_k is assigned or is claimed by another subgraph we can do nothing.
+            if (Partial_status[v_k] == -3 || Claimed[v_k]) {
+                continue;
+            }
+
+            //If v_k is not assigned and on a matching path in GL4. So partial assigned and matched in GL4 or unassigned and visited in gL4.
+            //Then we can take the nonzero, but we cannot expand from vertex v_k.
+            //If v_k is partially assigned but not to one processor specifically we can claim the nonzero but not expand from vertex v_k.
+            else if ((Partial_status[v_k] >= 0 &&  Matched_GL4[v_k]) || ( Partial_status[v_k]== -1 && visited_GL4[v_k] ) || Partial_status[v_k] < -3 || Partial_status[v_k]== -2 ) {
+
+                subgraph_sizes[rc] += 1;
+                nonzero_claimed = 1;
+            }
+
+            //If v_k is unassigned and not visisted in GL4 and not claimed in another subgraph, we can claim the edge and
+            //we can expand from v_k.
+            else if (Partial_status[v_k] == -1 && visited_GL4[v_k] == 0 && Claimed[v_k] == 0) {
+
+                subgraph_stacks[rc].push(v_k);
+                Claimed[v_k] = 1;
+                subgraph_sizes[rc] += 1;
+                nonzero_claimed = 1;
+            }
+
+            else {
+                continue;
+            }
+         }
+
+        if (nonzero_claimed) {
+
+            order_subgraphs.pop_front();
+            order_subgraphs.push_back(rc);
+        }
+    }
+
+    std::vector<std::vector<int>> Packing_set_GL3;
+    Packing_set_GL3.resize(Processors);
+
+    for (auto l = index_subgraphs.begin(); l != index_subgraphs.end(); l++) {
+
+        int index_rc = *l;
+        int partial_status_rc = Partial_status[index_rc];
+
+        Packing_set_GL3[partial_status_rc].push_back(subgraph_sizes[index_rc]);
+    }
+
+    GL3 = Compute_value_GL3(Packing_set_GL3, Partition_size);
+    return GL3;
+}
+
+int BFS_Global_L4( std::vector<int> Partial_Status, int M, int N, matrix * A, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, std::vector<int> Partition_Size) {
 
     //Total number of matches found by the Global L4 bound.
     int GL4_bound = 0;
@@ -490,6 +638,9 @@ int BFS_Global_L4( std::vector<int> Partial_Status, int M, int N, matrix * A) {
     std::vector<bool> Color_match_rc(Processors, 0);  //To-do eigenlijk te lang p-1 kan
     std::vector<std::vector<bool>> maintain_color_match(M+N, Color_match_rc);
   
+
+    std::vector<bool>Matched(M + N, 0);
+
     //Traverse all rowcols
     for (int v_i = 0; v_i < (M + N); v_i++) {
 
@@ -507,14 +658,14 @@ int BFS_Global_L4( std::vector<int> Partial_Status, int M, int N, matrix * A) {
         //These two vectors are used to free unassigned nodes used in the path finding "bfs" that do not lead to a match.
         std::vector<bool> Succesfull_Child(M + N, 0); //1 if node i is unassigned and is on a path that gives a match.
         std::vector<int> parent(M + N, -1); //keeps track of the parent of node i
-        std::vector<int> Newly_visited; // If Newly_visited[i]=1 , unassigned node i is visited during the bfs from veretx v_i.
+        std::vector<int> Newly_visited; //Newly_visited contains the unassigned nodes that are visited during the bfs from veretx v_i.
       
         //vector used to store vertices
         std::vector<int> queue;
         queue.push_back(v_i);
         visited[v_i] = 1;
 
-        //Number of new matches w find for v_i.
+        //Number of new matches we find for v_i.
         int new_matches_vi = 0;
 
         //The following integers are used to keep track of length op path from veretx v_i in path finding "bfs".
@@ -546,6 +697,9 @@ int BFS_Global_L4( std::vector<int> Partial_Status, int M, int N, matrix * A) {
                 else {
                     //If v_k is partially assigned to a processor/color with which vertex v_i has not already a match, MATCH!
                     if (Partial_Status[v_k] != -1) {
+
+                        Matched[v_i] = 1;
+                        Matched[v_k] = 1;
 
                         maintain_color_match[v_i][Partial_Status[v_k]] = 1;
                         maintain_color_match[v_k][Partial_Status[v_i]] = 1;
@@ -600,6 +754,50 @@ int BFS_Global_L4( std::vector<int> Partial_Status, int M, int N, matrix * A) {
         //Add the number of new matches of v_i to the GL4 bound.
         GL4_bound += new_matches_vi;
     }
+
+    //for (int l = 0; l < M + N; l++) {
+
+    //    if (Matched[l] == 1) {
+    //    
+    //        //If the rowcol=row.
+    //        if (l < M) {
+    //            int no_sets = Packing_Sets[0].size();
+    //            //Loop ovr all the packing sets for the rows.
+    //            for (int i = 0; i < no_sets; i++) {
+    //                Packing_Sets[0][i][l] = 0;
+    //            }
+    //        }
+
+    //        //If the  rowcol=column.
+    //        else {
+    //            int new_index_intersect = (l - M);
+    //            int no_sets = Packing_Sets[1].size();
+    //            //Loop over all packing sets of the columns.
+    //            for (int i = 0; i < no_sets; i++) {
+    //                Packing_Sets[1][i][new_index_intersect] = 0;
+    //            }
+    //        }
+
+    //    }
+
+    //}
+    //int a = L3bound(Packing_Sets, Partition_Size);
+    //if ( a>0) {
+    ////    std::cout << "L3 na GL4; " << a << " ";
+    //}
+
+    int GL3=   GL3_bound(Matched, visited, Partial_Status, M + N, A, Partition_Size);
+    //if ((GL3 - a) != 0) {
+    //   // std::cout << " " << GL3 - a;
+    //}
+    int max3;
+    //if (a > GL3) {
+    //    max3 = a;
+    //}
+    //else {
+    //    max3 = GL3;
+    //}
+    GL4_bound += GL3;
     return GL4_bound;
 }
 
@@ -644,10 +842,7 @@ int BFS2_Global_L4(std::vector<int> Matches_L4, int no_matched,std::vector<int> 
     //}
 
 
-    //maintain_color_match.resize(M + N);
-
-    //Nodig ls je niet elke keer hele bfs wil doen ToDo
-    std::vector<int> No_paths(M + N, 0); //nog niet in gebruik ToDo
+ 
 
 
     for (int v_i = 0; v_i < (M + N); v_i++) {
@@ -670,7 +865,7 @@ int BFS2_Global_L4(std::vector<int> Matches_L4, int no_matched,std::vector<int> 
 
 
         std::vector<int> Newly_visited;
-
+       // std::vector<int> Newly_visited2;
 
         std::vector<int> queue;
         queue.push_back(v_i);
@@ -690,8 +885,9 @@ int BFS2_Global_L4(std::vector<int> Matches_L4, int no_matched,std::vector<int> 
             queue.erase(queue.begin(), queue.begin() + 1);
             // std::cout << v_j << "\n";
             y += 1;
-            Newly_visited.push_back(v_j);
-
+            if (level > 0) {
+                Newly_visited.push_back(v_j);
+            }
 
             std::vector<int> intersect_rowcols = A->Intersecting_RowCol(v_j);
 
@@ -700,7 +896,7 @@ int BFS2_Global_L4(std::vector<int> Matches_L4, int no_matched,std::vector<int> 
                 int v_k = *i;
 
 
-                if (Partial_Status[v_k] < -1 || Partial_Status[v_k] == Partial_Status[v_i] || visited[v_k] == 1 || (Partial_Status[v_k] >= 0 && maintain_color_match[v_i][Partial_Status[v_k]])) {
+                if (Partial_Status[v_k] < -1 || Partial_Status[v_k] == Partial_Status[v_i] || visited[v_k] == 1 || (Partial_Status[v_k] >= 0 && maintain_color_match[v_i][Partial_Status[v_k]])|| maintain_color_match[v_k][Partial_Status[v_i]]) {
                     continue;
                 }
 
@@ -717,15 +913,14 @@ int BFS2_Global_L4(std::vector<int> Matches_L4, int no_matched,std::vector<int> 
                         new_matches_vi += 1;
                         visited[v_k] = 1;
                         parent[v_k] = v_j;
-                        No_paths[v_k] += 1;
-                        No_paths[v_j] += 1;
+                   
                         Succesfull_Child[v_j] = 1;
                         int v_l = v_j;
                         while (v_l != v_i) {
 
                             v_l = parent[v_l];
                             Succesfull_Child[v_l] = 1;
-                            No_paths[v_l] += 1;
+                       
                         }
 
                     }
@@ -736,6 +931,7 @@ int BFS2_Global_L4(std::vector<int> Matches_L4, int no_matched,std::vector<int> 
                         visited[v_k] = 1;
                         parent[v_k] = v_j;
                         x_new += 1;
+                      //  Newly_visited2.push_back(v_k);
 
                     }
                 }
@@ -760,10 +956,11 @@ int BFS2_Global_L4(std::vector<int> Matches_L4, int no_matched,std::vector<int> 
 
             }
         }
-        for (auto i = Newly_visited.begin(); i != Newly_visited.end(); i++) {
 
-            if (Succesfull_Child[*i] != 1 && *i != v_i) {
-                visited[*i] = 0;
+        for (auto g = Newly_visited.begin(); g != Newly_visited.end(); g++) {
+
+            if (Succesfull_Child[*g] != 1 ) {
+                visited[*g] = 0;
 
             }
 

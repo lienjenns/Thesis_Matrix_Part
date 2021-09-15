@@ -38,11 +38,13 @@ std::string Location_matrix;
 std::vector<bool> Zero_State;
 std::vector<bool> AllProc_State;
 bool Stop_Partition = 0;
+int Overall_LB=0;
 
 //Define some of the exetrnal variables of Global.h.
 std::set<std::vector<bool>> AllStates;
 int Max_Partition_size;
 std::vector <std::vector<bool>>Index_and_Status;
+std::set<int> Indices_2proc_states;
 int UB=1;
 int Lowest_cv_sofar= -1;
 
@@ -56,11 +58,17 @@ bool PQ = 0;
 //Do we want to use symmetry for the 2nd row/column?
 bool s2 = 1;
 //Do we want to combine L3 and L3 bound, and calculate the L3 after L4 is detemrined?
-bool CombL3_L4 = 1;
+bool CombL3_L4 =1 ;
 //Do we want to use the Global L4 bound?
 bool GL4_on = 1;
 //Give the maximum length of path in BFS of global L4 bound
-int length_path = 7;
+int length_path = 9;
+//Do we want to use the iterative deepening UB?
+bool Iterative_UB=1;
+//Do we want to use the overall LB, is only ussed when the iterative deepening UB is used?
+bool Overall_LB_on = 1;
+
+
 
 
 int combolocal = 0;
@@ -75,11 +83,12 @@ int aantalGL4 = 0;
 int main(int argc, char* argv[])
 {
     if (argc < 2) {
-        nameMatrix = "Hamrle1";
-        Processors = 2;
+        nameMatrix = "relat3";
+        Processors = 4;
         Epsilon = 0.03;
-        Location_matrix = "31-50matrix/" + nameMatrix + ".mtx";
+        Location_matrix = "0-30matrix/" + nameMatrix + ".mtx";
     }
+
     else {
 
         nameMatrix = argv[1];
@@ -116,9 +125,6 @@ int main(int argc, char* argv[])
     
 
  //Now make/determine some variables for the "Partition" function = The Tree:
-   
-    //Determine the initial value of the UB.
-   // init_UB(pointA);
 
    //Here the set of all posibble states without the "all processors state =(1,1,1, ...,1)" is made,
     AllStates = States( 0, Zero_State, Processors);
@@ -126,6 +132,8 @@ int main(int argc, char* argv[])
     //Here the vector of binairy indices with there status is made.
     Index_and_Status = indexStatus_vs_Status();
    
+   Indices_2proc_states= Determine_2states();
+    
     //Call the function that makes the basic info for the L3 bound.
     Basic_L3_info();
 
@@ -184,20 +192,36 @@ int main(int argc, char* argv[])
   int LB3_First = 0;
 
 
+
   //Initialize the bipartite graph necessary for the local L4 bound
   Bi_Graph graph(&A.M, &A.N);
 
   int count_rondes = 0;
   float UB_factor = 1.25;
-  while (Lowest_cv_sofar == -1) {
-      std::cout << "Nu in ronde: " << count_rondes << " UB: " << UB<< "\n";
-      //Give the "Partition" function = the tree all the information it needs and execute it.
+  if (Iterative_UB) {
+      while (Lowest_cv_sofar == -1) {
+          std::cout << "Nu in ronde: " << count_rondes << " UB: " << UB << "\n";
+          //Give the "Partition" function = the tree all the information it needs and execute it.
+          Partition(TheState, order3,size_order3, &A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols, Packing_Sets, LB3_First, Value_Partial_status, graph);
+
+
+          int new_UB = ceil(UB * UB_factor);
+          if (Overall_LB_on) {
+              Overall_LB = UB;
+          }
+          UB = new_UB;
+          count_rondes++;
+      }
+
+  }
+
+  else {
+      //Determine the initial value of the UB.
+      init_UB(pointA);
+      
+      //The main function, the partition function, i.d. this function makes the whole branh and bound tree.
       Partition(TheState, order3, size_order3, &A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols, Packing_Sets, LB3_First, Value_Partial_status, graph);
 
-
-      int new_UB = ceil(UB * UB_factor);
-      UB = new_UB;
-      count_rondes++;
   }
 
    //When the partition function is executed the number of partial partitions that where aborted,
@@ -273,7 +297,7 @@ int main(int argc, char* argv[])
 
     output_States_nzs(A);
 
-    std::cout << "GL4: " << aantalGL4 << " , combo : " << combolocal << " ,GL4 groter: " << GL4groter << " ,L4 groter " << L4groter << " , L3 " << L3gr<< " ,gelijk "<< gelijk << " ,GL42 groter dan l4 "<<GL42;
+    std::cout << "GL4: " << aantalGL4 << " , combo : " << combolocal <<  " , L3 " << L3gr<< " ,gelijk "<< gelijk ;
 
 }
 
