@@ -5,6 +5,8 @@
 #include "./Global.h"
 #include "./Util.h"
 #include "./matrix.h"
+#include"./Symmetry.h"
+#include<numeric>
 
 
 //This function makes the set containing the states that must be taken into account when assigning the first rowcol a state.
@@ -125,12 +127,207 @@ std::set<std::vector<bool>> Second_Symmetry_Check(std::set < std::vector<bool>> 
     //This set will contain all the remaining feasible states.
     std::set<std::vector<bool>> Feas_states_Symm;
 
-    std::set<std::vector<bool>>::iterator it;
+    
 
 
     std::set_intersection(Symm_Set2.begin(), Symm_Set2.end(), Feas_set.begin(), Feas_set.end(), std::inserter(Feas_states_Symm, Feas_states_Symm.end()));
     
     return Feas_states_Symm;
+}
+
+Symmetry_processors::Symmetry_processors() {
+
+    std::vector<int> initial_set;
+    initial_set.resize(Processors);
+    std::iota(initial_set.begin(), initial_set.end(), 0);
+
+    Different_processor_sets.push_back(initial_set);
+    No_symmetry = 0;
+
+
+}
+
+void Symmetry_processors::adjust_processor_sets(std::vector<bool> state) {
+
+    std::vector<int> used_procs_state = Determine_Set_indices(state);
+    std::sort(used_procs_state.begin(), used_procs_state.end());
+
+
+    int no_sets = Different_processor_sets.size();
+
+
+    for (int j = 0; j < no_sets; j++) {
+
+        std::vector<int> Proc_setj = Different_processor_sets[j];
+        std::vector<int> new_Proc_Set;
+        std::vector<int> new_Proc_Set2;
+
+
+        //Sorting is neccesary in order to use set_interscetion and set_difference
+        std::sort(Proc_setj.begin(), Proc_setj.end());
+
+
+        std::set_intersection(Proc_setj.begin(), Proc_setj.end(), used_procs_state.begin(), used_procs_state.end(), std::back_inserter(new_Proc_Set));
+
+        if (!new_Proc_Set.empty()) {
+            Different_processor_sets[j] = new_Proc_Set;
+            std::set_difference(Proc_setj.begin(), Proc_setj.end(), used_procs_state.begin(), used_procs_state.end(), std::back_inserter(new_Proc_Set2));
+
+            if (!new_Proc_Set2.empty()) {
+                Different_processor_sets.push_back(new_Proc_Set2);
+
+            }
+        }
+        else { continue; }
+
+        if (Different_processor_sets.size() == Processors) {
+            No_symmetry = 1;
+            break;
+        }
+    }
+
+}
+
+std::set<std::vector<bool>> Symmetry_processors::make_symmetry_set(int current_set, std::set<std::vector<bool>> symm_set) {
+
+    std::set<std::vector<bool>> Symm3_set;
+    std::set<std::vector<bool>> Final_Symm3_set;
+
+    int no_processor_sets = Different_processor_sets.size();
+
+
+
+    if (current_set == no_processor_sets) {
+        symm_set.erase(Zero_State);
+
+        return symm_set;
+
+    }
+
+    else {
+        std::vector<int> current_proc_set = Different_processor_sets[current_set];
+        int no_proc_currentset = current_proc_set.size();
+
+        for (int i = 0; i <= Processors; i++) {
+
+            if (i <= no_proc_currentset) {
+
+                for (auto l = symm_set.begin(); l != symm_set.end(); l++) {
+                    std::vector<bool> adjust_State = *l;
+
+                    for (int j = 0; j < i; j++) {
+
+                        int index = current_proc_set[j];
+                        adjust_State[index] = 1;
+
+                    }
+
+                    Symm3_set.emplace(adjust_State);
+                }
+
+            }
+
+        }
+
+        Final_Symm3_set = make_symmetry_set(current_set + 1, Symm3_set);
+
+
+    }
+    return Final_Symm3_set;
+}
+std::set<std::vector<bool>> Make_symm3_set(std::vector<std::vector<int>> Processor_sets, int current_set, std::set<std::vector<bool>> symm_set) {
+
+    std::set<std::vector<bool>> Symm3_set;
+    std::set<std::vector<bool>> Final_Symm3_set;
+
+
+
+
+    if (current_set == 4) {
+        symm_set.erase(Zero_State);
+
+        return symm_set;
+
+    }
+
+    else {
+        std::vector<int> current_proc_set = Processor_sets[current_set];
+        int no_proc_currentset = current_proc_set.size();
+
+        for (int i = 0; i <= Processors; i++) {
+
+            if (i <= no_proc_currentset) {
+
+                for (auto l = symm_set.begin(); l != symm_set.end(); l++) {
+                    std::vector<bool> adjust_State = *l;
+
+                    for (int j = 0; j < i; j++) {
+
+                        int index = current_proc_set[j];
+                        adjust_State[index] = 1;
+
+                    }
+
+                    Symm3_set.emplace(adjust_State);
+                }
+
+            }
+
+        }
+
+        Final_Symm3_set = Make_symm3_set(Processor_sets, current_set + 1, Symm3_set);
+
+
+    }
+    return Final_Symm3_set;
+}
+
+std::set<std::vector<bool>> Symmetry3(std::vector<std::vector<bool>> Assigned_States) {
+
+    //The 4 vectors over which we divide the processors.
+    std::vector<int> First;
+    std::vector<int> Second;
+    std::vector<int> Third;
+    std::vector<int> Fourth;
+
+    //States assigned untill now
+    std::vector<bool> State1 = Assigned_States[0];
+    std::vector<bool> State2 = Assigned_States[1];
+
+    //some state used to divide the processors
+    std::vector<bool> State_intersect;
+    std::vector<bool> state_xor;
+    std::vector<bool> State_or;
+    std::vector<bool> only_state1;
+    std::vector<bool> only_state2;
+
+    State_intersect = State1 && State2;
+    First = Determine_Set_indices(State_intersect);
+
+    State_or = State1 || State2;
+    Second = Determine_indices_zeros(State_or);
+
+    state_xor = XOR(State1, State2);
+    only_state1 = state_xor && State1;
+    only_state2 = state_xor && State2;
+
+    Third = Determine_Set_indices(only_state1);
+    Fourth = Determine_Set_indices(only_state2);
+
+
+    //if (!First.empty() && !Second.empty() && !Third.empty() && !Fourth.empty()) { //ToDo dit geldt alleen voor p=4, voor is 3 hoeven er maar 3 niet leeg te zijn vierde is altijd leeg
+
+    //    std::cout << "geen symmetry weg te halen";
+    //    //Hier moet all states inclusief all proc state uitgepoept worden
+    //}
+
+  //  else {
+    std::vector<std::vector<int>> Proc_sets = { First, Second, Third, Fourth };
+    std::set < std::vector<bool>> start_symm = { Zero_State };
+    std::set < std::vector<bool>>Symmetry_set = Make_symm3_set(Proc_sets, 0, start_symm);
+    //  std::cout << " ";
+    // }
+    return Symmetry_set;
 }
 
 

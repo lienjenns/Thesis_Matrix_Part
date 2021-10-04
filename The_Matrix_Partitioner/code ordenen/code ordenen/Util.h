@@ -21,6 +21,9 @@ std::vector<bool> operator &&(std::vector<bool> State_nz, std::vector<bool> Stat
 //Function || operator for two vector<bool>. 
 std::vector<bool> operator ||(std::vector<bool> vector1, std::vector<bool> vector2);
 
+//Function, XOR operator for two vectors<bool>.
+std::vector<bool> XOR(std::vector<bool> vector1, std::vector<bool> vector2);
+
 //Function that determines the max partition size
 int Load_Balance(int nnz);
 

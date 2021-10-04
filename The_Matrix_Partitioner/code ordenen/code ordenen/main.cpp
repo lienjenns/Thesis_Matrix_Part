@@ -18,6 +18,7 @@
 #include <string> 
 #include"./output.h"
 #include<math.h>
+#include"./Symmetry.h"
 
 
 //Initialize some of the exertnal variables of Global.h.
@@ -32,7 +33,7 @@ double Epsilon;
 std::string nameMatrix;
 std::string filename_Sol_info;
 std::string Location_matrix;
-
+int no_tobeAssigned;
 
 //Initial value for some other external variables of Global.h
 std::vector<bool> Zero_State;
@@ -57,14 +58,18 @@ std::ofstream Solution_and_info;
 bool PQ = 0;
 //Do we want to use symmetry for the 2nd row/column?
 bool s2 = 1;
+//Do we want to elimenate symmetry for the 3th row/column?
+bool s3 = 1;
 //Do we want to combine L3 and L3 bound, and calculate the L3 after L4 is detemrined?
 bool CombL3_L4 =1 ;
 //Do we want to use the Global L4 bound?
 bool GL4_on = 1;
+//Do we want to use the Global L3 bound?
+bool GL3_on = 1;
 //Give the maximum length of path in BFS of global L4 bound
-int length_path = 9;
+int length_path = 300;
 //Do we want to use the iterative deepening UB?
-bool Iterative_UB=1;
+bool Iterative_UB=0;
 //Do we want to use the overall LB, is only ussed when the iterative deepening UB is used?
 bool Overall_LB_on = 1;
 
@@ -78,15 +83,16 @@ int aantalGL4 = 0;
  int L3gr=0;
  int gelijk = 0;
  int GL42 = 0;
+ int Check = 0;
 
 
 int main(int argc, char* argv[])
 {
     if (argc < 2) {
-        nameMatrix = "relat3";
-        Processors = 4;
+        nameMatrix ="Sandi_authors";
+        Processors =4;
         Epsilon = 0.03;
-        Location_matrix = "0-30matrix/" + nameMatrix + ".mtx";
+        Location_matrix = "80-100matrix/" + nameMatrix + ".mtx";
     }
 
     else {
@@ -160,6 +166,7 @@ int main(int argc, char* argv[])
    int size_order3 = order3.size();
 
 
+   no_tobeAssigned = d;
    //The starting "Partition" is made.
    //Every rowcol is not yet assigned a status so the state of every rowcol is (0,..0,).
    std::vector<bool > bs(Processors,0);
@@ -191,7 +198,7 @@ int main(int argc, char* argv[])
   //Initialize LB3bound at zero
   int LB3_First = 0;
 
-
+  Symmetry_processors Symm = Symmetry_processors();
 
   //Initialize the bipartite graph necessary for the local L4 bound
   Bi_Graph graph(&A.M, &A.N);
@@ -202,7 +209,7 @@ int main(int argc, char* argv[])
       while (Lowest_cv_sofar == -1) {
           std::cout << "Nu in ronde: " << count_rondes << " UB: " << UB << "\n";
           //Give the "Partition" function = the tree all the information it needs and execute it.
-          Partition(TheState, order3,size_order3, &A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols, Packing_Sets, LB3_First, Value_Partial_status, graph);
+          Partition(TheState, c,d, &A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols, Packing_Sets, LB3_First, Value_Partial_status, graph, Symm);
 
 
           int new_UB = ceil(UB * UB_factor);
@@ -218,9 +225,10 @@ int main(int argc, char* argv[])
   else {
       //Determine the initial value of the UB.
       init_UB(pointA);
+      std::cout << "UB: " << UB << "\n";
       
       //The main function, the partition function, i.d. this function makes the whole branh and bound tree.
-      Partition(TheState, order3, size_order3, &A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols, Packing_Sets, LB3_First, Value_Partial_status, graph);
+      Partition(TheState, order3, size_order3, &A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols, Packing_Sets, LB3_First, Value_Partial_status, graph, Symm);
 
   }
 
@@ -298,6 +306,7 @@ int main(int argc, char* argv[])
     output_States_nzs(A);
 
     std::cout << "GL4: " << aantalGL4 << " , combo : " << combolocal <<  " , L3 " << L3gr<< " ,gelijk "<< gelijk ;
+    std::cout << " de check " << Check;
 
 }
 

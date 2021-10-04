@@ -510,9 +510,10 @@ int Compute_value_GL3(std::vector<std::vector<int>> Global_PackingSets, std::vec
 
 //This function grows the subgraphs for the global packing bound, i.e. GL3 bound.
 //The start point of the subgraphs are partially assigned rowcols (partially assigned to  1 proc) that are not on a matching path in the GL4 bound. 
-int GL3_bound(std::vector<bool> Matched_GL4, std::vector<bool> visited_GL4, std::vector<int> Partial_status, int no_rc, matrix * A, std::vector<int> Partition_size) {
+int GL3_bound(std::vector<bool> Matched_GL4, std::vector<bool> visited_GL4, std::vector<int> Partial_status, matrix * A, std::vector<int> Partition_size, std::vector<std::vector<bool>> states) {
 
     int GL3 = 0;
+    int no_rc = A->M + A->N;
 
     //Store the index of the partially assigned rowcol in this container. 
     std::deque<int> order_subgraphs;                //This queue gives the order in which we traverse the subgraphs.
@@ -573,10 +574,25 @@ int GL3_bound(std::vector<bool> Matched_GL4, std::vector<bool> visited_GL4, std:
             int v_k = intersect_rc_vi[Start_intersect];
 
             //If the vertex v_k is assigned or is claimed by another subgraph we can do nothing.
-            if (Partial_status[v_k] == -3 || Claimed[v_k]) {
+            if ( Claimed[v_k]) {
                 continue;
             }
 
+            else if (Partial_status[v_k] == -3) {
+                std::vector<bool> state_vk = states[v_k];
+                int sum = std::accumulate(state_vk.begin(), state_vk.end(), 0);
+                int partstate_rc = Partial_status[rc];
+                if ((sum > 1) && (state_vk[partstate_rc] == 1)) {
+
+                    subgraph_sizes[rc] += 1;
+                    nonzero_claimed = 1;
+
+                }
+                else {
+                    continue; 
+                }
+
+            }
             //If v_k is not assigned and on a matching path in GL4. So partial assigned and matched in GL4 or unassigned and visited in gL4.
             //Then we can take the nonzero, but we cannot expand from vertex v_k.
             //If v_k is partially assigned but not to one processor specifically we can claim the nonzero but not expand from vertex v_k.
@@ -623,7 +639,7 @@ int GL3_bound(std::vector<bool> Matched_GL4, std::vector<bool> visited_GL4, std:
     return GL3;
 }
 
-int BFS_Global_L4( std::vector<int> Partial_Status, int M, int N, matrix * A, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, std::vector<int> Partition_Size) {
+int BFS_Global_L4( std::vector<int> Partial_Status,  matrix * A, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, std::vector<int> Partition_Size, int lowerbound, std::vector<std::vector<bool>> states) {
 
     //Total number of matches found by the Global L4 bound.
     int GL4_bound = 0;
@@ -631,39 +647,49 @@ int BFS_Global_L4( std::vector<int> Partial_Status, int M, int N, matrix * A, st
     int max_matches = Processors - 1;
 
     //vector used to see if a vertex is visited
-    std::vector<bool> visited(M + N, 0);
+    std::vector<bool> visited((A -> M +A -> N), 0);
 
     //During the whole path finding "bfs"  maintain the partial statuses/colors of the vertices  that match with vertex i.
     //e.g. if maintain_color_match[i]=(0,1,0)then vertex/rowcol i is matched with a vertex that has partial status 1.
     std::vector<bool> Color_match_rc(Processors, 0);  //To-do eigenlijk te lang p-1 kan
-    std::vector<std::vector<bool>> maintain_color_match(M+N, Color_match_rc);
+    std::vector<std::vector<bool>> maintain_color_match((A->M + A->N), Color_match_rc);
   
+    //Keeps track which partilly assigned vertices are matched.
+    //This info is needed for the GL3 bound.
+    std::vector<bool>Matched((A->M + A->N), 0);
 
-    std::vector<bool>Matched(M + N, 0);
+    //Sort the rowcols, to make sure we first try to find matching path from rowcols partially assigned to 1 processor,
+    //and then traverse the rowcols partially assigned to 2 processors.
+    std::vector<int> order((A->M + A->N));
+    std::iota(order.begin(), order.end(), 0); //Initializing
+    std::sort(order.begin(), order.end(), [&Partial_Status](int i, int j) {return ((Partial_Status[i] >= 0) && (Partial_Status[j] < 0)); });
+
 
     //Traverse all rowcols
-    for (int v_i = 0; v_i < (M + N); v_i++) {
+    for (auto rowcol = order.begin(); rowcol != order.end(); rowcol ++) {
+
+        int v_i = *rowcol;
 
         //With which colors is v_i already matched?
          std::vector<bool> maintain_color_matches_i=maintain_color_match[v_i]; 
         //Number of matches of veretx v_i
         int no_matches_vi = std::accumulate(maintain_color_matches_i.begin(), maintain_color_matches_i.end(), 0);
 
-        //If v_i is unassigned, assigned, partially assigned to two or more processors or is already matched with p-1 colors
-        //,then we can find no path that results in a match for v_i.
-        if (Partial_Status[v_i] < 0 || visited[v_i] == 1||no_matches_vi == max_matches) {
+        //If v_i is unassigned, assigned, partially assigned different than partialy assigned to 1 or 2 processors,
+        //,or if v_i is already matched with p-1 processors/colors;
+        //Then we can find no path that results in a match for v_i.
+        if (Partial_Status[v_i] ==-3 || Partial_Status[v_i] == -7 || Partial_Status[v_i]== -1 ||no_matches_vi == max_matches) {
             continue;
         }
 
-        //These two vectors are used to free unassigned nodes used in the path finding "bfs" that do not lead to a match.
-        std::vector<bool> Succesfull_Child(M + N, 0); //1 if node i is unassigned and is on a path that gives a match.
-        std::vector<int> parent(M + N, -1); //keeps track of the parent of node i
+        //These 3 vectors are used to free unassigned nodes used in the path finding "bfs" that do not lead to a match.
+        std::vector<bool> Succesfull_Child((A->M + A->N), 0); //1 if node i is unassigned and is on a path that gives a match.
+        std::vector<int> parent((A->M + A->N), -1); //keeps track of the parent of node i
         std::vector<int> Newly_visited; //Newly_visited contains the unassigned nodes that are visited during the bfs from veretx v_i.
       
         //vector used to store vertices
         std::vector<int> queue;
         queue.push_back(v_i);
-        visited[v_i] = 1;
 
         //Number of new matches we find for v_i.
         int new_matches_vi = 0;
@@ -676,74 +702,220 @@ int BFS_Global_L4( std::vector<int> Partial_Status, int M, int N, matrix * A, st
         int y = 0;      //Counts the number of nodes of the previous level we have already branched from 
 
         //Find paths from vertex v_i that end in a vertex with different partial status then node v_i.
-        while (level != length_path && !queue.empty()) {
+        //If veretx v_i is partially assigned to 1 processor.
+        if (Partial_Status[v_i] >= 0) {
 
-            int v_j = queue.front();
-            queue.erase(queue.begin(), queue.begin() + 1);
-            y += 1;
+            while (level != length_path && !queue.empty()) {
 
-            std::vector<int> intersect_rowcols = A-> Intersecting_RowCol(v_j);
+                int v_j = queue.front();
+                queue.erase(queue.begin(), queue.begin() + 1);
+                y += 1;
 
-            //Traverse all rowcols that intersect with rowcol v_j.
-            for (auto i = intersect_rowcols.begin(); i != intersect_rowcols.end(); i++) {
+                std::vector<int> intersect_rowcols = A->Intersecting_RowCol(v_j);
 
-                int v_k = *i;
+                //Traverse all rowcols that intersect with rowcol v_j.
+                for (auto i = intersect_rowcols.begin(); i != intersect_rowcols.end(); i++) {
 
-                if (Partial_Status[v_k] < -1 || Partial_Status[v_k] == Partial_Status[v_i] || visited[v_k] == 1 || (Partial_Status[v_k] >= 0 && maintain_color_match[v_i][Partial_Status[v_k]]) || maintain_color_match[v_k][Partial_Status[v_i]]) {
-                    continue;
-                }
+                    int v_k = *i;
 
-                //Else the vertex v_k is unassigned, i.e. partial status =-1, or the vertex v_k is partially assigned to a processor/color with which vertex v_i has not already a match.
-                else {
-                    //If v_k is partially assigned to a processor/color with which vertex v_i has not already a match, MATCH!
-                    if (Partial_Status[v_k] != -1) {
+                    //If v_k, is assigned or partially assigned different than to 1 proc., if v_k is partially assigend to the same processor as v_i
+                    //or v_k is unassigned but already visited, or v_k/ v_i is already mathced to the processor of  v_i/v_k
+                    //Then we cannot match v_k or use this vertex on a matching path.
+                    if (Partial_Status[v_k] < -1 || Partial_Status[v_k] == Partial_Status[v_i] || visited[v_k] == 1 || (Partial_Status[v_k] >= 0 && maintain_color_match[v_i][Partial_Status[v_k]]) 
+                        || maintain_color_match[v_k][Partial_Status[v_i]]) {
+                        continue;
+                    }
 
-                        Matched[v_i] = 1;
-                        Matched[v_k] = 1;
+                    //Else the vertex v_k is unassigned, i.e. partial status =-1, or the vertex v_k is partially assigned to a processor/color with which vertex v_i has not already a match.
+                    else {
+                        //If v_k is partially assigned to a processor/color with which vertex v_i has not already a match, MATCH!
+                        if (Partial_Status[v_k] != -1) {
 
-                        maintain_color_match[v_i][Partial_Status[v_k]] = 1;
-                        maintain_color_match[v_k][Partial_Status[v_i]] = 1;
-                       // visited[v_k] = 1;
-                        no_matches_vi += 1;
-                        new_matches_vi += 1;
-                        parent[v_k] = v_j;
-                        Succesfull_Child[v_j] = 1;
-                        int v_l = v_j;
+                            Matched[v_i] = 1;
+                            Matched[v_k] = 1;
 
-                        while (v_l != v_i) {
+                            maintain_color_match[v_i][Partial_Status[v_k]] = 1;
+                            maintain_color_match[v_k][Partial_Status[v_i]] = 1;
+                           
+                            no_matches_vi += 1;
+                            new_matches_vi += 1;
+                            parent[v_k] = v_j;
+                            Succesfull_Child[v_j] = 1;
+                            int v_l = v_j;
 
-                            v_l = parent[v_l];
-                            Succesfull_Child[v_l] = 1;
+                            while (v_l != v_i) {
+
+                                v_l = parent[v_l];
+                                Succesfull_Child[v_l] = 1;
+                            }
+                        }
+
+                        //Else vertex v_k is unassigned.
+                        else {
+
+                            queue.push_back(v_k);
+                            visited[v_k] = 1;
+                            parent[v_k] = v_j;
+                            Newly_visited.push_back(v_k);
+                            x_new += 1;
                         }
                     }
 
-                    //Else vertex v_k is unassigned.
-                    else {
-
-                        queue.push_back(v_k);
-                        visited[v_k] = 1;
-                        parent[v_k] = v_j;
-                        Newly_visited.push_back(v_k);
-                        x_new += 1;
+                    if (no_matches_vi == max_matches) {
+                        break;
                     }
+                }
+
+                if (y == x) {
+                    level += 1;
+                    x = x_new;
+                    x_new = 0;
+                    y = 0;
                 }
 
                 if (no_matches_vi == max_matches) {
                     break;
                 }
             }
+        }
+        //If v_i is partially assigned to 2 processors, so partial state is -2, -4, -5, -6, -8 or lower
+        else if (Partial_Status[v_i] == -2 || (Partial_Status[v_i] < -3 && Partial_Status[v_i] != -7)) {
+            int  binair_index_vi = -Partial_Status[v_i];
+            std::vector<bool> Part_state_vi = Index_and_Status[binair_index_vi];
+            std::vector<int> procs_vi = Determine_Set_indices(Part_state_vi);
+            std::sort(procs_vi.begin(), procs_vi.end());
 
-            if (y == x) {
-                level += 1;
-                x = x_new;
-                x_new = 0;
-                y = 0;
-            }
+            while (level != length_path && !queue.empty()) {
 
-            if (no_matches_vi == max_matches) {
-                break;
+                int v_j = queue.front();
+                queue.erase(queue.begin(), queue.begin() + 1);
+                y += 1;
+
+                std::vector<int> intersect_rowcols = A->Intersecting_RowCol(v_j);
+
+                //Traverse all rowcols that intersect with rowcol v_j.
+                for (auto i = intersect_rowcols.begin(); i != intersect_rowcols.end(); i++) {
+
+                    int v_k = *i;
+
+                    //If v_k is assigned or partially assigned but not partially assigned to one or two processors, we skip v_k.
+                    if (Partial_Status[v_k] == -3 || Partial_Status[v_k] == -7) {
+                        continue;
+                    }
+
+                    std::vector<bool> Part_state_vk;
+                    std::vector<int> procs_vk;
+
+                    //If v_k partially assigned, determine th eprocessors to which it is aprtially assigned
+                    if (Partial_Status[v_k] < -1) {
+                        int binair_index_vk = -Partial_Status[v_k];
+                         Part_state_vk = Index_and_Status[binair_index_vk];
+                        procs_vk = Determine_Set_indices(Part_state_vk);
+                    }
+                    else if (Partial_Status[v_k] > -1) {
+                        procs_vk. push_back(Partial_Status[v_k]);
+                    }
+                    else{}
+
+                    std::sort(procs_vk.begin(), procs_vk.end());
+
+                    bool match_sum_vi, match_sum_vk; 
+                    match_sum_vi = 0;
+                    match_sum_vk = 0;
+                    //Determine for v_k and v_i, if they are already matched with a processor that is also in the partial state of v_i respectively v_k.
+                    for (auto j_i = procs_vi.begin(); j_i != procs_vi.end(); j_i++) {
+
+                        if (maintain_color_match[v_k][*j_i] == 1) {
+                            match_sum_vk = 1;
+                            break;
+                        }
+                    }
+
+                    for (auto j_k = procs_vk.begin(); j_k != procs_vk.end(); j_k++) {
+
+                        if (maintain_color_match[v_i][*j_k] == 1) {
+                            match_sum_vi = 1;
+                            break;
+                        }
+                    }
+                    //Determine if v_i and v_k "share "a processor, i.e. both partial assigend rowcols  are assigned to the same processor(s).
+                    std::vector<int> intersect_procs;
+                    std::set_intersection(procs_vi.begin(), procs_vi.end(), procs_vk.begin(), procs_vk.end(), std::back_inserter(intersect_procs) );
+
+                    //If v_k contains a processor of v_i , v_k unassigend but visisted, or v_i/v_k already matched with a proc of v_k/v_i
+                    //
+                    if ( intersect_procs.size() != 0 || visited[v_k] == 1 || match_sum_vi != 0 || match_sum_vk != 0) {
+                        continue;
+                    }
+
+
+                    //Else the vertex v_k is unassigned  i.e. partial status =-1, and not visited, 
+                    //or the vertex v_k is partially assigned to one or two processors/color with which vertex v_i has not already a match.
+                    else {
+                        //If v_k is partially assigned to one or two processor/color with which vertex v_i has not already a match, MATCH!
+                        if (Partial_Status[v_k] != -1) {
+
+
+                            Matched[v_i] = 1;
+                            Matched[v_k] = 1;
+
+                            //Update the matches of v_k and v_i.
+                            for (auto k_1 = procs_vi.begin(); k_1 != procs_vi.end(); k_1++) {
+
+                                maintain_color_match[v_k][*k_1] = 1;
+                            }
+
+                            for (auto k_2 = procs_vk.begin(); k_2 != procs_vk.end(); k_2++) {
+
+                                maintain_color_match[v_i][*k_2] = 1;
+                            }
+
+                            no_matches_vi += procs_vk.size();
+                            new_matches_vi += 1;
+                            parent[v_k] = v_j;
+                            Succesfull_Child[v_j] = 1;
+                            int v_l = v_j;
+
+                            while (v_l != v_i) {
+
+                                v_l = parent[v_l];
+                                Succesfull_Child[v_l] = 1;
+                            }
+                        }
+
+                        //Else vertex v_k is unassigned.
+                        else {
+
+                            queue.push_back(v_k);
+                            visited[v_k] = 1;
+                            parent[v_k] = v_j;
+                            Newly_visited.push_back(v_k);
+                            x_new += 1;
+                        }
+                    }
+
+                    if (no_matches_vi == max_matches) {
+                        break;
+                    }
+                }
+
+                if (y == x) {
+                    level += 1;
+                    x = x_new;
+                    x_new = 0;
+                    y = 0;
+                }
+
+                if (no_matches_vi == max_matches) {
+                    break;
+                }
             }
         }
+
+
+
+    
+
         //Before we will branch from the next v_i, free all unassigned vertices that were visited, but are not on a "matching" path.
         for (auto i = Newly_visited.begin(); i != Newly_visited.end(); i++) {
 
@@ -755,49 +927,59 @@ int BFS_Global_L4( std::vector<int> Partial_Status, int M, int N, matrix * A, st
         GL4_bound += new_matches_vi;
     }
 
-    //for (int l = 0; l < M + N; l++) {
+    
+    int LB_now = lowerbound + GL4_bound;
+    if (LB_now < UB) {
 
-    //    if (Matched[l] == 1) {
-    //    
-    //        //If the rowcol=row.
-    //        if (l < M) {
-    //            int no_sets = Packing_Sets[0].size();
-    //            //Loop ovr all the packing sets for the rows.
-    //            for (int i = 0; i < no_sets; i++) {
-    //                Packing_Sets[0][i][l] = 0;
-    //            }
-    //        }
+        //Adjust the packingsets, if a rowcol is matched in GL4 it cannot be used in the local packing bound L3
+        //So set the packingset of this rowcol to 0.
+        for (int l = 0; l < (A->M + A->N); l++) {
 
-    //        //If the  rowcol=column.
-    //        else {
-    //            int new_index_intersect = (l - M);
-    //            int no_sets = Packing_Sets[1].size();
-    //            //Loop over all packing sets of the columns.
-    //            for (int i = 0; i < no_sets; i++) {
-    //                Packing_Sets[1][i][new_index_intersect] = 0;
-    //            }
-    //        }
+            if (Matched[l] == 1) {
 
-    //    }
+                //If the rowcol=row.
+                if (l < A->M) {
+                    int no_sets = Packing_Sets[0].size();
+                    //Loop ovr all the packing sets for the rows.
+                    for (int i = 0; i < no_sets; i++) {
+                        Packing_Sets[0][i][l] = 0;
+                    }
+                }
 
-    //}
-    //int a = L3bound(Packing_Sets, Partition_Size);
-    //if ( a>0) {
-    ////    std::cout << "L3 na GL4; " << a << " ";
-    //}
+                //If the  rowcol=column.
+                else {
+                    int new_index_intersect = (l - A ->M);
+                    int no_sets = Packing_Sets[1].size();
+                    //Loop over all packing sets of the columns.
+                    for (int i = 0; i < no_sets; i++) {
+                        Packing_Sets[1][i][new_index_intersect] = 0;
+                    }
+                }
+            }
 
-    int GL3=   GL3_bound(Matched, visited, Partial_Status, M + N, A, Partition_Size);
-    //if ((GL3 - a) != 0) {
-    //   // std::cout << " " << GL3 - a;
-    //}
-    int max3;
-    //if (a > GL3) {
-    //    max3 = a;
-    //}
-    //else {
-    //    max3 = GL3;
-    //}
-    GL4_bound += GL3;
+        }
+
+        int comboL3 = L3bound(Packing_Sets, Partition_Size);
+   
+        if ( (LB_now + comboL3 ) >= UB) {
+            GL4_bound += comboL3;
+            return GL4_bound;
+
+        }
+        if (GL3_on) {
+
+            int GL3 = GL3_bound(Matched, visited, Partial_Status,  A, Partition_Size, states);
+            if ((GL3 - comboL3) != 0) {
+               // std::cout << " " << GL3 - comboL3;
+            }
+            int extracheck = GL3 - comboL3;
+            Check += extracheck;
+            int max3 = std::max(comboL3, GL3);
+
+            GL4_bound += max3;
+        }
+    }
+    
     return GL4_bound;
 }
 

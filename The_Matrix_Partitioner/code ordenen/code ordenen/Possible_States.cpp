@@ -8,7 +8,7 @@
 #include "./Util.h"
 #include<numeric>
 #include<Windows.h>
-#include <tuple>
+#include<tuple>
 #include"./Symmetry.h"
 #include"Lower_bounds.h"
 #include<utility>
@@ -640,6 +640,8 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
     std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
     int LB, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, int LB3_oud, std::vector<int>Value_Partial_status , Bi_Graph bigraph) {
 
+    LB -= LB3_oud;
+
     //Define two containers to keep track of the rowcols that need to be reoved or added to the graph in lowerbound 4.
     std::vector<int> add_vertices;
     std::vector<int> remove_vertices;
@@ -662,6 +664,10 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
     int increase_LB1 = LB1(Status_rowcol);
     LB += increase_LB1;
 
+    if (LB >= UB) {
+        return std::make_tuple(Vector_Freenz, Partition_size, color_count, LB, Partial_Status_rowcols, Packing_Sets, LB3_oud, Value_Partial_status, bigraph);
+
+    }
 
     //Adjust the packing sets (L3 bound) for the assigned rowcol
     //If "rowcol"< M , then rowcol= a row;
@@ -784,9 +790,15 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
 
              //Add the new L2 bound.
              LB += Partial_Status_rowcols[index_itersect_rc].first;
+          /*   if (Partial_Status_rowcols[index_itersect_rc].first == (Processors - 1)) {
+                 std::cout << " L2 ";
+             }*/
+
           }
        
-
+          if (LB >= UB) {
+              return std::make_tuple(Vector_Freenz, Partition_size, color_count, LB, Partial_Status_rowcols, Packing_Sets, LB3_oud, Value_Partial_status, bigraph);
+          }
           //Now Update the packig sets for the local L3 bound, for this intersect rowcol.
 
            //Get the partial statuses for this intersect rowcol.
@@ -873,22 +885,24 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
                   }
               }
           }
-          if (L2_bound_intersectrc == 1 && sum_1Proc_Partial_status == 2) {
-              std::vector<bool> v(Processors, 0);
-              for (auto l = all_1procs.begin(); l != all_1procs.end(); l++) {
-                  v[*l] = 1;
+
+          if (Processors > 2) {
+              if (L2_bound_intersectrc == 1 && sum_1Proc_Partial_status == 2) {
+                  std::vector<bool> v(Processors, 0);
+                  for (auto l = all_1procs.begin(); l != all_1procs.end(); l++) {
+                      v[*l] = 1;
+
+                  }
+                  int partial_value = (-1 * Binair_index(v));
+
+
+                  Value_Partial_status[index_itersect_rc] = partial_value;
+              }
+              if (L2_bound_intersectrc == 0 && sum_partial_statuses == 1 && (Indices_2proc_states.find(val) != Indices_2proc_states.end())) {
+                  Value_Partial_status[index_itersect_rc] = (-1 * val);
 
               }
-              int partial_value = (-1 * Binair_index(v));
-
-
-              Value_Partial_status[index_itersect_rc] = partial_value;
           }
-          if (L2_bound_intersectrc == 0 && sum_partial_statuses == 1 && (Indices_2proc_states.find(val) != Indices_2proc_states.end())) {
-              Value_Partial_status[index_itersect_rc] = (-1 * val);
-
-          }
-
         }
         
         //Now update color_count and Partition sizes.
@@ -947,7 +961,7 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
   
   //Deterine the new L3 bound for this partial partitioning
   int L3a = L3bound(Packing_Sets, Partition_size);
- if ( (LB - LB3_oud + L3a)  >= UB) {
+ if ( (LB  + L3a)  >= UB) {
      LB += L3a;
       return std::make_tuple(Vector_Freenz, Partition_size, color_count, LB, Partial_Status_rowcols, Packing_Sets, LB3_oud, Value_Partial_status, bigraph);
   }
@@ -965,34 +979,22 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
       new_L4 += bigraph.L4_combL3;  
   }
 
-  if ((LB - LB3_oud + new_L4) >= UB) {
+  if ((LB  + new_L4) >= UB) {
       LB += new_L4;
       return std::make_tuple(Vector_Freenz, Partition_size, color_count, LB, Partial_Status_rowcols, Packing_Sets, LB3_oud, Value_Partial_status, bigraph);
   }
 
-
+  int lowerbound = LB ;
  int GL4 = 0;
   if (GL4_on) {
-      GL4 = BFS_Global_L4(Value_Partial_status, A->M, A->N, A, Packing_Sets, Partition_size);
+      GL4 = BFS_Global_L4(Value_Partial_status,  A, Packing_Sets, Partition_size, lowerbound, The_States);
   }
 
 
 
   int probeer = 0;
-probeer=BFS2_Global_L4(bigraph.Match,bigraph.no_Matched, Value_Partial_status, A->M, A->N, A);
+//probeer=BFS2_Global_L4(bigraph.Match,bigraph.no_Matched, Value_Partial_status, A->M, A->N, A);
 
-  //if (probeer > new_L4) {
-  //    GL42 += 1;
-
-  //}
-
-  //if (GL4 > new_L4) {
-  //    
-  //   GL4groter+=1;
-  //  
-
-  //}
-  
 
   //if (GL4 - probeer>0)
   //{
@@ -1007,21 +1009,13 @@ probeer=BFS2_Global_L4(bigraph.Match,bigraph.no_Matched, Value_Partial_status, A
   //   // std::cout << "mweh ";
   //}
 
-  //if (new_L4 > GL4) {
-  //   L4groter += 1;
 
-  //}
   
 
 if (new_L4 == GL4) {
 
       gelijk += 1;
   }
-
-  
-  /*if (new_L4 - GL4 > 13) {
-      std::cout << new_L4 - GL4 << " ";
-  }*/
 
  
   //Determine max of L3 and L4 bound
@@ -1039,14 +1033,10 @@ if (new_L4 == GL4) {
   max_L3_L4 = new_L4;
   combolocal += 1;
  
- // std::cout << " hm ";
+ 
   }
- // std::vector<bool> zucht = { 1,0 };
-  //if (Lowest_cv_sofar==2  ) {
-  //    std::cout << "waarom ";
-  //}
+ 
   //Determine difference between old an new L3/L4 bound
-  int add_L3_L4 = max_L3_L4 - LB3_oud;
 
   ////Detemrine the differnec between the new and old L3 bound 
   //int  L3_erbij = L3a - LB3_oud;
@@ -1059,7 +1049,7 @@ if (new_L4 == GL4) {
   //Adjust the old L3/L4 bound
 
   LB3_oud = max_L3_L4;
-  LB += add_L3_L4;
+  LB += max_L3_L4;
  
    //prints differnec in old and new L3 bound if differnce>0.
  /*   if (L3_erbij != 0) {
@@ -1119,6 +1109,41 @@ struct Alt_color2 {
 };
 
 
+struct Alt_color0 {
+
+    Alt_color0(int index) { this->index = index; }
+    bool operator () (const std::vector<bool>& a, const std::vector<bool>& b) {
+
+
+
+
+        return((std::accumulate(a.begin(), a.end(), 0) < std::accumulate(b.begin(), b.end(), 0)) || ((std::accumulate(a.begin(), a.end(), 0) == std::accumulate(b.begin(), b.end(), 0)) && (a[index] > b[index])));
+    }
+
+
+    int index;
+};
+
+struct Alt_color3 {
+
+    Alt_color3(std::vector<bool> index) { this->index = index; }
+
+
+    bool operator () (const std::vector<bool>& a, const std::vector<bool>& b) {
+
+
+        std::vector<bool> A = a && index;
+        std::vector<bool> B = b && index;
+        int sum_proc_A = std::accumulate(A.begin(), A.end(), 0);
+        int sum_proc_B = std::accumulate(B.begin(), B.end(), 0);
+        int sum_a = std::accumulate(a.begin(), a.end(), 0);
+        int sum_b = std::accumulate(b.begin(), b.end(), 0);
+
+        return((sum_a < sum_b&& sum_proc_A != 0) || (sum_proc_A != 0 && sum_proc_B == 0 && sum_a != Processors) || ((sum_a == sum_b) && (sum_proc_A > sum_proc_B)) || sum_b == Processors);
+    }
+    std::vector<bool> index;
+};
+
 //A short to store the state of the previous value of GetAsyncKeystate (used in the function Partition).
 short previous_State = 0;
 
@@ -1134,7 +1159,8 @@ int Aant_aborted=0;
 //The tree first traverses one branch until a leaf. (DFS)
 void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order_rows_columns,
     int a, matrix * Info, std::vector<int> Vrije_NZ, std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
-    int lowerbound, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, int LB3_oud, std::vector<int> value_partialstatus, Bi_Graph bigraph) {
+    int lowerbound, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, 
+    int LB3_oud, std::vector<int> value_partialstatus, Bi_Graph bigraph, Symmetry_processors Symm) {
 
 
     //Open the file n which we store all new ub and corresponding partitions for the matrix
@@ -1187,6 +1213,7 @@ void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order
     //If a==0, then all rowcols with more than 0 nonzeros are asssigned a state.
     //So the whole matrix is partitioned.
     if (a == 0) {
+       /* std::cout << "check0";*/
       
         //Detemine the communication voume of this new partitioning
         int Comm_vol = LowerBound1(The_States);
@@ -1254,19 +1281,14 @@ void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order
     //If we didn't stop the tree manually, LB<UB and a>0, then we will go deeper in the tree and partition the next rowcol
     else {
         
-        int y = Order_rows_columns.size();
+       // int y = Order_rows_columns.size();
+
+     
 
         //Determine the index of the next rowcol 
-        int i = Order_rows_columns[y-a];
+        int i = Order_rows_columns[no_tobeAssigned-a];
         //Determine the indices of the  rows/columns intersecting with this rowocl in a nonzero.
         std::vector<int> IntersectingRowCol= Info -> Intersecting_RowCol(i); 
-        
-        //Prints the indices of the intersecting rows/columns
-       /*   std::cout << "Huidige indeex: " << i << " intersecting rij/kolom :" << "\n";
-          for (int k = 0; k < IntersectingRowCol.size(); k++) {
-              std::cout << IntersectingRowCol[k] << " ";
-          }
-          std::cout << "\n";*/
 
         //Determine the no of free nz in the rowcol that you're about to assign a status.
         int no_Free_nzi = Vrije_NZ[i]; 
@@ -1321,19 +1343,31 @@ void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order
         }
 
          //Include the first symmetry step, that is remove the symmetry that occurs in assigning the first rowcol.
-        if (a == y) {
+        if (a == no_tobeAssigned) {
             FeasibleStates_Final=First_Symmetry_Check(First_Symmetry_Set(), FeasibleStates_Final);
         }
 
-        if (a == (y - 1) && s2==1) {
-           FeasibleStates_Final= Second_Symmetry_Check(Symmetry2(The_States[Order_rows_columns[0]]), FeasibleStates_Final);
+       
+        if (a < no_tobeAssigned) {
+
+            if (Symm.No_symmetry == 0) {
+                Symm.adjust_processor_sets(The_States[Order_rows_columns[(no_tobeAssigned - a - 1)]]);
+
+                if (Symm.No_symmetry == 0) {
+
+                    std::set < std::vector<bool>> initial_set = { Zero_State };
+                    std::set<std::vector<bool>> Symmset = Symm.make_symmetry_set(0,initial_set);
+                    FeasibleStates_Final = Second_Symmetry_Check(Symmset, FeasibleStates_Final);
+                }
+            }
         }
+      
 
         std::vector<std::vector<bool>> FeasibleStates_FinalOrder(FeasibleStates_Final.begin(), FeasibleStates_Final.end());
 
         //Possibly for the first rowcol change the order in which we traverse the feasible states
         //Do this only when PRiority Queue is activated (i.e. PQ=1), and using priority is only possible when the number of processors is 3 or 4.
-        if (a == y && PQ==1 && (Processors==3 || Processors==4)) {
+        if (a == no_tobeAssigned && PQ==1 && (Processors==3 || Processors==4)) {
 
            int no_nz_rc0= Info -> perRow_Col[i];
            float ratio =  (float)no_nz_rc0 / (float)Max_Partition_size ;
@@ -1353,14 +1387,14 @@ void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order
         //Traverse first the states that contain this processor for the current rowcol.
         //To do this change the order of the vector.
 
-        if (a != y) {
+        if (a != no_tobeAssigned) {
 
             //Information needed to use sorting functien Altcolor1
-            int index_lowest_partition = std::min_element(Partition_size.begin(), Partition_size.end()) - Partition_size.begin();
-            int Proc_lowest_partition = log2(index_lowest_partition + 1);
+          //  int index_lowest_partition = std::min_element(Partition_size.begin(), Partition_size.end()) - Partition_size.begin();
+            //int Proc_lowest_partition = log2(index_lowest_partition + 1);
 
             //Information needed to use sorting function Altcolor2
-         /*   std::vector<int> Oneprocsize;
+            std::vector<int> Oneprocsize;
             std::vector<bool> info_minparts(Processors,0);
             Oneprocsize.resize(Processors);
 
@@ -1376,11 +1410,11 @@ void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order
                 if (Oneprocsize[k] == min_Part) {
                     info_minparts[k] = 1;
                 }
-           }*/
+           }
 
 
-           // std::sort(FeasibleStates_FinalOrder.begin(), FeasibleStates_FinalOrder.end(), Alt_color2(info_minparts) );
-           std::sort(FeasibleStates_FinalOrder.begin(), FeasibleStates_FinalOrder.end(), Alt_color1(Proc_lowest_partition));
+           std::sort(FeasibleStates_FinalOrder.begin(), FeasibleStates_FinalOrder.end(), Alt_color2(info_minparts) );
+         //  std::sort(FeasibleStates_FinalOrder.begin(), FeasibleStates_FinalOrder.end(), Alt_color1(Proc_lowest_partition));
 
         }
 
@@ -1398,6 +1432,11 @@ void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order
 
             //This rowcol=rowcol i, is now assigned state Chosen_State.
             The_States[i] = Chosen_State;
+
+           /* if (a == y) {
+
+                std::cout << "check";
+            }*/
         
             //variables for the tie() fucntion used to unapck the tuple returned by the Update function
             //tie() or get() wat is beter ToDo ??
@@ -1418,7 +1457,7 @@ void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order
             int b = a - 1;
 
             //Recurse, go to the next layer in the tree.
-            Partition(The_States, Order_rows_columns, b, Info, new_Free_NZ, new_Partsize, new_colorcount,  new_lb, new_Partial_status, new_Packing_Sets, new_LB3_oud, new_val_partstatus, New_bigrph);
+            Partition(The_States, Order_rows_columns, b, Info, new_Free_NZ, new_Partsize, new_colorcount,  new_lb, new_Partial_status, new_Packing_Sets, new_LB3_oud, new_val_partstatus, New_bigrph, Symm);
         }
 
     }

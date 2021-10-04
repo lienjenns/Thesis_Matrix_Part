@@ -20,10 +20,28 @@ std::set<std::vector<bool>> Symmetry2(std::vector<bool> previous_State);
 //with the states in the "symmetry set
 std::set<std::vector<bool>> Second_Symmetry_Check(std::set < std::vector<bool>> Symm_Set2, std::set<std::vector<bool>>Feas_set);
 
-
+std::set<std::vector<bool>> Symmetry3(std::vector<std::vector<bool>> Assigned_States);
 //Function to make a priority queue for the state for the first rowcol
 //(This is only used when activated, i.e. PQ=1)
 std::vector<std::vector<bool>> Priority_Queue(std::set<std::vector<bool>> Feasible_rowcol0, float The_ratio);
+
+
+
+class Symmetry_processors
+{
+
+public:
+    std::vector<std::vector<int>> Different_processor_sets;
+
+    bool No_symmetry;
+
+    Symmetry_processors();
+    void adjust_processor_sets(std::vector<bool> state);
+
+    std::set<std::vector<bool>> make_symmetry_set(int current_set, std::set<std::vector<bool>> symm_set);
+
+
+};
 
 
 //The sanity check to check the partition sizes

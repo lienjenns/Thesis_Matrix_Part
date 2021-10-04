@@ -1,6 +1,7 @@
 #pragma once
 #include<vector>
 #include<set>
+#include<array>
 
 
 
@@ -74,7 +75,7 @@ public:
 
 
 //Function for Global L4 bond, uses bfs
-int BFS_Global_L4( std::vector<int> Partial_Status, int M, int N, matrix * A, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, std::vector<int> Partition_Size);
+int BFS_Global_L4( std::vector<int> Partial_Status,  matrix * A, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, std::vector<int> Partition_Size, int lowerbound, std::vector<std::vector<bool>> states);
 
 
 //Function for Global L4 bond, starts with the solution of the local L4 bound and uses bfs to find remaining matches,

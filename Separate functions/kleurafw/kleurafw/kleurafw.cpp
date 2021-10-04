@@ -76,6 +76,20 @@ struct Ellende2 {
     int index;
 };
 
+struct Alt_color0 {
+
+    Alt_color0(int index) { this->index = index; }
+    bool operator () (const std::vector<bool>& a, const std::vector<bool>& b) {
+
+
+
+
+        return((std::accumulate(a.begin(), a.end(), 0) < std::accumulate(b.begin(), b.end(), 0)) || ((std::accumulate(a.begin(), a.end(), 0) == std::accumulate(b.begin(), b.end(), 0)) && (a[index] > b[index])));
+    }
+
+
+    int index;
+};
 
 struct Alt_color2 {
 
@@ -134,7 +148,8 @@ int main()
 
    // std::sort(B.begin(), B.end(), Gedoe);
     std::vector<bool> sorting = { 1,0,1 };
-    std::sort(B.begin(), B.end(), Alt_color3(sorting));
+    int index = 0;
+    std::sort(B.begin(), B.end(), Alt_color0(index));
 
     for (int j = 0; j < B.size(); j++) {
 
@@ -158,6 +173,12 @@ int main()
     }*/
 
    // std::cout << log2(8);
+
+    D[0] = 1;
+    std::cout << "hmm ";
+    for (int i = 0; i < 3; i++) {
+        std::cout << D[i];
+    }
 
 }
 

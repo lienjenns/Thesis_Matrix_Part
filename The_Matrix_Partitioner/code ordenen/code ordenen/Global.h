@@ -59,10 +59,16 @@ extern std::string filename_Sol_info;
 
 extern std::string nameMatrix;
 
+
+extern int no_tobeAssigned;
+
+
 //Some parameters to turn some features on and off.
 extern bool PQ;
 extern bool s2;
+extern bool s3;
 extern bool GL4_on;
+extern bool GL3_on;
 extern bool CombL3_L4;
 extern bool Overall_LB_on;
 extern bool Iterative_UB;
@@ -74,3 +80,5 @@ extern int GL4groter;
 extern int L3gr;
 extern int gelijk;
 extern int GL42;
+
+extern int Check;

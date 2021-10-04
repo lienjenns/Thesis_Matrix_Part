@@ -28,7 +28,7 @@ int Binair_index(std::vector<bool> State) {
 void init_UB(matrix *info) {
 
   UB= std::min(info->M, info->N)* (Processors - 1) + Processors - 1;
-   // UB = 15;
+ //   UB = 13;
 }
 
 //Given p Processors this function determines the set of all possible states.
@@ -203,6 +203,45 @@ std::vector<int> Determine_Set_indices(std::vector<bool> State_Intersect_RC) {
    // }
 
     return Set_Indices;
+}
+
+
+//Function || operator for two vector<bool>. 
+//For instance if a=[0,1,0] and b=[1,1,0], then the function returns a || b =[1,1,0]
+std::vector<bool> XOR(std::vector<bool> vector1, std::vector<bool> vector2) {
+
+    int p = vector1.size();
+    int lengthState_row = vector2.size();
+
+    if (p == lengthState_row) {
+
+        std::vector<bool> New_state_nz(p, 0);
+
+        for (int i = 0; i < p; i++) {
+
+            //If in one of the two vectors the ith entry is 1, 
+            //then the ith entry of the New_State_nz wil also be 1.
+            if (vector1[i] != vector2[i]) {
+
+                New_state_nz[i] = 1;
+            }
+
+            else {
+                New_state_nz[i] = 0;
+            }
+        }
+
+        return New_state_nz;
+    }
+
+
+    else {
+
+        std::cerr << "Error in using XOR operator for vectors";
+        std::vector<bool> Notassigned = { 0, 0, 0, 0 };
+        return Notassigned;
+    }
+
 }
 
 //Function && operator for two vector<bool>. 
