@@ -10,7 +10,9 @@
 
 
 
-//This function determines the order in which the rows an columns are traversed in the tree,
+
+//This function determines the 
+//in which the rows an columns are traversed in the tree,
 //This order is absed on the number of nonzeros in a rowcol, no dstinction is made between rows and columns.
 std::vector<int> Determine_Order_row_columns(std::vector<int> number_nz);
 
@@ -32,8 +34,9 @@ int LowerBound1(std::vector < std::vector<bool>>The_Partition);
 
 
 //This function makes the B&B tree, (DFS).
-void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> Order_rows_columns, int a, matrix * Info, std::vector<int> Vrije_NZ, std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
-	int lowerbound, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, int LB3_oud, std::vector<int>Value_Partial_status, Bi_Graph bigraph, Symmetry_processors Symm);
+void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> &Order_rows_columns, int a, matrix * Info, std::vector<int> Vrije_NZ, std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
+	int lowerbound, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols, std::array<std::vector<std::vector<int>>, 2> Packing_Sets2,
+	int max_L4_L3, std::vector<int>Value_Partial_status, Bi_Graph bigraph, Symmetry_processors Symm);
 
 
 //This fucntion gives the number of partial partitions that were aborted, beacause LB>=UB.

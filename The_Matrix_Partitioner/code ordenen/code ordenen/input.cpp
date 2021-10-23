@@ -63,7 +63,7 @@ std::vector<std::string> tokenize(const std::string& line) {
         }
 
 
-        // Read defining parameters:
+        // Read number of rows, columns and nz:
         file >> M >> N >> nnz;
 
         //std::cout << M << " " << N << " " << nnz<< "\n";

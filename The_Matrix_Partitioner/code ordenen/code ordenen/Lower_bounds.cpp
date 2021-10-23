@@ -57,20 +57,14 @@ std::vector<std::pair<int, std::vector<bool>>> L2bound(std::vector<bool> Status_
 
     int options = pow(2, Processors) - 2;
 
-    //First get the index of the partial statussen of the rowcol, "rc".
+    //First get the index and partial statussen of the rowcol, "rc".
     for (int i = 0; i < options; i++) {
 
         if (info[i] == 1) {
-            index_partial_Statuses.push_back(i);
+            index_partial_Statuses.push_back(i); 
+            
+            Partial_Statuses.push_back(Index_and_Status[i]);
         }
-    }
-
-    int x = index_partial_Statuses.size();
-
-    //Now use the indices of the partial statuses to get the partial statuses themselves and save them in a vector.
-    for (int j = 0; j < x; j++) {
-        int ind_St = index_partial_Statuses[j];
-        Partial_Statuses.push_back(Index_and_Status[ind_St]);
     }
 
     //
@@ -106,6 +100,11 @@ std::vector<std::pair<int, std::vector<bool>>> L2bound(std::vector<bool> Status_
         //Replace no_least_ones with no of ones in this state.
         if (no_ones < no_least_ones) {
             no_least_ones = no_ones;
+
+        }
+        //If we find a state with only 1 oene, there will not be a state with a lower number of ones, so break.
+        if (no_least_ones == 1) {
+            break;
         }
     }
 
@@ -136,30 +135,33 @@ void Basic_L3_info() {
     }
 }
 
-//For now this function is the most basic of possible local L3 bound, only looks at rowcols
-//that are partial one color, consequently it  only takes into account partition sizes of  single processors.
+//Fucntion computes the L3 bound 
+// Only looks at rowcols that are partial one color, consequently it  only takes into account partition sizes of  single processors.
 //This function calculates the "local" L3 bound = local packing bound.
 //with as input the Packing sets of the partial partition and the partition sizes of the partial partition.
-int L3bound(std::array<std::vector<std::vector<int>>, 2> Packing_Sets, std::vector<int> Partition_Size) {
+int L3bound_improved(std::array<std::vector<std::vector<int>>, 2> &Packing_Sets, std::vector<int> &Partition_Size, matrix * A) {
 
     //Starting value L3 bound
     int L3bound = 0;
-    //Number of packing sets to check, for now this is equal to p i.e. number of processors.
-    int no_Partials = Packing_Sets[1].size();
 
     //We loop over  the rows and cols.
     for (int j = 0; j < 2; j++) {
-        std::vector<std::vector<int>> Row_or_Col_packingset = Packing_Sets[j];
+      
 
         //We loop over all the packingsets of only the rows (or only the columns).
-        //At this moment there are p packing sets.
-        for (int i = 0; i < no_Partials; i++) {
-            std::vector<int> present_Packing_Set = Row_or_Col_packingset[i];
+        //There are p packing sets.
+        for (int i = 0; i < Processors; i++) {
+           
 
             //How many nonzeros are still allowed in this partition.
-            int still_allowed = Max_Partition_size - Partition_Size[Info_L3[i]]; 
+            int still_allowed = Max_Partition_size - Partition_Size[Info_L3[i]];
+            int sum = 0;
+            //Determine the sum of free nonzeros in this packingset which we would like to assign to processor i.
+            for (int k = 0; k < (A -> Cmax); k++) {
 
-            int sum = std::accumulate(present_Packing_Set.begin(), present_Packing_Set.end(), 0);
+                sum += k * Packing_Sets[j][i][k];
+            }
+
 
             //If number allowed is more than the sum of nonzeros that is partially coloured in this colour,
             //then there is nothing to do.
@@ -168,36 +170,98 @@ int L3bound(std::array<std::vector<std::vector<int>>, 2> Packing_Sets, std::vect
             }
 
             else {
-                //Starting value of number of rows or columns cut for this packing set.
-                int number_of_cuts = 0;
+                //Start with the row(column) with most free nonzeros.
+                int c = (A -> Cmax ) - 1;
+                //Number of rows(columns) with c free nonzeros.
+                int present_no_c = Packing_Sets[j][i][c];
 
                 //We need to cut rows(columns) as long as the sum of nonzeros in this packing set  >  no of nonzeros stil allowed in this packing set.
                 //Cut rows(columns) in this packing set in descending order of no of free nonzeros per row(column).
                 while (sum > still_allowed) {
 
-                    int Index_MaxElement = std::max_element(present_Packing_Set.begin(), present_Packing_Set.end()) - present_Packing_Set.begin();
-                    int max_entry = present_Packing_Set[Index_MaxElement];
-                    //We set the max element now at -1, so we will certainly not indicate this rowcol as having maxvalue again.
-                    present_Packing_Set[Index_MaxElement] = -1;
+                    while (present_no_c == 0) {
+                        c--;
+                        present_no_c = Packing_Sets[j][i][c];
+                    }
 
-                    sum -= max_entry;
-                    number_of_cuts += 1;
+                    sum -= c;
+                    present_no_c -= 1;
+                    L3bound += 1;
                 }
-                L3bound += number_of_cuts;
             }
-
-
         }
     }
+
     return L3bound;
 }
 
 
+//For now this function is the most basic of possible local L3 bound, only looks at rowcols
+//that are partial one color, consequently it  only takes into account partition sizes of  single processors.
+//This function calculates the "local" L3 bound = local packing bound.
+//with as input the Packing sets of the partial partition and the partition sizes of the partial partition.
+//int L3bound(std::array<std::vector<std::vector<int>>, 2> Packing_Sets, std::vector<int> Partition_Size) {
+//
+//    //Starting value L3 bound
+//    int L3bound = 0;
+//    //Number of packing sets to check, for now this is equal to p i.e. number of processors.
+//    int no_Partials = Packing_Sets[1].size();
+//
+//    //We loop over  the rows and cols.
+//    for (int j = 0; j < 2; j++) {
+//        std::vector<std::vector<int>> Row_or_Col_packingset = Packing_Sets[j];
+//
+//        //We loop over all the packingsets of only the rows (or only the columns).
+//        //At this moment there are p packing sets.
+//        for (int i = 0; i < no_Partials; i++) {
+//            std::vector<int> present_Packing_Set = Row_or_Col_packingset[i];
+//
+//            //How many nonzeros are still allowed in this partition.
+//            int still_allowed = Max_Partition_size - Partition_Size[Info_L3[i]]; 
+//
+//            int sum = std::accumulate(present_Packing_Set.begin(), present_Packing_Set.end(), 0);
+//
+//            //If number allowed is more than the sum of nonzeros that is partially coloured in this colour,
+//            //then there is nothing to do.
+//            if (sum <= still_allowed) {
+//                continue;
+//            }
+//
+//            else {
+//                //Starting value of number of rows or columns cut for this packing set.
+//                int number_of_cuts = 0;
+//
+//                //We need to cut rows(columns) as long as the sum of nonzeros in this packing set  >  no of nonzeros stil allowed in this packing set.
+//                //Cut rows(columns) in this packing set in descending order of no of free nonzeros per row(column).
+//                while (sum > still_allowed) {
+//
+//                    int Index_MaxElement = std::max_element(present_Packing_Set.begin(), present_Packing_Set.end()) - present_Packing_Set.begin();
+//                    int max_entry = present_Packing_Set[Index_MaxElement];
+//                    //We set the max element now at -1, so we will certainly not indicate this rowcol as having maxvalue again.
+//                    present_Packing_Set[Index_MaxElement] = -1;
+//
+//                    sum -= max_entry;
+//                    number_of_cuts += 1;
+//                }
+//                L3bound += number_of_cuts;
+//            }
+//
+//
+//        }
+//    }
+//    return L3bound;
+//}
+
+
 // This function updates the graph after assigning rowcol "rc_i" a state.
-void Bi_Graph::Set_rowcol(int rc_i, std::vector <int> add_rc, std::vector<int> remove_rc, int* M, int* N, matrix * info, std::vector<int> PartialStatus, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, std::vector<int> Partition_Size) {  //Pointer matrix A megeven voor interscet rowcol kan nu evt. met vector<vector<int, als dit doet da n hoef je niet M en N los mee te gevn
+void Bi_Graph::Set_rowcol(int rc_i, std::vector <int> add_rc, std::vector<int> remove_rc,  matrix * info, std::vector<int> PartialStatus,
+ std::vector<int> Partition_Size, std::array<std::vector<std::vector<int>>, 2>  Packing_Sets2, std::vector<std::vector<int>> &color_count ) {  
+
+    
 
     if (In_graph[rc_i] == 1) {
-        remove_vertex(rc_i, M, N);
+        remove_vertex(rc_i, &(info->M),  &(info->N) );
+       
     }
 
     int no_to_remove = remove_rc.size();
@@ -210,7 +274,8 @@ void Bi_Graph::Set_rowcol(int rc_i, std::vector <int> add_rc, std::vector<int> r
 
         if (In_graph[rcj] == 1) {
 
-            remove_vertex(rcj, M, N);
+            remove_vertex(rcj, &(info->M), &(info->N) );
+            
         }
     }
 
@@ -221,44 +286,51 @@ void Bi_Graph::Set_rowcol(int rc_i, std::vector <int> add_rc, std::vector<int> r
         if (In_graph[rck] == 0) {
 
            
-            add_vertex(rck, info -> Intersecting_RowCol(rck) , M, N, PartialStatus); ///Intersecting rijcol meot meegegeven worden dmv matrix struct.
+            add_vertex(rck, info -> Intersecting_RowCol(rck) , &(info->M), &(info->N), PartialStatus);
+         
         }
     }
 
-    if (CombL3_L4) {
-        for (int k = 0; k < (*M + *N); k++) {
+   
+    if (CombL3_L4 ) {
 
-            for (int l = 0; l < Processors - 1; l++) {
+        for (int k = 0; k < (info->M + info->N); k++) {
 
-                int index_vj = k + l * (*M + *N);
+            for (int l = 0; l < (Processors - 1) ; l++) {
+
+                int index_vj = k + l * (info->M + info->N);
                 if (Match[index_vj] != index_vj) {
 
                     //If the rowcol=row.
-                    if (k < *M) {
-                        int no_sets = Packing_Sets[0].size();
-                        //Loop ovr all the packing sets for the rows.
-                        for (int i = 0; i < no_sets; i++) {
-                            Packing_Sets[0][i][k] = 0;
-                        }
+                    if (k < (info->M)) {
+                        int index_packingset = PartialStatus[k];
+                        int index_partial_status = pow(2, index_packingset) - 1;
+
+                        int no_nz = info->perRow_Col[k] - color_count[index_partial_status][k];
+                        Packing_Sets2[0][index_packingset][no_nz] -= 1;
                     }
 
                     //If the  rowcol=column.
                     else {
-                        int new_index_intersect = (k - *M);
-                        int no_sets = Packing_Sets[1].size();
-                        //Loop over all packing sets of the columns.
-                        for (int i = 0; i < no_sets; i++) {
-                            Packing_Sets[1][i][new_index_intersect] = 0;
-                        }
+
+                        int index_packingset = PartialStatus[k];
+                        int index_partial_status = pow(2, index_packingset) - 1;
+
+                        int no_nz = info->perRow_Col[k] - color_count[index_partial_status][k];
+                        Packing_Sets2[1][index_packingset][no_nz] -= 1;
                     }
 
                     break;
                 }
-            }
+            }   
         }
-
-        L4_combL3 = L3bound(Packing_Sets, Partition_Size);
+        
+        L4_combL3 = L3bound_improved(Packing_Sets2, Partition_Size, info);
+      
     }
+
+ 
+
 }
 
 
@@ -477,7 +549,7 @@ void Bi_Graph::remove_vertex(int rc_i, int* M, int* N) {
 
 
 //This function determines the Gobal L3 bound, given the global packingsets and the sizes of every part.
-int Compute_value_GL3(std::vector<std::vector<int>> Global_PackingSets, std::vector<int> Partition_sizes) {
+int Compute_value_GL3(std::vector<std::vector<int>> &Global_PackingSets, std::vector<int> Partition_sizes) {
 
     int Value_GL3 = 0;
 
@@ -487,7 +559,7 @@ int Compute_value_GL3(std::vector<std::vector<int>> Global_PackingSets, std::vec
 
         int still_allowed = Max_Partition_size - Partition_sizes[Info_L3[i]]; 
         int sum = std::accumulate(PackingSet_i.begin(), PackingSet_i.end(), 0);
-
+        
         if (sum <= still_allowed) {
             continue;
         }
@@ -505,6 +577,7 @@ int Compute_value_GL3(std::vector<std::vector<int>> Global_PackingSets, std::vec
             }
         }
     }
+
     return Value_GL3;
 }
 
@@ -529,7 +602,7 @@ int GL3_bound(std::vector<bool> Matched_GL4, std::vector<bool> visited_GL4, std:
     //First determine which partially assigned rowcols are not matched in the GL4 bound.
     //Note: We only take into account partially assigned rowcols, that are partially assigned to one processor, i.e partial status >=0.
     for (int i = 0; i < no_rc; i++) {
-        if (Matched_GL4[i] == 0 && Partial_status[i] >= 0) {
+        if (Matched_GL4[i] == 0 && (Partial_status[i] >= 0 )) {
 
             order_subgraphs.push_back(i);
             subgraph_stacks[i].push(i);
@@ -596,7 +669,7 @@ int GL3_bound(std::vector<bool> Matched_GL4, std::vector<bool> visited_GL4, std:
             //If v_k is not assigned and on a matching path in GL4. So partial assigned and matched in GL4 or unassigned and visited in gL4.
             //Then we can take the nonzero, but we cannot expand from vertex v_k.
             //If v_k is partially assigned but not to one processor specifically we can claim the nonzero but not expand from vertex v_k.
-            else if ((Partial_status[v_k] >= 0 &&  Matched_GL4[v_k]) || ( Partial_status[v_k]== -1 && visited_GL4[v_k] ) || Partial_status[v_k] < -3 || Partial_status[v_k]== -2 ) {
+            else if (( (Partial_status[v_k] >= 0 ) &&  Matched_GL4[v_k]) || ( Partial_status[v_k]== -1 && visited_GL4[v_k] ) || Partial_status[v_k] < -3 || Partial_status[v_k]== -2 ) {
 
                 subgraph_sizes[rc] += 1;
                 nonzero_claimed = 1;
@@ -639,7 +712,10 @@ int GL3_bound(std::vector<bool> Matched_GL4, std::vector<bool> visited_GL4, std:
     return GL3;
 }
 
-int BFS_Global_L4( std::vector<int> Partial_Status,  matrix * A, std::array<std::vector<std::vector<int>>, 2> Packing_Sets, std::vector<int> Partition_Size, int lowerbound, std::vector<std::vector<bool>> states) {
+//Function that determines the Global L4 bond, tries to find paths form  partially assigned rowcols to other different partially assigned rowcols.
+//After detrmining the GL4 bound it computes (after removing the paths used in the GL4 bound), the L3  and GL3 bound and adds the maximum of these two to the gL4 bound
+int BFS_Global_L4( std::vector<int> Partial_Status,  matrix * A, std::vector<int> Partition_Size, int lowerbound, 
+    std::vector<std::vector<bool>> states, std::array<std::vector<std::vector<int>>, 2> Packing_Sets2, std::vector<std::vector<int>> &color_count) {
 
     //Total number of matches found by the Global L4 bound.
     int GL4_bound = 0;
@@ -658,7 +734,7 @@ int BFS_Global_L4( std::vector<int> Partial_Status,  matrix * A, std::array<std:
     //This info is needed for the GL3 bound.
     std::vector<bool>Matched((A->M + A->N), 0);
 
-    //Sort the rowcols, to make sure we first try to find matching path from rowcols partially assigned to 1 processor,
+    //Sort the rowcols, to make sure we first try to find matching path with the start and end point being rowcols partially assigned to 1 processor,
     //and then traverse the rowcols partially assigned to 2 processors.
     std::vector<int> order((A->M + A->N));
     std::iota(order.begin(), order.end(), 0); //Initializing
@@ -694,7 +770,7 @@ int BFS_Global_L4( std::vector<int> Partial_Status,  matrix * A, std::array<std:
         //Number of new matches we find for v_i.
         int new_matches_vi = 0;
 
-        //The following integers are used to keep track of length op path from veretx v_i in path finding "bfs".
+        //The following integers are used to keep track of length op path from vertex v_i in path finding "bfs".
         //We only look at path with a maximum length equal to length_path.
         int level = 0;
         int x = 1;      //The number of nodes on the previous level.
@@ -702,7 +778,7 @@ int BFS_Global_L4( std::vector<int> Partial_Status,  matrix * A, std::array<std:
         int y = 0;      //Counts the number of nodes of the previous level we have already branched from 
 
         //Find paths from vertex v_i that end in a vertex with different partial status then node v_i.
-        //If veretx v_i is partially assigned to 1 processor.
+        //If vertex v_i is partially assigned to 1 processor.
         if (Partial_Status[v_i] >= 0) {
 
             while (level != length_path && !queue.empty()) {
@@ -719,9 +795,9 @@ int BFS_Global_L4( std::vector<int> Partial_Status,  matrix * A, std::array<std:
                     int v_k = *i;
 
                     //If v_k, is assigned or partially assigned different than to 1 proc., if v_k is partially assigend to the same processor as v_i
-                    //or v_k is unassigned but already visited, or v_k/ v_i is already mathced to the processor of  v_i/v_k
+                    //or v_k is unassigned but already visited, or v_k/ v_i is already matched to the processor of (the partial assignment)  v_i/v_k
                     //Then we cannot match v_k or use this vertex on a matching path.
-                    if (Partial_Status[v_k] < -1 || Partial_Status[v_k] == Partial_Status[v_i] || visited[v_k] == 1 || (Partial_Status[v_k] >= 0 && maintain_color_match[v_i][Partial_Status[v_k]]) 
+                    if (Partial_Status[v_k] < -1 || Partial_Status[v_k] == Partial_Status[v_i] || visited[v_k] == 1 || ( (Partial_Status[v_k] >=  0) && maintain_color_match[v_i][Partial_Status[v_k]]) 
                         || maintain_color_match[v_k][Partial_Status[v_i]]) {
                         continue;
                     }
@@ -798,7 +874,7 @@ int BFS_Global_L4( std::vector<int> Partial_Status,  matrix * A, std::array<std:
 
                     int v_k = *i;
 
-                    //If v_k is assigned or partially assigned but not partially assigned to one or two processors, we skip v_k.
+                    //If v_k is assigned or partially assigned but not partially assigned to one or two processors then v_k cannot be on a matching path, so we skip v_k.
                     if (Partial_Status[v_k] == -3 || Partial_Status[v_k] == -7) {
                         continue;
                     }
@@ -806,14 +882,14 @@ int BFS_Global_L4( std::vector<int> Partial_Status,  matrix * A, std::array<std:
                     std::vector<bool> Part_state_vk;
                     std::vector<int> procs_vk;
 
-                    //If v_k partially assigned, determine th eprocessors to which it is aprtially assigned
+                    //If v_k partially assigned, determine the processors to which it is partially assigned
                     if (Partial_Status[v_k] < -1) {
                         int binair_index_vk = -Partial_Status[v_k];
                          Part_state_vk = Index_and_Status[binair_index_vk];
                         procs_vk = Determine_Set_indices(Part_state_vk);
                     }
                     else if (Partial_Status[v_k] > -1) {
-                        procs_vk. push_back(Partial_Status[v_k]);
+                        procs_vk.push_back(Partial_Status[v_k]);
                     }
                     else{}
 
@@ -842,8 +918,8 @@ int BFS_Global_L4( std::vector<int> Partial_Status,  matrix * A, std::array<std:
                     std::vector<int> intersect_procs;
                     std::set_intersection(procs_vi.begin(), procs_vi.end(), procs_vk.begin(), procs_vk.end(), std::back_inserter(intersect_procs) );
 
-                    //If v_k contains a processor of v_i , v_k unassigend but visisted, or v_i/v_k already matched with a proc of v_k/v_i
-                    //
+                    //If v_k contains a processor of v_i, or v_k unassigend but visited, or v_i/v_k is already matched with a processor of v_k/v_i
+                    //Then we cannot use v_k on matching path from v_i.
                     if ( intersect_procs.size() != 0 || visited[v_k] == 1 || match_sum_vi != 0 || match_sum_vk != 0) {
                         continue;
                     }
@@ -854,7 +930,6 @@ int BFS_Global_L4( std::vector<int> Partial_Status,  matrix * A, std::array<std:
                     else {
                         //If v_k is partially assigned to one or two processor/color with which vertex v_i has not already a match, MATCH!
                         if (Partial_Status[v_k] != -1) {
-
 
                             Matched[v_i] = 1;
                             Matched[v_k] = 1;
@@ -926,8 +1001,10 @@ int BFS_Global_L4( std::vector<int> Partial_Status,  matrix * A, std::array<std:
         //Add the number of new matches of v_i to the GL4 bound.
         GL4_bound += new_matches_vi;
     }
-
+    // End determining GL4 bound
     
+    //If LB+GL4 > = UB then we can return GL4 bound, this partial solution will not improve upon UB
+    //else compute L3 and/or GL3.
     int LB_now = lowerbound + GL4_bound;
     if (LB_now < UB) {
 
@@ -937,43 +1014,43 @@ int BFS_Global_L4( std::vector<int> Partial_Status,  matrix * A, std::array<std:
 
             if (Matched[l] == 1) {
 
-                //If the rowcol=row.
-                if (l < A->M) {
-                    int no_sets = Packing_Sets[0].size();
-                    //Loop ovr all the packing sets for the rows.
-                    for (int i = 0; i < no_sets; i++) {
-                        Packing_Sets[0][i][l] = 0;
-                    }
-                }
+                if (Partial_Status[l] >= 0) {
+                    if (l < A->M) {
+                        int index_packingset = Partial_Status[l];
+                        int index_partial_status = pow(2, index_packingset) - 1;
+    
+                        int no_nz = A ->perRow_Col[l] - color_count[index_partial_status][l];
+                        Packing_Sets2[0][index_packingset][no_nz] -= 1;
 
-                //If the  rowcol=column.
-                else {
-                    int new_index_intersect = (l - A ->M);
-                    int no_sets = Packing_Sets[1].size();
-                    //Loop over all packing sets of the columns.
-                    for (int i = 0; i < no_sets; i++) {
-                        Packing_Sets[1][i][new_index_intersect] = 0;
                     }
+                    else {
+                        int index_packingset = Partial_Status[l];
+                        int index_partial_status = pow(2, index_packingset) - 1;
+
+                        int no_nz = A->perRow_Col[l] - color_count[index_partial_status][l];
+                        Packing_Sets2[1][index_packingset][no_nz] -= 1;
+
+                    }
+
                 }
             }
 
         }
 
-        int comboL3 = L3bound(Packing_Sets, Partition_Size);
-   
+        int comboL3 = L3bound_improved(Packing_Sets2, Partition_Size, A);
+        
         if ( (LB_now + comboL3 ) >= UB) {
             GL4_bound += comboL3;
             return GL4_bound;
-
         }
+
         if (GL3_on) {
 
             int GL3 = GL3_bound(Matched, visited, Partial_Status,  A, Partition_Size, states);
-            if ((GL3 - comboL3) != 0) {
-               // std::cout << " " << GL3 - comboL3;
-            }
+           /// ToDo gewoon extra info voor mezelf dir
             int extracheck = GL3 - comboL3;
             Check += extracheck;
+            //
             int max3 = std::max(comboL3, GL3);
 
             GL4_bound += max3;
@@ -1078,7 +1155,7 @@ int BFS2_Global_L4(std::vector<int> Matches_L4, int no_matched,std::vector<int> 
                 int v_k = *i;
 
 
-                if (Partial_Status[v_k] < -1 || Partial_Status[v_k] == Partial_Status[v_i] || visited[v_k] == 1 || (Partial_Status[v_k] >= 0 && maintain_color_match[v_i][Partial_Status[v_k]])|| maintain_color_match[v_k][Partial_Status[v_i]]) {
+                if (Partial_Status[v_k] < -1 || Partial_Status[v_k] == Partial_Status[v_i] || visited[v_k] == 1 || ( (Partial_Status[v_k] >= 0 ) && maintain_color_match[v_i][Partial_Status[v_k]])|| maintain_color_match[v_k][Partial_Status[v_i]]) {
                     continue;
                 }
 

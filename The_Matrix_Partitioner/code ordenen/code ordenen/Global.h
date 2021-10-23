@@ -46,11 +46,6 @@ extern int Overall_LB;
 //Maximum length of path in bfs in Global L4 bound.
 extern int length_path;
 
-//This variable is watched in Possible_States.cpp:
-
-//A boolean that starts at 0, and becomes one when the escape button is pushed.
-//If Stop_partition=1 the execution of the tree stops and the best found solution until that moment is printed.
-extern bool Stop_Partition;
 
 
 //Name of output stream and the file to store all information about a matrix new upperbounds etc. in a file
@@ -65,20 +60,18 @@ extern int no_tobeAssigned;
 
 //Some parameters to turn some features on and off.
 extern bool PQ;
-extern bool s2;
-extern bool s3;
+
 extern bool GL4_on;
 extern bool GL3_on;
 extern bool CombL3_L4;
 extern bool Overall_LB_on;
 extern bool Iterative_UB;
 
-extern int aantalGL4;
-extern int combolocal;
-extern int L4groter;
-extern int GL4groter;
-extern int L3gr;
-extern int gelijk;
-extern int GL42;
+
+
+
+
+
+
 
 extern int Check;

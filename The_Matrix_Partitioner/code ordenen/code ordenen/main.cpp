@@ -21,6 +21,7 @@
 #include"./Symmetry.h"
 
 
+
 //Initialize some of the exertnal variables of Global.h.
 
 //Give the number of Processsors
@@ -34,12 +35,12 @@ std::string nameMatrix;
 std::string filename_Sol_info;
 std::string Location_matrix;
 int no_tobeAssigned;
+int length_path;
 
 //Initial value for some other external variables of Global.h
 std::vector<bool> Zero_State;
 std::vector<bool> AllProc_State;
-bool Stop_Partition = 0;
-int Overall_LB=0;
+
 
 //Define some of the exetrnal variables of Global.h.
 std::set<std::vector<bool>> AllStates;
@@ -47,6 +48,7 @@ int Max_Partition_size;
 std::vector <std::vector<bool>>Index_and_Status;
 std::set<int> Indices_2proc_states;
 int UB=1;
+int Overall_LB=0;
 int Lowest_cv_sofar= -1;
 
 //Define the outputstream and file name in order to store all info about the partitioning of this matrix.
@@ -56,43 +58,31 @@ std::ofstream Solution_and_info;
 
 //Do we want to use the priority Queue, for p=3 / p=4.
 bool PQ = 0;
-//Do we want to use symmetry for the 2nd row/column?
-bool s2 = 1;
-//Do we want to elimenate symmetry for the 3th row/column?
-bool s3 = 1;
 //Do we want to combine L3 and L3 bound, and calculate the L3 after L4 is detemrined?
 bool CombL3_L4 =1 ;
 //Do we want to use the Global L4 bound?
 bool GL4_on = 1;
 //Do we want to use the Global L3 bound?
 bool GL3_on = 1;
-//Give the maximum length of path in BFS of global L4 bound
-int length_path = 300;
 //Do we want to use the iterative deepening UB?
-bool Iterative_UB=0;
+bool Iterative_UB=1;
 //Do we want to use the overall LB, is only ussed when the iterative deepening UB is used?
 bool Overall_LB_on = 1;
 
 
 
-
-int combolocal = 0;
-int aantalGL4 = 0;
- int L4groter=0;
- int GL4groter=0;
- int L3gr=0;
- int gelijk = 0;
- int GL42 = 0;
+ 
+//To see if GL3 is better than L3 it is the sum of all values GL3-L3.
  int Check = 0;
 
 
 int main(int argc, char* argv[])
 {
     if (argc < 2) {
-        nameMatrix ="Sandi_authors";
+        nameMatrix ="bcspwr01";
         Processors =4;
         Epsilon = 0.03;
-        Location_matrix = "80-100matrix/" + nameMatrix + ".mtx";
+        Location_matrix = "0-30matrix/" + nameMatrix + ".mtx";
     }
 
     else {
@@ -112,6 +102,7 @@ int main(int argc, char* argv[])
     clock_t start, end;
     start = clock();
 
+
     //Prints the number of processors and the chosen value of Epsilon.
     std::cout << "Number of Processors: " << Processors <<"  Value epsilon : "<< Epsilon<< "\n";
 
@@ -121,7 +112,9 @@ int main(int argc, char* argv[])
 
     matrix* pointA;
     pointA = &A;
-  
+ 
+    //Give the maximum length of path in BFS of global L4 bound
+    length_path = A.M + A.N;
 
     //File to store all information about one matirx
     //It stores all  new upperbounds, corresponding partitions  and new ub value
@@ -151,22 +144,24 @@ int main(int argc, char* argv[])
    int b=A.Determine_Cmax();
    
    //Below the order of the rows and columns is determined:
-   std::vector<int> c;
-   c=Determine_Order_row_columns(pointA -> perRow_Col);
+   std::vector<int> order1;
+   order1=Determine_Order_row_columns(pointA -> perRow_Col);
 
    std::vector<int> order2;
    order2 = Determine_Order_row_columns2(pointA -> perRow_Col, pointA -> M);
    
    std::vector<int>order3=Determine_Order_row_columns3(pointA->perRow_Col, A);
 
+   std::cout << "\n" << A.Cmax << " dit was cmax" << "\n";
+
    //The length of the vector that contans the order of rowcols is needed for the "Partition"function.
    //Note this length can be smaller than m+n because some rowcols may not contain any nonzeros.
-   int d = c.size();
+   int size_order1 = order1.size();
    int size_order2 = order2.size();
    int size_order3 = order3.size();
 
 
-   no_tobeAssigned = d;
+   no_tobeAssigned = size_order1;
    //The starting "Partition" is made.
    //Every rowcol is not yet assigned a status so the state of every rowcol is (0,..0,).
    std::vector<bool > bs(Processors,0);
@@ -185,18 +180,21 @@ int main(int argc, char* argv[])
   std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols((pointA -> M + pointA ->N), std::make_pair(0, initial_Partstat));  
 
 
-  //Initialize packing sets for L3 bound.
-  std::vector<int> Rows(pointA ->M, 0);
-  std::vector<int> Cols(pointA -> N, 0);
-  std::vector < std::vector<int>>PAck_row(Processors, Rows);
-  std::vector < std::vector<int>>PAck_col(Processors, Cols);
-  std::array<std::vector<std::vector<int>>, 2> Packing_Sets = { PAck_row, PAck_col };
+
+
+  //Initialize (improved) packing set for L3 bound;
+  std::vector<int> rows(pointA->Cmax, 0);
+  std::vector<int> cols(pointA->Cmax, 0);
+  std::vector < std::vector<int>>Pack_row(Processors, rows);
+  std::vector < std::vector<int>>Pack_col(Processors, cols);
+  std::array<std::vector<std::vector<int>>, 2> Packing_Sets2 = { Pack_row, Pack_col };
 
   //initialize partial status
   std::vector<int>Value_Partial_status(pointA->M + pointA->N, -1);
 
   //Initialize LB3bound at zero
-  int LB3_First = 0;
+  int max_pack_match = 0;
+
 
   Symmetry_processors Symm = Symmetry_processors();
 
@@ -209,8 +207,7 @@ int main(int argc, char* argv[])
       while (Lowest_cv_sofar == -1) {
           std::cout << "Nu in ronde: " << count_rondes << " UB: " << UB << "\n";
           //Give the "Partition" function = the tree all the information it needs and execute it.
-          Partition(TheState, c,d, &A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols, Packing_Sets, LB3_First, Value_Partial_status, graph, Symm);
-
+          Partition(TheState, order3,size_order3, &A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols,Packing_Sets2, max_pack_match, Value_Partial_status, graph, Symm);
 
           int new_UB = ceil(UB * UB_factor);
           if (Overall_LB_on) {
@@ -228,7 +225,7 @@ int main(int argc, char* argv[])
       std::cout << "UB: " << UB << "\n";
       
       //The main function, the partition function, i.d. this function makes the whole branh and bound tree.
-      Partition(TheState, order3, size_order3, &A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols, Packing_Sets, LB3_First, Value_Partial_status, graph, Symm);
+      Partition(TheState, order3, size_order3, &A, A.perRow_Col, Partition_size, color_count, 0, Partial_Status_rowcols,  Packing_Sets2, max_pack_match, Value_Partial_status, graph, Symm);
 
   }
 
@@ -245,14 +242,7 @@ int main(int argc, char* argv[])
    std::cout << "\n" << "Time taken: " << std::setprecision(5)<< time_taken << "sec";
    Solution_and_info << "\n" << "Time taken: " << std::setprecision(5) << time_taken << "sec"<<"\n";
 
-   //Check if partition was stopped before finishing, If so print this in file with all the info about partitioning this matrix.
-   if (Stop_Partition == 1) {
-       Solution_and_info << " \n" << "STOPPED BEFORE PARTITION WAS FINISHED" << "\n"
-           << "SOLUTION MAY NOT BE OPTIMAL"<< "\n";
-
-   }
-
-
+   
    //Prints the best solution that is found so far and the corresponding communication volume.
    //(It also prints the solution in the file)
    std::cout <<"\n"<< "The best solution found so far is:  ";
@@ -291,12 +281,12 @@ int main(int argc, char* argv[])
     std::string filename_PriorQueue = "p=" + std::to_string(Processors) + ",priorQueue.txt";
 
     //Determine number of cuts in the first rowcol, in the optimal solution.
-    std::vector<bool> State0=Best_solution_sofar[order2[0]];
+    std::vector<bool> State0=Best_solution_sofar[order3[0]];
     int Cut_rc_0= std::accumulate(State0.begin(), State0.end(), 0) - 1;
 
 
     Prior_queue.open(filename_PriorQueue, std::ios::out | std::ios::app);
-    Prior_queue << nameMatrix <<  " & " << A.nnz << " & " << Max_Partition_size << " & " << A.perRow_Col[order2[0]] <<" & " << Cut_rc_0 << " & "
+    Prior_queue << nameMatrix <<" & "<< A.M<< " & "<< A.N<< " & " << A.nnz << " & " << Max_Partition_size << " &  "<< order3[0]<< " & " << A.perRow_Col[order3[0]] <<" & " << Cut_rc_0 << " & "
         << "\n";
     Prior_queue.close();
 
@@ -305,7 +295,7 @@ int main(int argc, char* argv[])
 
     output_States_nzs(A);
 
-    std::cout << "GL4: " << aantalGL4 << " , combo : " << combolocal <<  " , L3 " << L3gr<< " ,gelijk "<< gelijk ;
+    
     std::cout << " de check " << Check;
 
 }
