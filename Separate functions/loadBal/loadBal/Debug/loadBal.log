@@ -1,5 +1,0 @@
-﻿  loadBal.cpp
-C:\Users\E.L.Jenneskens\Documents\git\e.l.-theses\loadBal\loadBal\loadBal.cpp(20,36): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\e.l.-theses\loadBal\loadBal\loadBal.cpp(145,23): warning C4018: '<': signed/unsigned mismatch
-C:\Users\E.L.Jenneskens\Documents\git\e.l.-theses\loadBal\loadBal\loadBal.cpp(248,17): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-  loadBal.vcxproj -> C:\Users\E.L.Jenneskens\Documents\git\e.l.-theses\loadBal\Debug\loadBal.exe

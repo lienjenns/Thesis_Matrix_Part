@@ -1,4 +1,0 @@
-﻿  symmetry2.cpp
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\Separate functions\symmetry2\symmetry2\symmetry2.cpp(92,19): warning C4018: '<=': signed/unsigned mismatch
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\Separate functions\symmetry2\symmetry2\symmetry2.cpp(92,52): warning C4018: '<=': signed/unsigned mismatch
-  symmetry2.vcxproj -> C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\Separate functions\symmetry2\Debug\symmetry2.exe
