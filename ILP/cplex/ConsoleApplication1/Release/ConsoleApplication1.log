@@ -1,0 +1,9 @@
+﻿  Input.cpp
+C:\Users\E.L.Jenneskens\Documents\git\ilp\cplex\ConsoleApplication1\Input.cpp(86,16): warning C4101: 'data': unreferenced local variable
+  main.cpp
+C:\Users\E.L.Jenneskens\Documents\git\ilp\cplex\ConsoleApplication1\main.cpp(60,34): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\ilp\cplex\ConsoleApplication1\main.cpp(188,17): warning C4244: 'initializing': conversion from 'IloNum' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\ilp\cplex\ConsoleApplication1\main.cpp(202,129): warning C4129: 'h': unrecognized character escape sequence
+C:\Users\E.L.Jenneskens\Documents\git\ilp\cplex\ConsoleApplication1\main.cpp(59,13): warning C4101: 'Max_part_size': unreferenced local variable
+  MTX.cpp
+concert.lib(iloconstraint.obj) : fatal error LNK1112: module machine type 'x64' conflicts with target machine type 'x86'

@@ -1,0 +1,15 @@
+﻿  Input.cpp
+C:\Users\E.L.Jenneskens\Documents\git\ilp\cplex\ConsoleApplication1\Input.cpp(122,27): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\ilp\cplex\ConsoleApplication1\Input.cpp(86,16): warning C4101: 'data': unreferenced local variable
+  MTX.cpp
+  main.cpp
+C:\Users\E.L.Jenneskens\Documents\git\ilp\cplex\ConsoleApplication1\main.cpp(26,33): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\ilp\cplex\ConsoleApplication1\main.cpp(34,20): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\ilp\cplex\ConsoleApplication1\main.cpp(72,27): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\ilp\cplex\ConsoleApplication1\main.cpp(156,30): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\ilp\cplex\ConsoleApplication1\main.cpp(217,146): warning C4129: 'h': unrecognized character escape sequence
+C:\Users\E.L.Jenneskens\Documents\git\ilp\cplex\ConsoleApplication1\main.cpp(288,24): warning C4129: 'd': unrecognized character escape sequence
+C:\Users\E.L.Jenneskens\Documents\git\ilp\cplex\ConsoleApplication1\main.cpp(299,20): warning C4129: 'd': unrecognized character escape sequence
+C:\Users\E.L.Jenneskens\Documents\git\ilp\cplex\ConsoleApplication1\main.cpp(300,20): warning C4129: 'e': unrecognized character escape sequence
+  Generating Code...
+  ConsoleApplication1.vcxproj -> C:\Users\E.L.Jenneskens\Documents\git\ilp\cplex\x64\Debug\ConsoleApplication1.exe
