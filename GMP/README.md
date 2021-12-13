@@ -18,6 +18,7 @@ In Possible_States.cpp lines 1142-1156 need to be removed, since this uses the w
 
 ```
 cd GMP/GMP
+
 g++ *.cpp -o GMP
 ```
    
