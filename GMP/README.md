@@ -16,7 +16,7 @@ the name of the matrix and the location of the matrix (in matrix market format) 
    
 
 
-# Input (in windows terminal);
+# Input ;
 
 ```
 .\GMP "name_matrix" "location_matrix" "p" "epsilon"
@@ -53,6 +53,7 @@ For example the subset of processors {0,1} has binary index 2^0 *1+2^1 *1 -1=2, 
 After the comments for every nonzero (a_ij) the location and  the binary index of the subset of processors to which it is assigned is mentioned.
 So the file has the folowing form:
 
+```
 %%MatrixMarket matrix coordinate general integer
 % Matrix partitioned into p="..." parts.
 % Max. allowed partition size was: "..." 
@@ -63,7 +64,7 @@ i j BinIndex_subset
 ...
 ...
 i j BinIndex_subset
-
+```
 
 Information about the partitioning:
 In the file  p="#processors" "matrix".txt , where #processors and matrix are input variables information about the partitioning of the matrix is stored.
