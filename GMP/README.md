@@ -17,9 +17,9 @@ This includes :#include "windows.h" in Main.cpp and Possible_States.cpp.
 In Possible_States.cpp lines 1142-1156 need to be removed, since this uses the windows.h
 
 ```
-cd GMP/GMP
+>> cd GMP/GMP
 
-g++ *.cpp -o GMP
+>> g++ *.cpp -o GMP
 ```
    
 
