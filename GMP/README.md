@@ -75,7 +75,7 @@ It also prints the optimal partitioning and the communication volume and the tim
 
 # For the user (on windows);
 
-## Alt button
+**Alt button**
 	    Press the alt button to see which subtree the algorithm is currently in
 	    When the Alt button is pressed the state of the first rowcol and the second rowcol that is
  	    partitioned is printed. This gives an indication how far the algorithm has progressed in the tree.
