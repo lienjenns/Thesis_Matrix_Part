@@ -6,19 +6,19 @@ the optimal partition of a matrix A into p parts. This algorithm uses a branch a
 The number of parts/processors p, the load-imbalance parameter epsilon,
 the name of the matrix and the location of the matrix (in matrix market format) are all user inputs.
 
-## Build:
+## Build
 
 ### Windows:
 Build with micrososft visual studio in release mode(x64), the executable can be found in the x64 directory!
 
-### Linux(Ubuntu)
+### Linux(Ubuntu):
 Build on Ubuntu 18.04, in order to build the project Windows specific code needs to be removed. 
 This includes :#include "windows.h" in Main.cpp and Possible_States.cpp. 
 In Possible_States.cpp lines 1142-1156 need to be removed, since this uses the windows.h
    
 
 
-## Input ;
+## Input:
 
 ```
 .\GMP "name_matrix" "location_matrix" "p" "epsilon"
@@ -76,7 +76,7 @@ Before the improved solution is printed, it first prints the current number of a
 It also prints the optimal partitioning and the communication volume and the time it took to find the optimal partitioning.
 
 
-## For the user (on windows);
+## For the user (on windows):
 
 **Alt button**
 	    Press the alt button to see which subtree the algorithm is currently in
