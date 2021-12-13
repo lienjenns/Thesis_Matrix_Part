@@ -7,12 +7,12 @@ the name of the matrix and the location of the matrix (in matrix market format) 
 # Build:
 
 ## Windows:
-	Build with micrososft visual studio in release mode(x64), the executable can be found in the x64 directory!
+Build with micrososft visual studio in release mode(x64), the executable can be found in the x64 directory!
 
 ## Linux(Ubuntu)
-	Build on Ubuntu 18.04, in order to build the project Windows specific code needs to be removed. 
-	This includes :#include "windows.h" in Main.cpp and Possible_States.cpp. 
-	In Possible_States.cpp line 1142-1156 needs to be removed, since this uses the windows.h
+Build on Ubuntu 18.04, in order to build the project Windows specific code needs to be removed. 
+This includes :#include "windows.h" in Main.cpp and Possible_States.cpp. 
+In Possible_States.cpp line 1142-1156 needs to be removed, since this uses the windows.h
    
 
 
