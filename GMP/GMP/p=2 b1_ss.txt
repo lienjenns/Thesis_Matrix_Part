@@ -1,0 +1,30 @@
+b1_ss
+Number of Processors: 2  Value epsilon : 0.03
+Max partition size: 8
+Start partitioning:
+Now in round: 0, with UB: 1
+Now in round: 1, with UB: 2
+Now in round: 2, with UB: 3
+Now in round: 3, with UB: 4
+16
+  10  01  10  10  01  01  01  01  11  10  10  01  11  11 CV: 3 : 0   
+
+Number of Partitions aborted: 16
+Time taken: 0.038sec
+The optimal partitioning of the matrix that is found:  10 01 10 10 01 01 01 01 11 10 10 01 11 11 
+With Communication Volume:  3
+b1_ss
+Number of Processors: 2  Value epsilon : 0.03
+Max partition size: 8
+Start partitioning:
+Now in round: 0, with UB: 1
+Now in round: 1, with UB: 2
+Now in round: 2, with UB: 3
+Now in round: 3, with UB: 4
+16
+  10  01  10  10  01  01  01  01  11  10  10  01  11  11 CV: 3 : 0   
+
+Number of Partitions aborted: 16
+Time taken: 0.018sec
+The optimal partitioning of the matrix that is found:  10 01 10 10 01 01 01 01 11 10 10 01 11 11 
+With Communication Volume:  3
