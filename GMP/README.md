@@ -12,7 +12,7 @@ Build with micrososft visual studio in release mode(x64), the executable can be 
 ## Linux(Ubuntu)
 Build on Ubuntu 18.04, in order to build the project Windows specific code needs to be removed. 
 This includes :#include "windows.h" in Main.cpp and Possible_States.cpp. 
-In Possible_States.cpp line 1142-1156 needs to be removed, since this uses the windows.h
+In Possible_States.cpp lines 1142-1156 need to be removed, since this uses the windows.h
    
 
 
