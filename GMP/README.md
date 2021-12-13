@@ -18,7 +18,7 @@ In Possible_States.cpp lines 1142-1156 need to be removed, since this uses the w
    
 
 
-## Input:
+## Run:
 
 ```
 .\GMP "name_matrix" "location_matrix" "p" "epsilon"
