@@ -4,19 +4,19 @@ the optimal partition of a matrix A into p parts. This algorithm uses a branch a
 The number of parts/processors p, the load-imbalance parameter epsilon,
 the name of the matrix and the location of the matrix (in matrix market format) are all user inputs.
 
-#Build:
+# Build:
 
-##Windows:
+## Windows:
 	Build with micrososft visual studio in release mode(x64), the executable can be found in the x64 directory!
 
-##Linux(Ubuntu)
+## Linux(Ubuntu)
 	Build on Ubuntu 18.04, in order to build the project Windows specific code needs to be removed. 
 	This includes :#include "windows.h" in Main.cpp and Possible_States.cpp. 
 	In Possible_States.cpp line 1142-1156 needs to be removed, since this uses the windows.h
    
 
 
-#Input (in windows terminal);
+# Input (in windows terminal);
 
 ```
 .\GMP "name_matrix" "location_matrix" "p" "epsilon"
@@ -29,7 +29,7 @@ For example:
 This command will partition the matrix "b1_ss" that can be found in the directory "matrix" into 4 parts, 
 and the load imbalance parameter epsilon is set to 0.03.
 
-#Output:
+# Output:
 
 Every time the algorithm finds an improvement over the previous best found solution 
 it is printed in the console screen (both the solution and the communication value are printed).
@@ -43,7 +43,7 @@ At the end, the time it took to compute the optimal solution, the number of abor
 an optimal solution and the corresponding optimal communication value are printed.
 
 
-#Output files:
+# Output files:
 
 Partitioned matrix:
 The partitioned matrix in matrix market format is printed in the file p="#processors" "matrix", OUT.txt , where #processors and matrix are input variables.
@@ -73,10 +73,10 @@ Before the improved solution is printed, it first prints the current number of a
 It also prints the optimal partitioning and the communication volume and the time it took to find the optimal partitioning.
 
 
-#For the user (on windows);
+# For the user (on windows);
 
-##Alt button
-		Press the alt button to see which subtree the algorithm is currently in
+## Alt button
+	    Press the alt button to see which subtree the algorithm is currently in
 	    When the Alt button is pressed the state of the first rowcol and the second rowcol that is
  	    partitioned is printed. This gives an indication how far the algorithm has progressed in the tree.
 
