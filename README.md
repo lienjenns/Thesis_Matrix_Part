@@ -16,6 +16,6 @@ and the matrix in Matrix Market format.
 
 
 
-<a name="1">1</a>:[1] (https://doi.org/10.1016/j.jpdc.2015.06.005)  *An exact algorithm for sparse matrix bipartitioning*, Daniel M. Pelt and Rob H. Bisseling, *Journal of Parallel and Distributed Computing*, **85** (2015) pp. 79-90.
+<a name="1">1</a>:[*An exact algorithm for sparse matrix bipartitioning*] (https://doi.org/10.1016/j.jpdc.2015.06.005)  *An exact algorithm for sparse matrix bipartitioning*, Daniel M. Pelt and Rob H. Bisseling, *Journal of Parallel and Distributed Computing*, **85** (2015) pp. 79-90.
 
 <a name="2">2</a>:[ *An improved exact algorithm and an NP-completeness proof for sparse matrix bipartitioning*,  Timon E. Knigge and Rob H. Bisseling, *Parallel Computing*, **96**  (2020) 102640 ] (https://doi.org/10.1016/j.parco.2020.102640) 
