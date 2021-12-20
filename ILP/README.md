@@ -13,18 +13,19 @@ and the matrix in Matrix Market format are all user inputs.
 
 # Use:
 To use this algorithm you need to install IBM ILOG CPLEX , see [](https://www.ibm.com/products/ilog-cplex-optimization-studio).
+Open ILP.sln with visual studio.
 
 
 ## Run:
 
 ```
- .\ConsoleApplication1 "name_matrix" "location_matrix" "p" "epsilon"
+ .\ILP "name_matrix" "location_matrix" "p" "epsilon"
 ```
 
 For example:
 
 ```
-.\ConsoleApplication1 "b1_ss" "matrix/b1_ss.mtx" "4" "0.03"
+.\ILP "b1_ss" "matrix/b1_ss.mtx" "4" "0.03"
 ```
 
 This command will partition the matrix "b1_ss" , which can be found in the directory "matrix", into 4 parts. 
