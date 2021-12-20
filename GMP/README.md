@@ -4,7 +4,7 @@ Given a number of processors p, and a load-imbalance parameter epsilon, the algo
 the optimal partition of a matrix A into p parts. This algorithm uses a branch and bound approach.
 
 The number of parts/processors p, the load-imbalance parameter epsilon,
-the name of the matrix and the location of the matrix (in matrix market format) are all user inputs.
+and the matrix in Matrix Market format are all user inputs.
 
 ## Build
 
