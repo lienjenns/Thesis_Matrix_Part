@@ -13,7 +13,7 @@ and the matrix in Matrix Market format are all user inputs.
 
 # Use:
 To use this program you need to install IBM ILOG CPLEX , see  <sup>[1](#1)</sup>. 
- Open ILP.sln with visual studio.
+Build with micrososft visual studio in release mode(x64), the executable can be found in the x64 directory.
 
 
 ## Run:
