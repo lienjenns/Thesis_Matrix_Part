@@ -3,7 +3,7 @@
 Given a number of processors p, and a load-imbalance parameter epsilon, the algorithm determines
 the optimal partition of a matrix A into p parts. This algorithm uses ILP to solve the sparse matrix partitioning problem. 
 The ILP model is implemented using IBM ILOG CPLEX 20.1.0 <sup>[1](#1)</sup>.
-(For the parameter settings of cplex we adjusted the number of threads cplex may use to 1.   See main.cpp r.183)
+(For the parameter settings of cplex we adjusted the number of threads cplex may use to 1.   See main.cpp r.185)
 
 
 
