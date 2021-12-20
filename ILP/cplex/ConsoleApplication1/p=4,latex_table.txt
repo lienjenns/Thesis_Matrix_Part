@@ -1,4 +1,0 @@
-GD95_b & 40 & 69 & 96  &3 & 0.591 s \\ \hline 
-lpi_itest2 & 9 & 13 & 26  &6 & 0.355 s \\ \hline 
-ERROR 0ERROR 0ERROR 0ERROR 1lpi_itest2 & 9 & 13 & 26  &6 & 0.384 s \\ \hline 
-Tina_AskCal & 11 & 11 & 29  &7 & 0.277 s \\ \hline 

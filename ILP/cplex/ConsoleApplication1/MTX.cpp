@@ -27,7 +27,7 @@ matrix::matrix(int x, int y, int z, std::vector<std::pair<int, int >> entries) {
     og_locations = entries;
     locations = entries;
    
-    //Sort both vectors, then every onzero has the same index in both vectors, (is important for the output files later on after ilp procedure.)
+    //Sort both vectors, then every nonzero has the same index in both vectors, (is important for the output files later on after ilp procedure.)
     std::sort(og_locations.begin(), og_locations.end());
     std::sort(locations.begin(), locations.end());
 
@@ -104,7 +104,7 @@ matrix::matrix(int x, int y, int z, std::vector<std::pair<int, int >> entries) {
 //It makes/fills in the following vectors in the matrix structure;  "Row_nz_entries and  "Start_Row".
 //These two vectors are the CRS data structure.
 void matrix::CRS(std::vector < std::pair<int, int>> locations, int nnz, int M) {
-    sort(locations.begin(), locations.end());
+    sort(locations.begin(), locations.end());               //should already be sorted, but this guarantees it.
 
     //Number of rows m plus 1 is vector length of start vector.
     int length = M + 1;
@@ -130,13 +130,13 @@ void matrix::CRS(std::vector < std::pair<int, int>> locations, int nnz, int M) {
 }
 
 //This fucntion makes the compressed column storage data structure.
-//It makes/fills in the following vectors in the matrix structure;   "RowEntries" and "Start_Column".
+//It makes/fills in the following vectors in the matrix structure;   "Col_nz_Entries" and "Start_Column".
 //These two vectors form the CCS data structure.
 void matrix::CCS(std::vector<std::tuple<int, int, int>> loations_with_nz, int nnz, int number_of_columns) {
 
     //sorts the pairs based on the second element of the pair and within every element sorts also based on 1st element.
-    //Sorting based on the second element makes sure that in the next for loop the row indices of the nonzeros are stored per column.
-    //So first teh row indices of the nz in column 0 are stored in RowEntries, then the row indices of the n in column 2etc..
+    //Sorting based on the second element makes sure that in the next for loop the indices of the nonzeros are stored per column.
+    //So first the nonzeros  in column 0 are stored in "Col_nz_Entries", then nonzeros in column 2etc..
     sort(loations_with_nz.begin(), loations_with_nz.end(), Sort_by_Second_than_first2);
 
     //Number of columns n plus 1 is vector length of start vector.
@@ -166,7 +166,7 @@ void matrix::CCS(std::vector<std::tuple<int, int, int>> loations_with_nz, int nn
 
 
 
-//Given an rowcol, this function determines the indices of the rowcols it intersects with in a nonzero
+//Given an rowcol, this function determines the indices of the nonzeros in that row/column.
 std::vector<int> matrix::Intersecting_RowCol(int index_ROWCOL) {
     int index = index_ROWCOL;
 

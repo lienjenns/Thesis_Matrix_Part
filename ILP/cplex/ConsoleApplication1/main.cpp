@@ -48,8 +48,8 @@ int LowerBound1(std::vector < std::vector<bool>>The_Partition) {
 int main(int argc, char* argv[])
 {
 	if (argc < 2) {
-		nameMatrix = "bibd_9_3";
-		P = 4;
+		nameMatrix = "relat4";
+		P = 3;
 		Epsilon = 0.03;
 		Location_matrix = "matrix/" + nameMatrix + ".mtx";
 	}
@@ -57,10 +57,12 @@ int main(int argc, char* argv[])
 	else {
 
 		nameMatrix = argv[1];
-		P = std::stoi(argv[2]);
-		Epsilon = std::stod(argv[3]);
-		Location_matrix = "matrix/" + nameMatrix + ".mtx";
+		Location_matrix = argv[2];
+		P = std::stoi(argv[3]);
+		Epsilon = std::stod(argv[4]);
 	}
+
+
 
 	//Read the information from the mtx file
 	matrix A(Read_From_File(Location_matrix));
@@ -68,7 +70,8 @@ int main(int argc, char* argv[])
 	std::cout << nameMatrix << " " << P << " " << Epsilon << "\n";
 
 	//Determine the maximum alowed size of a part.
-	int Max_size = (1 + Epsilon) * ceil((float)A.nnz / (float)P); //gaat goed rond t naar beneden af ook als bv 4.8 dan max parititon size 4 moet k nog floor en dan int? ToDo
+	int Max_size = floor ( (1 + Epsilon) * ceil( (float)A.nnz / (float)P) ); 
+
 
 	////Now make the ILP model in CPlex
 
@@ -147,8 +150,6 @@ int main(int argc, char* argv[])
 	//Add the hyperedge constraints; x_ij<=y_kj, if nz "i" is in net "k".
 	//So y_kj=1 if it contains a nonzero that is assigend to processor j.
 	// nz(A) *2*p constraits.
-
-	int count = 0; //Used to check if orrect number of constraints is added.
 	for (int i = 0; i < no_nets; i++) {
 
 		std::vector<int> RC_nz = A.Intersecting_RowCol(i);
@@ -161,7 +162,6 @@ int main(int argc, char* argv[])
 
 			for (int k = 0; k < P; k++) {
 
-				count += 1;
 
 				int var_nz = no_nz + nnz * k;
 				int var_net = i + no_nets * k;
@@ -180,63 +180,64 @@ int main(int argc, char* argv[])
 	IloCplex solver(model);
 
 
-	//This is a aprameter that can be used to adjust the algorithm that cplex uses.
-	//Mip uses dynmaic search or branch and cut, 0; cplex choosed, 1; branch and cut, 2; dynamic search
-   // solver.setParam(IloCplex::Param::MIP::Strategy::Search, 0);
 
-	//Make sure we only use one thread and the final optimal solutions are not allowed to have a "gap" between its value and the real optimal value.
-	solver.setParam(IloCplex::Param::Threads, 1);    //Set threads to one in order to make ilp sequential
-	solver.setParam(IloCplex::Param::MIP::Tolerances::AbsMIPGap, 0.0000000); //
-	solver.setParam(IloCplex::Param::MIP::Tolerances::MIPGap, 0.0);
+	//Make sure we only use one thread. Set threads to one in order to make ilp sequential
+	solver.setParam(IloCplex::Param::Threads, 1);   
+
 
 	//Solve the model "model".
 	solver.solve();
 
-	//Get the optimal value of the objective function found by the solver.
-	std::cout << "opt value, CV: " << solver.getObjValue();
+	
 
 	end = clock();
 
-	std::cout << " status: " << solver.getStatus(); //Status signals if solution is optimal
 
-	//For more informatiom about the status of the solution and the cuts made during the optimilization;
-	//std::cout << "cstat" << solver.getCplexStatus(); //cplexstatus also signals if solution is optimal
-	//std::cout << "0cuts " << solver.getNcuts(solver.CutZeroHalf); //Can be used to determine how many of a specific type cut are used.
+	
+
+	
+
+	//Get the optimal value of the objective function found by the solver.
+	//We round the optimal value, although the objective value should be an integer, 
+	//due to round off errors  e.g. by the computer a integer value can deviate from its integer value by very small amounts e.g.  with 2 e-16.
+	//Other option to solve this problem is  by setting the parameter EPINT to 0 (default value is 1e-5). The parameter Epint specifies the amount by which an computed solution value 
+	//for an integer variable can violate its integrality requirement. But setting Epint to 0 can possibly result in performance issues. 
+	//	solver.setParam(IloCplex::Param::MIP::Tolerances::Integrality, 0);  << settig Epint to 0.
+
+	int OPt_val = round( solver.getObjValue() );
+
+	std::cout << "opt value, CV: " << OPt_val;
+
+	std::cout << " Status: " << solver.getStatus()<< "\n"; //Status signals if solution is optimal
+
+
 
 	double time_taken = double(end - start) / double(CLOCKS_PER_SEC);
 
 
-	//Make a file to store the optimal value and used time for every matrix, in a format that makes a table in latex.
-	std::ofstream OptSol;
-	//file name depends on number of processors.
-	std::string filename_Opt = "p=" + std::to_string(P) + ",latex_table.txt";
-
-	OptSol.open(filename_Opt, std::ios::out | std::ios::app);
-	OptSol << nameMatrix << " & " << A.og_M << " & " << A.og_N << " & " << A.nnz << "  &" << solver.getObjValue() << " & " << time_taken << " s" << " \\\\ \\\hline " << "\n";
+	
 
 	//Check if found solution is indeed optimal.
 	if (solver.getStatus() != IloAlgorithm::Optimal) {
-		OptSol << "NOT OPTIMAL";
-		std::cerr << "Objective value found is not optimal!";
+		std::cerr << "ERROR: Objective value found is not optimal!";
 	}
 
-	////Now generate some output files and do som checks to see if the solution is feasible.
 
-	//Make a file to store the latex commands to make a tikz picture of the partitioned matrix.
-	std::ofstream TikzPic_matrix;
-	//name of file for Tikz picture
-	std::string filename_TikzPic = "p=" + std::to_string(P) + " " + nameMatrix + ", Tikz.txt";
+
+	
 
 	//File to store the partitioned matrix in matrix market format
 	std::ofstream output_NZ;
 	//name of file
 	std::string filename_output = "p=" + std::to_string(P) + " " + nameMatrix + ", OUT.txt";
 
-	TikzPic_matrix.open(filename_TikzPic, std::ios::out | std::ios::app);
 	output_NZ.open(filename_output, std::ios::out | std::ios::app);
-	TikzPic_matrix << "\\begin{tikzpicture}";
+	
 	output_NZ << "%%MatrixMarket matrix coordinate general integer" << "\n";
-	output_NZ << A.og_M << " " << A.og_N << " " << A.nnz << "\n";
+	output_NZ << "% Matrix partitioned into p=" << P << " parts." << "\n";
+	output_NZ << "% Max. allowed partition size was: " << Max_size << "." << "\n";
+	output_NZ << "% Optimal communication volume is: " << OPt_val << " with status "<< solver.getStatus() << "." << "\n";
+	
 
 	////Declare some variables in order to check the feasibility of the solution.
 
@@ -247,76 +248,81 @@ int main(int argc, char* argv[])
 	std::vector<bool> state(P, 0);
 	std::vector<std::vector<bool>> rowcol_values(A.og_M+A.og_N, state);
 
-	//Traverse all nonzeros to make the martrix market file for the partitioned matrix and file for the tikz pic.
+
+	//Determine how many nonzeros are owned by each processor in the final partitioning.
+	for (int i = 0; i < nnz; i++) {
+		int ind_nz;
+
+		for (int j = 0; j < P; j++) {
+
+			ind_nz = i + nnz * j;
+			IloBool antwrd = solver.getIntValue(nonzeros[ind_nz]);  //get INT value: the Int is important otherwise variable can be e.g. 2 e-16 due to round off errors.
+
+			if (antwrd) {
+				part_sizes[j] ++;
+
+			}
+		}
+	}
+
+	output_NZ << "%Size of the different parts: ";
+	for (int j = 0; j < P; j++) {
+		output_NZ<< part_sizes[j] << " ";
+	}
+	output_NZ << "."<< "\n";
+	output_NZ << A.og_M << " " << A.og_N << " " << A.nnz << "\n";
+
+	//Traverse all nonzeros to make the martrix market file for the partitioned matrix.
 	//And at the same time we run some checks.
 	for (int i = 0; i < nnz; i++) {
 		int ind_nz;
 
 		std::pair<int, int> entries = A.og_locations[i];
-		output_NZ << entries.first << " " << entries.second << " ";
+		output_NZ << entries.first +1 << " " << entries.second + 1 << " ";
 		
-		//Var to check if every noznero is assigned to one and only one proc.
+		//Var to check if every nonzero is assigned to one and only one proc.
 		int assigned = 0;
 
 		for (int j = 0; j < P; j++) {
 			
 			ind_nz = i + nnz * j;
-			IloBool antwrd = solver.getIntValue(nonzeros[ind_nz]);  //get INT value: the Int is important otherwise variable can be e.g. 2 e-16.
+			IloBool antwrd = solver.getIntValue(nonzeros[ind_nz]);  //get INT value: the Int is important otherwise variable can be e.g. 2 e-16 due to round off errors.
 
 			if (antwrd) {
 				assigned++;
-				part_sizes[j] ++;
 
 				output_NZ << j << "\n";
 
 				rowcol_values[entries.first][j] = 1;
 				rowcol_values[(entries.second + A.og_M)][j] = 1;
 
-				//Code to make tikz pic.
-				if (P < 5) {
-
-					int m = A.og_M;
-					int n = A.og_N;
-
-					std::vector<std::string> colors = { "red", "blue",  "yellow",  "black" };
-					int color_index = j;
-					std::string color = colors[color_index];
-					int ri = entries.first;
-					int cj = entries.second;
-
-					TikzPic_matrix << "\\\draw[fill = , color = " << color << " , line width = 0] ( " << cj * 0.1 << ", " << (m - ri) * 0.1 << ") rectangle( " <<
-						(cj + 1) * 0.1 << ", " << (m - ri + 1) * 0.1 << " );" << "\n";
-				}
+			
 			}
 		}
 		
 		if (assigned != 1) {
-			OptSol << "ERROR X 0";
+			std::cerr << "ERROR: a nonzero is assigned to multiple or no processors.";
 		}
 	}
 
-	TikzPic_matrix << "\\\draw [very thin] (0, 0.1) rectangle (" << A.og_N * 0.1 << ", " << 0.1 + A.og_M * 0.1 << ") ; " << "\n";
-	TikzPic_matrix << "\\\end{tikzpicture}";
+
 	
 	//Check if part sizes aren't to large for the optimal solution (this shouldn't be the case).
 	for (int i = 0; i < P; i++) {
 		if ( part_sizes[i] > Max_size) {
-			std::cerr << "Partition size of proc: " << i << " is too large";
-			OptSol << "ERROR Part_Size";
+			std::cerr << "ERROR: Partition size of proc: " << i << " is too large";
 		}
 	}
 
 	//Check the objective value.
 	int expected_opt_value = LowerBound1(rowcol_values);
-	if (expected_opt_value != solver.getObjValue()) {
+	if (expected_opt_value != OPt_val) {
 		
-		std::cerr << "Optimal value is possibly not optimal.";
-		OptSol << "ERROR: optval X & Y";
+		std::cerr << "ERROR: Optimal value is possibly not optimal.";
 	}
 
-	OptSol.close();
 	output_NZ.close();
-	TikzPic_matrix.close();
+	
 
 	//Close the model, free the allocated memory
 	//solver.clear();

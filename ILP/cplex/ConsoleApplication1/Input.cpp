@@ -8,12 +8,12 @@
 #include"./MTX.h"
 
 
-// Split a string on whitespace.
-std::vector<std::string> tokenize(const std::string& line) {
+//Function splits a string on whitespace.
+std::vector<std::string> Split(const std::string& line) {
     std::istringstream iss(line);
-    return std::vector<std::string>{
-        std::istream_iterator<std::string>{iss},
-            std::istream_iterator<std::string>{}};
+
+    return std::vector<std::string>{  std::istream_iterator<std::string>{iss},
+        std::istream_iterator<std::string>{}};
 }
 
 matrix Read_From_File(std::string filename) {
@@ -28,8 +28,7 @@ matrix Read_From_File(std::string filename) {
     // open file to read it
     std::ifstream file(filename);
 
-    /*  if (file.is_open())
-          std::cout << file.rdbuf();*/
+   
 
     if (file.fail()) {
         std::cerr << "Not able to read the file." << "\n";
@@ -42,15 +41,15 @@ matrix Read_From_File(std::string filename) {
     std::string headerline;
     std::getline(file, headerline);
 
-    const auto& tokens = tokenize(headerline);
+    const auto& tokens = Split(headerline);
 
     if (tokens.size() != 5)
-        std::cerr << "first line is not a valid typecode.";
+        std::cerr << "First line is not a valid typecode.";
 
     if (tokens[0] != "%%MatrixMarket")
-        std::cerr << "first line did not start with a typecode.";
+        std::cerr << "First line did not start with a typecode.";
     if (tokens[1] != "matrix")
-        std::cerr << "file does not describe a matrix.";
+        std::cerr << "File does not describe a matrix.";
 
 
     if (tokens[4] == "symmetric" || tokens[4] == "hermitian" ||
@@ -63,11 +62,9 @@ matrix Read_From_File(std::string filename) {
         file.ignore(2048, '\n');
     }
 
-
     // Read number of rows, columns and nz:
     file >> M >> N >> nnz;
 
-    //std::cout << M << " " << N << " " << nnz<< "\n";
 
     // Make sure the vector has enough capacity to store all information.
     locations.reserve(nnz);
@@ -98,7 +95,7 @@ matrix Read_From_File(std::string filename) {
 
     file.close();
 
-    std::cout << "size locations " << locations.size() << "\n";
+   
     ////Prints the matrix in a real matrix form
     ////Extra check in order to see if the information from the file is correctly read.
     //int t = 0;
@@ -120,7 +117,7 @@ matrix Read_From_File(std::string filename) {
 
     //Because of possible symmetry determine new value nnz
     nnz = locations.size();
-    std::cout << "no nnz" << nnz << "\n";
+    
     return matrix(M, N, nnz, locations);
 }
 

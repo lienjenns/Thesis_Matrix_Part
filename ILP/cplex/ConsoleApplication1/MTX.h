@@ -11,7 +11,7 @@ struct matrix {
 public:
 	//The number of rows in the compressed matrix.
 	int M;
-	//The numebr of columns in the compressed matrix.
+	//The number of columns in the compressed matrix.
 	int N;
 	//The number of the rows and columns in the original matrix.
 	int og_M;
@@ -51,7 +51,7 @@ public:
 	//Function that makes the CCS data structure and fills the vectors: "Col_nz_entries" and "Start_Column".
 	void CCS(std::vector<std::tuple<int, int, int>> loations_with_nz ,int nnz, int number_of_columns);
 
-	//Given an rowcol, this function determines the indices of the  nonzeros in that rowcol.
+	//Given an rowcol, this function determines the indices of the nonzeros in that rowcol.
 	std::vector<int> Intersecting_RowCol(int index_ROWCOL);
 
 };
