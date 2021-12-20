@@ -31,7 +31,7 @@ For example:
 This command will partition the matrix "b1_ss" , which can be found in the directory "matrix", into 4 parts. 
 The load imbalance parameter epsilon is set to 0.03.
 
-##Output:
+## Output:
 
 The output of the program cplex is showed in the terminal. 
 After the ouput of the cplex proram we print the optimal comunication volume and the status of this value to check wheter or not it is optimal.
