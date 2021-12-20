@@ -5,7 +5,7 @@ That is  given a number of processors p, and a load-imbalance parameter epsilon,
 the optimal partitioning of a matrix A into p parts. 
 
 The "GMP" program is based on the branch and bound method and uses the same approach as the exact matrix bipartitioners 
-MondriaanOpt <sup>[1](#1)</sup> and  MatrixPartitioner MP  <sup>[2](#2)</sup>.
+MondriaanOpt<sup>[1](#1)</sup> and  MatrixPartitioner MP<sup>[2](#2)</sup>.
 
 The "ILP" program is based on ILP.
 
