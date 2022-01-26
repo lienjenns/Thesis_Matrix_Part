@@ -8,6 +8,7 @@
 #include<time.h>
 #include "./MTX.h"
 #include "./Input.h"
+#include <algorithm>
 
 ILOSTLBEGIN
 
@@ -48,8 +49,8 @@ int LowerBound1(std::vector < std::vector<bool>>The_Partition) {
 int main(int argc, char* argv[])
 {
 	if (argc < 2) {
-		nameMatrix = "relat4";
-		P = 3;
+		nameMatrix = "rel3";
+		P = 4;
 		Epsilon = 0.03;
 		Location_matrix = "matrix/" + nameMatrix + ".mtx";
 	}
@@ -84,7 +85,7 @@ int main(int argc, char* argv[])
 	int nnz = A.nnz;
 	int m = A.M;
 	int n = A.N;
-	int no_nets = m + n; // no nets (that contain only at least one nonzero)
+	int no_nets = m + n; // no. nets that contain at least one nonzero.
 	int no_net_var = no_nets * P; //Number of net variables
 	int no_nnz_var = P * nnz;   //Number of nonzeros variables
 
@@ -126,7 +127,7 @@ int main(int argc, char* argv[])
 	}
 	
 	//Add the Load balance constraints, every part may contain at maximum "Max_size" nonzeros.
-	//So p constraints.
+	//So P constraints.
 	for (int i = 0; i < P; i++) {
 
 		IloExpr loadbal(env);
@@ -140,7 +141,7 @@ int main(int argc, char* argv[])
 	}
 
 
-	//Symmetry assignment nonzeros. 
+	//Symmetry in assignment of the nonzeros: 
 	//Every partition has p! equivalent ones including itself, to remove some symmetry we fix the first nonzero.
 	//nonzero 0 is assigned to proc 0.
 	//Now every partition has (p-1)! equivalent ones including itself
@@ -193,15 +194,11 @@ int main(int argc, char* argv[])
 	end = clock();
 
 
-	
-
-	
-
 	//Get the optimal value of the objective function found by the solver.
 	//We round the optimal value, although the objective value should be an integer, 
-	//due to round off errors  e.g. by the computer a integer value can deviate from its integer value by very small amounts e.g.  with 2 e-16.
+	//due to round off errors  e.g. by the computer a integer value can deviate from its integer value by very small amounts e.g.  with 2*e-16.
 	//Other option to solve this problem is  by setting the parameter EPINT to 0 (default value is 1e-5). The parameter Epint specifies the amount by which an computed solution value 
-	//for an integer variable can violate its integrality requirement. But setting Epint to 0 can possibly result in performance issues. 
+	//for an integer variable can violate its integrality requirement. But setting Epint to 0 can possibly result in performance issues. Also it may be impossible to achieve a tolerance of 0 do to finite precision floating point computattions.
 	//	solver.setParam(IloCplex::Param::MIP::Tolerances::Integrality, 0);  << settig Epint to 0.
 
 	int OPt_val = round( solver.getObjValue() );
@@ -215,25 +212,20 @@ int main(int argc, char* argv[])
 	double time_taken = double(end - start) / double(CLOCKS_PER_SEC);
 
 
-	
-
 	//Check if found solution is indeed optimal.
 	if (solver.getStatus() != IloAlgorithm::Optimal) {
-		std::cerr << "ERROR: Objective value found is not optimal!";
+		std::cerr << "\n"<< "ERROR: Objective value found is not optimal!";
 	}
 
-
-
-	
 
 	//File to store the partitioned matrix in matrix market format
 	std::ofstream output_NZ;
 	//name of file
-	std::string filename_output = "p=" + std::to_string(P) + " " + nameMatrix + ", OUT.txt";
+	std::string filename_output =  nameMatrix + ".mtx-I" + std::to_string(P);
 
 	output_NZ.open(filename_output, std::ios::out | std::ios::app);
 	
-	output_NZ << "%%MatrixMarket matrix coordinate general integer" << "\n";
+	output_NZ << "%%MatrixMarket matrix coordinate integer general" << "\n";
 	output_NZ << "% Matrix partitioned into p=" << P << " parts." << "\n";
 	output_NZ << "% Max. allowed partition size was: " << Max_size << "." << "\n";
 	output_NZ << "% Optimal communication volume is: " << OPt_val << " with status "<< solver.getStatus() << "." << "\n";
@@ -256,7 +248,7 @@ int main(int argc, char* argv[])
 		for (int j = 0; j < P; j++) {
 
 			ind_nz = i + nnz * j;
-			IloBool antwrd = solver.getIntValue(nonzeros[ind_nz]);  //get INT value: the Int is important otherwise variable can be e.g. 2 e-16 due to round off errors.
+			IloBool antwrd = solver.getIntValue(nonzeros[ind_nz]);  //get INT value: the Int is important otherwise variable can be e.g. 2*e-16 due to round off errors.
 
 			if (antwrd) {
 				part_sizes[j] ++;
@@ -291,7 +283,7 @@ int main(int argc, char* argv[])
 			if (antwrd) {
 				assigned++;
 
-				output_NZ << j << "\n";
+				output_NZ << j+1 << "\n";
 
 				rowcol_values[entries.first][j] = 1;
 				rowcol_values[(entries.second + A.og_M)][j] = 1;
@@ -301,16 +293,15 @@ int main(int argc, char* argv[])
 		}
 		
 		if (assigned != 1) {
-			std::cerr << "ERROR: a nonzero is assigned to multiple or no processors.";
+			std::cerr << "ERROR: a nonzero is assigned to multiple or no processors." << "\n";
 		}
 	}
-
 
 	
 	//Check if part sizes aren't to large for the optimal solution (this shouldn't be the case).
 	for (int i = 0; i < P; i++) {
 		if ( part_sizes[i] > Max_size) {
-			std::cerr << "ERROR: Partition size of proc: " << i << " is too large";
+			std::cerr << "ERROR: Partition size of proc: " << i << " is too large"<< "\n";
 		}
 	}
 
@@ -318,15 +309,12 @@ int main(int argc, char* argv[])
 	int expected_opt_value = LowerBound1(rowcol_values);
 	if (expected_opt_value != OPt_val) {
 		
-		std::cerr << "ERROR: Optimal value is possibly not optimal.";
+		std::cerr << "ERROR: Optimal value is possibly not optimal."<< "\n";
 	}
 
 	output_NZ.close();
-	
 
 	//Close the model, free the allocated memory
 	//solver.clear();
 	env.end();
 }
-
-

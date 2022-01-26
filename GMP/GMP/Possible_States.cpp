@@ -910,6 +910,8 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
               }
           }
 
+          //If there are >2 processors, then an unassigned rowcol can also be partially assigned to 2 processors.
+          //Adjust the values of the partial states of these rowcols.
           if (Processors > 2) {
               if (L2_bound_intersectrc == 1 && sum_1Proc_Partial_status == 2) {
                   std::vector<bool> v(Processors, 0);
@@ -929,10 +931,7 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
           }
         }
         
-        //Now update color_count and Partition sizes.
-
-        //Now update color_count  for the intersect rowcol, this needs to be done  both if the intersect rowcol is already assigned
-        // and if it is not yet assigned.
+        //Now update Partition sizes.
 
         //If the state of the nz where the rowcol and the intersceting rowcol intersect doesn't change
         //colour_count for both the rowcol and intersect rowcol stay the same.
@@ -1000,22 +999,12 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
   }
 
   int lowerbound = LB ;
- int GL4 = 0;
+  int GL4 = 0;
   if (GL4_on) {
       GL4 = BFS_Global_L4(Value_Partial_status,  A,  Partition_size, lowerbound, The_States, Packing_Sets2, color_count);
   }
 
-
-
-  int probeer = 0;
-//probeer=BFS2_Global_L4(bigraph.Match,bigraph.no_Matched, Value_Partial_status, A->M, A->N, A);
-
-
-
- 
-  //Determine max of L3 , L4, and sum(GL4+GL3) bound
- 
-   
+  //Determine max of L3 , L5, and sum(GL4+ max(GL3, L3))=GL5 bound
   if(L3a >= new_L4 && L3a >= GL4) {
       max_L3_L4 = L3a;
   }
@@ -1027,10 +1016,6 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
 
   }
 
-
-  //Adjust the old L3/L4 bound
-
-  
   LB += max_L3_L4;
  
     return std::make_tuple(Vector_Freenz, Partition_size, color_count, LB, Partial_Status_rowcols, Packing_Sets2, max_L3_L4, Value_Partial_status, bigraph);

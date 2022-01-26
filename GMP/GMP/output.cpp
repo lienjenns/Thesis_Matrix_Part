@@ -33,7 +33,7 @@ output_NZ.open(filename_output, std::ios::out | std::ios::app);
 	std::vector<std::tuple<int, int, int>> Solution;
 	//Print some information about the matrix, number of processors and the sollution.
 
-	output_NZ << "%%MatrixMarket matrix coordinate general integer" << "\n";
+	output_NZ << "%%MatrixMarket matrix coordinate integer general" << "\n";
 	output_NZ << "% Matrix partitioned into p=" << Processors << " parts." << "\n";
 	output_NZ << "% Max. allowed partition size was: " << Max_Partition_size << "."<<"\n";
 	output_NZ << "% Optimal communication volume is: " << Lowest_cv_sofar << "." << "\n";

@@ -102,7 +102,7 @@ std::vector<std::pair<int, std::vector<bool>>> L2bound(std::vector<bool> Status_
             no_least_ones = no_ones;
 
         }
-        //If we find a state with only 1 oene, there will not be a state with a lower number of ones, so break.
+        //If we find a state with only 1 one, there will not be a state with a lower number of ones, so break.
         if (no_least_ones == 1) {
             break;
         }

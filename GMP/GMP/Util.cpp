@@ -83,7 +83,7 @@ std::set<std::vector<bool>> States( int start, std::vector<bool> Different_State
 //Function that determines the maximum partition size 
 int Load_Balance(int nnz) {
     int Max_part_size;
-    Max_part_size = (1 + Epsilon) * ceil((float)nnz / (float)Processors); //gaat goed rond t naar beneden af ook als bv 4.8 dan max parititon size 4 moet k nog floor en dan int? ToDo
+    Max_part_size = floor ( (1 + Epsilon) * ceil((float)nnz / (float)Processors) ); 
 
     if ((Processors * Max_part_size) < nnz) {
 

@@ -1,5 +1,4 @@
-// code ordenen.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+
 #include "./input.h"
 #include "./matrix.h"
 #include "./Possible_States.h"
@@ -22,31 +21,25 @@
 
 
 
-//Initialize some of the exertnal variables of Global.h.
-
-//Give the number of Processsors
+//Define some of the exetrnal variables of Global.h.
 int Processors;
-
-//Give the value of Epsilon 3% load imbalance means Epsilon=0.03
 double Epsilon;
-
-//Give the name of the matrix you want to partition.
 std::string nameMatrix;
 std::string filename_Sol_info;
 std::string Location_matrix;
 int no_tobeAssigned;
 int length_path;
 
-//Initial value for some other external variables of Global.h
 std::vector<bool> Zero_State;
 std::vector<bool> AllProc_State;
 
 
-//Define some of the exetrnal variables of Global.h.
 std::set<std::vector<bool>> AllStates;
 int Max_Partition_size;
 std::vector <std::vector<bool>>Index_and_Status;
 std::set<int> Indices_2proc_states;
+
+//Initial value for some other external variables of Global.h/Possible_States.h
 int UB=1;
 int Overall_LB=0;
 int Lowest_cv_sofar= -1;
@@ -65,7 +58,7 @@ bool GL4_on = 1;
 bool GL3_on = 1;
 //Do we want to use the iterative deepening UB?
 bool Iterative_UB=1;
-//Do we want to use the overall LB, is only ussed when the iterative deepening UB is used?
+//Do we want to use the overall LB, (is only used when the iterative deepening UB is used) ?
 bool Overall_LB_on = 1;
 
 
@@ -77,7 +70,7 @@ int main(int argc, char* argv[])
 {
     if (argc < 2) {
         nameMatrix ="b1_ss";
-        Processors =2;
+        Processors =3;
         Epsilon = 0.03;
         Location_matrix = "matrix/" + nameMatrix + ".mtx";
     }
@@ -92,7 +85,7 @@ int main(int argc, char* argv[])
     }
     filename_Sol_info = "p=" + std::to_string(Processors) + " " + nameMatrix + ".txt";
 
-    std::cout << nameMatrix<<"\n";
+    
 
     Zero_State = std::vector<bool>(Processors, 0);
     AllProc_State = std::vector<bool>(Processors, 1);
@@ -100,13 +93,14 @@ int main(int argc, char* argv[])
     clock_t start, end;
     start = clock();
 
-
+    std::cout << nameMatrix<<"\n";
     //Prints the number of processors and the chosen value of Epsilon.
     std::cout << "Number of Processors: " << Processors <<"  Value epsilon : "<< Epsilon<< "\n";
 
     //Give the name of the mtx or txt file ToDo (now enetr name in r.42)
   
     matrix A(Read_From_File(Location_matrix));
+  
 
     matrix* pointA;
     pointA = &A;
@@ -139,6 +133,7 @@ int main(int argc, char* argv[])
     std::cout << "Max partition size: " << Max_Partition_size << "\n";
     Solution_and_info << "Max partition size: " << Max_Partition_size << "\n"<<"Start partitioning:"<< "\n"<< std::flush;
 
+    //Determine the value of Cmax.
    int b=A.Determine_Cmax();
    
    //Below the order of the rows and columns is determined:
@@ -152,16 +147,17 @@ int main(int argc, char* argv[])
 
 
 
-   //The length of the vector that contans the order of rowcols is needed for the "Partition"function.
-   //Note this length can be smaller than m+n because some rowcols may not contain any nonzeros.
+   //The length of the vector that contains the order of rowcols is needed for the "Partition"function.
+   //Note this length can be smaller than m+n because some rowcols may not contain any nonzeros. (All 3 sizes should be the same)
    int size_order1 = order1.size();
    int size_order2 = order2.size();
    int size_order3 = order3.size();
 
 
    no_tobeAssigned = size_order1;
+
    //The starting "Partition" is made.
-   //Every rowcol is not yet assigned a status so the state of every rowcol is (0,..0,).
+   //Every rowcol is not yet assigned a status, so the state of every rowcol is (0,..0,).
    std::vector<bool > bs(Processors,0);
    std::vector<std::vector<bool>> TheState(A.M+A.N,bs);
   
@@ -176,8 +172,6 @@ int main(int argc, char* argv[])
   //Initial container values for L2bound, 
   std::vector<bool> initial_Partstat(options, 0);
   std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols((pointA -> M + pointA ->N), std::make_pair(0, initial_Partstat));  
-
-
 
 
   //Initialize (improved) packing set for L3 bound;
@@ -197,7 +191,7 @@ int main(int argc, char* argv[])
   //Initialize LB3bound at zero
   int max_pack_match = 0;
 
-
+  //Initialize the object of the class that contains the ifo over the symmetry during the partitioning.
   Symmetry_processors Symm = Symmetry_processors();
 
   //Initialize the bipartite graph necessary for the local L4 bound
@@ -266,8 +260,7 @@ int main(int argc, char* argv[])
    //Close the file with all information about the partitioning of this  matrix
    Solution_and_info.close();
 
-
-
+   //Make the output file of the partitioned matrix with the assignement of each nonzero.
     output_States_nzs(A);
 }
 

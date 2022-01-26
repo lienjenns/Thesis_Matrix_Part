@@ -1,74 +1,12 @@
-﻿  Lower_bounds.cpp
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Lower_bounds.cpp(25,27): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Lower_bounds.cpp(58,17): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Lower_bounds.cpp(97,55): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Lower_bounds.cpp(133,19): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Lower_bounds.cpp(267,40): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Lower_bounds.cpp(268,34): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Lower_bounds.cpp(307,50): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Lower_bounds.cpp(317,50): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Lower_bounds.cpp(454,33): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Lower_bounds.cpp(542,56): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Lower_bounds.cpp(570,88): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Lower_bounds.cpp(948,61): warning C4267: '+=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Lower_bounds.cpp(1020,50): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Lower_bounds.cpp(1028,50): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-  main.cpp
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\main.cpp(157,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\main.cpp(158,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\main.cpp(159,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\main.cpp(169,16): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\main.cpp(215,22): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-  matrix.cpp
-  output.cpp
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\output.cpp(44,14): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-  Possible_States.cpp
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(28,50): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(38,30): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(61,50): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(84,30): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(92,59): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(130,30): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(149,91): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(161,89): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(222,49): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(277,43): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(292,44): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(395,36): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(403,26): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(483,67): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(523,56): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(576,56): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(595,56): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(619,56): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(681,29): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(816,114): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(901,43): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(1178,39): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(1263,63): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Possible_States.cpp(1348,28): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-  input.cpp
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\input.cpp(121,31): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\input.cpp(85,20): warning C4101: 'data': unreferenced local variable
-  Symmetry.cpp
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Symmetry.cpp(116,50): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Symmetry.cpp(159,60): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Symmetry.cpp(170,57): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-  Util.cpp
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Util.cpp(18,38): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Util.cpp(86,35): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Util.cpp(100,11): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Util.cpp(119,10): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Util.cpp(153,48): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Util.cpp(186,48): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Util.cpp(215,27): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Util.cpp(216,41): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Util.cpp(253,28): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Util.cpp(254,46): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Util.cpp(290,27): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\GMP\Util.cpp(291,41): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+﻿  main.cpp
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\GMP\GMP\main.cpp(152,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\GMP\GMP\main.cpp(153,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\GMP\GMP\main.cpp(154,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\GMP\GMP\main.cpp(165,16): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\GMP\GMP\main.cpp(209,22): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
   Generating code
-  Previous IPDB not found, fall back to full compilation.
-  All 1849 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  1 of 1849 functions (<0.1%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    2 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
-  GMP.vcxproj -> C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\The_Matrix_Partitioner\code ordenen\x64\Release\GMP.exe
+  GMP.vcxproj -> C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\GMP\x64\Release\GMP.exe
