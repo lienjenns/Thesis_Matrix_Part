@@ -63,7 +63,7 @@ After the comments for every nonzero (a_ij) the location and  the binary index o
 So the file has the folowing form:
 
 ```
-%%MatrixMarket matrix coordinate general integer
+%%MatrixMarket matrix coordinate integer general
 % Matrix partitioned into p="..." parts.
 % Max. allowed partition size was: "..." 
 % Optimal communication volume is: "..."
