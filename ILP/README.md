@@ -40,16 +40,16 @@ After the ouput of the cplex proram we print the optimal comunication volume and
 
 # Output file:
 
-The partitioned matrix in matrix market format is given in the file p="#processors" "matrix", OUT.txt, where #processors and matrix are input variables.
+The partitioned matrix in matrix market format is given in the file  "matrix".mtx-I"#processors", where #processors and matrix are input variables.
 In the comments of this file the value of p, the maximum allowed size of a part, the found optimal communication volume and the status of the found communciation volume are mentioned.
 If CPLEX determined the optimal communciation volume the status should be "Optimal".
-Additionally, for each processor the number of nonzeros owned by that processor are mentioned in order of the processors.
-For example, if p=3, and the file states "Size of different parts: 3 5 4 ", it means that processor 0 owns 3 nonzeros, processor 1 owns 5 nonzeros and processor 2 owns 4 nonzeros.
+Additionally, for each processor the number of nonzeros owned by that processor are mentioned in order of the processors. 
+For example, if p=3, and the file states "Size of different parts: 3 5 4 ", it means that processor 1 owns 3 nonzeros, processor 2 owns 5 nonzeros and processor 3 owns 4 nonzeros.
 After the comments for every nonzero (a_ij), the location and the processor to which it is assigned is mentioned.
 So the file has the folowing form:
 
 ```
-%%MatrixMarket matrix coordinate general integer
+%%MatrixMarket matrix coordinate integer general
 % Matrix partitioned into p="..." parts.
 % Max. allowed partition size was: "..." 
 % Optimal communication volume is: "..."  with status " ..." .
