@@ -253,6 +253,8 @@ int L3bound_improved(std::array<std::vector<std::vector<int>>, 2> &Packing_Sets,
 //}
 
 
+/*
+
 // This function updates the graph after assigning rowcol "rc_i" a state.
 void Bi_Graph::Set_rowcol(int rc_i, std::vector <int> add_rc, std::vector<int> remove_rc,  matrix * info, std::vector<int> PartialStatus,
  std::vector<int> Partition_Size, std::array<std::vector<std::vector<int>>, 2>  Packing_Sets2, std::vector<std::vector<int>> &color_count ) {  
@@ -546,7 +548,7 @@ void Bi_Graph::remove_vertex(int rc_i, int* M, int* N) {
         Augment_Path(Previous_matches_to_i[i]);
     }
 }
-
+*/
 
 //This function determines the Gobal L3 bound, given the global packingsets and the sizes of every part.
 int Compute_value_GL3(std::vector<std::vector<int>> &Global_PackingSets, std::vector<int> Partition_sizes) {
@@ -712,6 +714,8 @@ int GL3_bound(std::vector<bool> Matched_GL4, std::vector<bool> visited_GL4, std:
     return GL3;
 }
 
+
+/*
 //Function that determines the Global L4 bond, tries to find paths form  partially assigned rowcols to other different partially assigned rowcols.
 //After detrmining the GL4 bound it computes (after removing the paths used in the GL4 bound), the L3  and GL3 bound and adds the maximum of these two to the gL4 bound
 int BFS_Global_L4( std::vector<int> Partial_Status,  matrix * A, std::vector<int> Partition_Size, int lowerbound, 
@@ -1058,5 +1062,568 @@ int BFS_Global_L4( std::vector<int> Partial_Status,  matrix * A, std::vector<int
 }
 
 
+*/
+
+// This function updates the graph after assigning rowcol "rc_i" a state.
+void Bi_Graph_FIX::Set_rowcol(int rc_i, std::vector <int> add_rc, std::vector<int> remove_rc, matrix* info, std::vector<int> PartialStatus,
+    std::vector<int> Partition_Size, std::array<std::vector<std::vector<int>>, 2>  Packing_Sets2, std::vector<std::vector<int>>& color_count) {
 
 
+    if (In_graph[rc_i] == 1) {
+        remove_vertex(rc_i, &(info->M), &(info->N));
+    }
+
+    int no_to_remove = remove_rc.size();
+    int no_to_add = add_rc.size();
+
+
+    for (int j = 0; j < no_to_remove; j++) {
+
+        int rcj = remove_rc[j];
+
+        if (In_graph[rcj] == 1) {
+
+            remove_vertex(rcj, &(info->M), &(info->N));
+
+        }
+    }
+
+    for (int i = 0; i < no_to_add; i++) {
+
+        int rck = add_rc[i];
+
+        if (In_graph[rck] == 0) {
+
+
+            add_vertex(rck, info->Intersecting_RowCol(rck), &(info->M), &(info->N), PartialStatus);
+
+        }
+    }
+
+
+    if (CombL3_L4) {
+
+        for (int k = 0; k < (info->M + info->N); k++) {
+
+
+            if (Match[k] != k) {
+
+                //If the rowcol=row.
+                if (k < (info->M)) {
+                    int index_packingset = PartialStatus[k];
+                    int index_partial_status = pow(2, index_packingset) - 1;
+
+                    int no_nz = info->perRow_Col[k] - color_count[index_partial_status][k];
+                    Packing_Sets2[0][index_packingset][no_nz] -= 1;
+                }
+
+                //If the  rowcol=column.
+                else {
+
+                    int index_packingset = PartialStatus[k];
+                    int index_partial_status = pow(2, index_packingset) - 1;
+
+                    int no_nz = info->perRow_Col[k] - color_count[index_partial_status][k];
+                    Packing_Sets2[1][index_packingset][no_nz] -= 1;
+                }
+
+
+            }
+
+        }
+
+        L4_combL3 = L3bound_improved(Packing_Sets2, Partition_Size, info);
+
+    }
+
+
+
+}
+
+
+//Constructor of the bipartite graph. 
+Bi_Graph_FIX::Bi_Graph_FIX(int* x, int* y) {
+
+    adj.resize(*x + *y);
+    In_graph.resize(*x + *y);
+    Match.resize(*x + *y);
+
+    //Initialize Match vector, ie. match[i]=i.
+    std::iota(Match.begin(), Match.end(), 0);
+
+    no_Matched = 0;
+    L4_combL3 = 0;
+    Max_V = *x + *y;
+}
+
+//Function that determines if there is an augmenting path for vertex v_i, given the current matching in the Bi_Graph.
+void Bi_Graph_FIX::Augment_Path(int v_i) {
+
+    if (Match[v_i] != v_i) {
+        std::cout << "al gematched";
+
+    }
+
+    // Will be set to 1 when augmented path is found
+    bool augm = 0;
+
+    //Vector used to store vertices
+    std::vector<int> queue;
+
+    //Vector used to see if a vertex is visited in the BFS tree, initialized as false.
+    std::vector<bool> visited(Max_V, 0);
+
+    //Vector that stores the parent of a vertex i the BFS tree, starts at -1 to indicate that no vertex has a parent in bfs.
+    // -1 indicates that a veretx has no parent in the BFS tree.
+    std::vector<int> parent(Max_V, -1);
+
+    int v_k, match_k;
+    int v_j, old_match_j;
+    int v_l;
+
+    queue.push_back(v_i);
+    visited[v_i] = 1;
+
+    while (augm == 0 && !queue.empty()) {
+
+        v_j = queue.front();
+        queue.erase(queue.begin(), queue.begin() + 1);
+
+        for (auto l = adj[v_j].begin(); l != adj[v_j].end(); l++) {
+
+            v_k = *l;
+
+            if (visited[v_k] == 1) {
+                continue;
+            }
+
+            else {
+                //v_k unmatched, so match v_k! 
+                //We have found and augmenting path.
+                if (Match[v_k] == v_k) {
+
+                    parent[v_k] = v_j;
+
+                    visited[v_k] = 1; //Niet perse nodig kan voor volledigheid
+
+                    //v_k will be mathched to v_j
+                    Match[v_k] = v_j;
+
+
+                    while (v_j != v_i) {
+
+                        old_match_j = Match[v_j];
+                        Match[v_j] = v_k;
+                        v_l = parent[old_match_j];
+
+                        Match[old_match_j] = v_l;
+
+                        v_j = v_l;
+                        v_k = old_match_j;
+
+
+                    }
+
+                    Match[v_i] = v_k; //v_i van gemaakt was eerst v_j maakt niet uit als goed is
+                    no_Matched += 1;
+                    augm = 1;
+
+                    break;
+
+
+                }
+
+                //If v_k is alrady matched, extend the BFS tree
+                else {
+                    match_k = Match[v_k];
+                    parent[v_k] = v_j;
+                    parent[match_k] = v_k;
+
+                    visited[v_k] = 1;
+                    visited[match_k] = 1;
+
+                    queue.push_back(match_k);
+                }
+
+            }
+        }
+    }
+}
+
+//This function adds the  vertex corresponding to rowcol "rc_i" to the graph.
+void Bi_Graph_FIX::add_vertex(int rc_i, std::vector<int> intersect_rc, int* M, int* N, std::vector<int> PartialStatus) {
+
+    //rowcol i is now in the graph
+    In_graph[rc_i] = 1;
+
+
+    int no = intersect_rc.size();
+
+    //Traverse all rowcols that intersect rowcol "rc_i".
+    for (int j = 0; j < no; j++) {
+
+        int k = intersect_rc[j];
+
+        //If rowcol k is in the graph && has an other partial status then rowcol rc_i, add rowcol k to the adjacency list of rowcol rc_i , 
+        //and vice-versa.
+        if (In_graph[k] == 1 && PartialStatus[k] > -1 && PartialStatus[rc_i] != PartialStatus[k]) {
+
+            adj[k].push_back(rc_i);
+            adj[rc_i].push_back(k);
+        }
+    }
+
+
+    //Now we check if can find an augemneting path starting in the rowcol we just added to the graph (rc_i).
+    Augment_Path(rc_i);
+}
+
+//This function removes the vertex corresponding to rowcol "rc_i" to the graph.
+void Bi_Graph_FIX::remove_vertex(int rc_i, int* M, int* N) {
+
+    //The possible match of rowcol rc_i:
+    int Previous_match_i;
+    //rowcol rc_i is no longer in the graph.
+    In_graph[rc_i] = 0;
+
+    //Remove rc_i from the adjacency lists
+    for (auto l = adj[rc_i].begin(); l != adj[rc_i].end(); l++) {
+
+        int vertex_k = *l;
+
+
+        std::vector<int>::iterator it;
+        it = std::find(adj[vertex_k].begin(), adj[vertex_k].end(), rc_i);
+
+        if (it != adj[vertex_k].end()) {
+
+            adj[vertex_k].erase(it);
+        }
+    }
+
+    //Now remove the adjacency list of the  vertex rc_i.
+    adj[rc_i].erase(adj[rc_i].begin(), adj[rc_i].end());
+
+    //Check if rc_i was matched
+    if (Match[rc_i] != rc_i) {
+
+        Previous_match_i = Match[rc_i];
+
+        //Reset the matches of rc_i
+        Match[Previous_match_i] = Previous_match_i;
+        Match[rc_i] = rc_i;
+        no_Matched--;
+
+        //We need to check for the vertex previous_match_i that was previously matched to rowcol rc_i, if there is an augmenting path starting at this vertex.
+        Augment_Path(Previous_match_i);
+
+    }
+
+}
+
+
+
+
+
+//Function that determines the Global L4 bond, tries to find a path form  partially assigned rowcols to another different partially assigned rowcol.
+//After detrmining the GL4 bound it computes (after removing the paths used in the GL4 bound), the L3  and GL3 bound and adds the maximum of these two to the gL4 bound
+int BFS_Global_L4_Fix(std::vector<int> Partial_Status, matrix* A, std::vector<int> Partition_Size, int lowerbound,
+    std::vector<std::vector<bool>> states, std::array<std::vector<std::vector<int>>, 2> Packing_Sets2, std::vector<std::vector<int>>& color_count) {
+
+    //Total number of matches found by the Global L4 bound.
+    int GL4_bound = 0;
+
+    //vector used to see if a vertex is visited
+    std::vector<bool> visited((A->M + A->N), 0);
+
+
+    //Keeps track which partilly assigned vertices are matched.
+    //This info is also needed for the GL3 bound.
+    std::vector<bool>Matched((A->M + A->N), 0);
+
+    //Sort the rowcols, to make sure we first try to find matching path with the start and end point being rowcols partially assigned to 1 processor,
+    //and then traverse the rowcols partially assigned to 2 processors.
+    std::vector<int> order((A->M + A->N));
+    std::iota(order.begin(), order.end(), 0); //Initializing
+    std::sort(order.begin(), order.end(), [&Partial_Status](int i, int j) {return ((Partial_Status[i] >= 0) && (Partial_Status[j] < 0)); });
+
+
+    //Traverse all rowcols
+    for (auto rowcol = order.begin(); rowcol != order.end(); rowcol++) {
+
+        int v_i = *rowcol;
+
+
+        //If v_i is assigned, partially assigned different than partialy assigned to 1 or 2 processors, unassigned
+        //,or if v_i is already matched with a rowcol ;
+        //Then we can find no path that results in a match for v_i.
+        if (Partial_Status[v_i] == -3 || Partial_Status[v_i] == -7 || Partial_Status[v_i] == -1 || Matched[v_i] == 1) {
+            continue;
+        }
+
+        //These 3 vectors are used to free unassigned nodes used in the path finding "bfs" that do not lead to a match.
+        std::vector<bool> Succesfull_Child((A->M + A->N), 0); //1 if node i is unassigned and is on a path that gives a match.
+        std::vector<int> parent((A->M + A->N), -1); //keeps track of the parent of node i
+        std::vector<int> Newly_visited; //Newly_visited contains the unassigned nodes that are visited during the bfs from veretx v_i.
+
+        //vector used to store vertices
+        std::vector<int> queue;
+        queue.push_back(v_i);
+
+        //Number of new matches we find for v_i.
+        int new_matches_vi = 0;
+
+        //The following integers are used to keep track of length op path from vertex v_i in path finding "bfs".
+        //We only look at path with a maximum length equal to length_path.
+        int level = 0;
+        int x = 1;      //The number of nodes on the previous level.
+        int x_new = 0; //counts the number of nodes on this level
+        int y = 0;      //Counts the number of nodes of the previous level we have already branched from 
+
+        //Try to find a path from vertex v_i that ends in a vertex with different partial status then node v_i.
+        //If vertex v_i is partially assigned to 1 processor.
+        if (Partial_Status[v_i] >= 0) {
+
+            while (level != length_path && !queue.empty()) {
+
+                int v_j = queue.front();
+                queue.erase(queue.begin(), queue.begin() + 1);
+                y += 1;
+
+                std::vector<int> intersect_rowcols = A->Intersecting_RowCol(v_j);
+
+                //Traverse all rowcols that intersect with rowcol v_j.
+                for (auto i = intersect_rowcols.begin(); i != intersect_rowcols.end(); i++) {
+
+                    int v_k = *i;
+
+                    //If v_k, is assigned or partially assigned different than to 1 proc., if v_k is partially assigend to the same processor as v_i
+                    //or v_k is unassigned but already visited, or v_k is already matched to a rowcol.
+                    //Then we cannot match v_k or use this vertex on a matching path.
+                    if (Partial_Status[v_k] < -1 || Partial_Status[v_k] == Partial_Status[v_i] || visited[v_k] == 1 || Matched[v_k] == 1) {
+                        continue;
+                    }
+
+                    //Else the vertex v_k is unassigned, i.e. partial status =-1, or the vertex v_k is partially assigned to a  different processor/color 
+                    //than the partial assignment of v_i.
+                    else {
+                        //If v_k is partially assigned to a processor/color different from the partial assignment of v_i, MATCH!
+                        if (Partial_Status[v_k] != -1) {
+
+                            Matched[v_i] = 1;
+                            Matched[v_k] = 1;
+
+                            new_matches_vi += 1;
+                            parent[v_k] = v_j;
+                            Succesfull_Child[v_j] = 1;
+                            int v_l = v_j;
+
+                            while (v_l != v_i) {
+
+                                v_l = parent[v_l];
+                                Succesfull_Child[v_l] = 1;
+                            }
+                        }
+
+                        //Else vertex v_k is unassigned.
+                        else {
+
+                            queue.push_back(v_k);
+                            visited[v_k] = 1;
+                            parent[v_k] = v_j;
+                            Newly_visited.push_back(v_k);
+                            x_new += 1;
+                        }
+                    }
+
+                    if (Matched[v_i] == 1) {
+                        break;
+                    }
+                }
+
+                if (y == x) {
+                    level += 1;
+                    x = x_new;
+                    x_new = 0;
+                    y = 0;
+                }
+
+                if (Matched[v_i] == 1) {
+                    break;
+                }
+            }
+        }
+        //If v_i is partially assigned to 2 processors, so partial state is -2, -4, -5, -6, -8 or lower
+        else if (Partial_Status[v_i] == -2 || (Partial_Status[v_i] < -3 && Partial_Status[v_i] != -7)) {  //else if so we don't have to do unnecessary computations if a rowol is partially assigend to 1 proc.
+            int  binair_index_vi = -Partial_Status[v_i];
+            std::vector<bool> Part_state_vi = Index_and_Status[binair_index_vi];
+            std::vector<int> procs_vi = Determine_Set_indices(Part_state_vi);
+            std::sort(procs_vi.begin(), procs_vi.end());
+
+            while (level != length_path && !queue.empty()) {
+
+                int v_j = queue.front();
+                queue.erase(queue.begin(), queue.begin() + 1);
+                y += 1;
+
+                std::vector<int> intersect_rowcols = A->Intersecting_RowCol(v_j);
+
+                //Traverse all rowcols that intersect with rowcol v_j.
+                for (auto i = intersect_rowcols.begin(); i != intersect_rowcols.end(); i++) {
+
+                    int v_k = *i;
+
+                    //If v_k is assigned or partially assigned but not partially assigned to one or two processors then v_k cannot be on a matching path, so we skip v_k.
+                    if (Partial_Status[v_k] == -3 || Partial_Status[v_k] == -7) {
+                        continue;
+                    }
+
+                    std::vector<bool> Part_state_vk;
+                    std::vector<int> procs_vk;
+
+                    //If v_k partially assigned, determine the processors to which it is partially assigned
+                    if (Partial_Status[v_k] < -1) {
+                        int binair_index_vk = -Partial_Status[v_k];
+                        Part_state_vk = Index_and_Status[binair_index_vk];
+                        procs_vk = Determine_Set_indices(Part_state_vk);
+                    }
+                    else if (Partial_Status[v_k] > -1) {
+                        procs_vk.push_back(Partial_Status[v_k]);
+                    }
+                    else {}
+
+                    std::sort(procs_vk.begin(), procs_vk.end());
+
+
+                    //Determine if v_i and v_k "share "a processor, i.e. both partial assigend rowcols  are assigned to the same processor(s).
+                    std::vector<int> intersect_procs;
+                    std::set_intersection(procs_vi.begin(), procs_vi.end(), procs_vk.begin(), procs_vk.end(), std::back_inserter(intersect_procs));
+
+                    //If v_k contains a processor of v_i, or v_k unassigend but visited, or v_k is already matched.
+                    //Then we cannot use v_k on matching path from v_i.
+                    if (intersect_procs.size() != 0 || visited[v_k] == 1 || Matched[v_k] == 1) {
+                        continue;
+                    }
+
+
+                    //Else the vertex v_k is unassigned  i.e. partial status =-1, and not visited, 
+                    //or the vertex v_k is NOT matched and its partial assignments to one or two processors/color is different than the partial assignment of vertex v_i.
+                    else {
+                        //If v_k is partially assigned to one or two processors/color different than the partial assignment of vertex v_i, MATCH!
+                        if (Partial_Status[v_k] != -1) {
+
+                            Matched[v_i] = 1;
+                            Matched[v_k] = 1;
+
+                            new_matches_vi += 1;
+                            parent[v_k] = v_j;
+                            Succesfull_Child[v_j] = 1;
+                            int v_l = v_j;
+
+                            while (v_l != v_i) {
+
+                                v_l = parent[v_l];
+                                Succesfull_Child[v_l] = 1;
+                            }
+                        }
+
+                        //Else vertex v_k is unassigned.
+                        else {
+
+                            queue.push_back(v_k);
+                            visited[v_k] = 1;
+                            parent[v_k] = v_j;
+                            Newly_visited.push_back(v_k);
+                            x_new += 1;
+                        }
+                    }
+
+                    if (Matched[v_i] == 1) {
+                        break;
+                    }
+                }
+
+                if (y == x) {
+                    level += 1;
+                    x = x_new;
+                    x_new = 0;
+                    y = 0;
+                }
+
+                if (Matched[v_i] == 1) {
+                    break;
+                }
+            }
+        }
+
+
+
+
+
+        //Before we will branch from the next v_i, free all unassigned vertices that were visited, but are not on a "matching" path.
+        for (auto i = Newly_visited.begin(); i != Newly_visited.end(); i++) {
+
+            if (Succesfull_Child[*i] != 1) {
+                visited[*i] = 0;
+            }
+        }
+        //Add the number of new matches of v_i to the GL4 bound.
+        GL4_bound += new_matches_vi;
+    }
+    // End determining GL4 bound
+
+    //If LB+GL4 > = UB then we can return GL4 bound, this partial solution will not improve upon UB
+    //else compute L3 and/or GL3.
+    int LB_now = lowerbound + GL4_bound;
+
+    if (LB_now < UB) {
+
+        //Adjust the packingsets, if a rowcol is matched in GL4 it cannot be used in the local packing bound L3
+        //So set the packingset of this rowcol to 0.
+        for (int l = 0; l < (A->M + A->N); l++) {
+
+            if (Matched[l] == 1) {
+
+                if (Partial_Status[l] >= 0) {
+                    if (l < A->M) {
+                        int index_packingset = Partial_Status[l];
+                        int index_partial_status = pow(2, index_packingset) - 1;
+
+                        int no_nz = A->perRow_Col[l] - color_count[index_partial_status][l];
+                        Packing_Sets2[0][index_packingset][no_nz] -= 1;
+
+                    }
+                    else {
+                        int index_packingset = Partial_Status[l];
+                        int index_partial_status = pow(2, index_packingset) - 1;
+
+                        int no_nz = A->perRow_Col[l] - color_count[index_partial_status][l];
+                        Packing_Sets2[1][index_packingset][no_nz] -= 1;
+
+                    }
+
+                }
+            }
+
+        }
+
+        int comboL3 = L3bound_improved(Packing_Sets2, Partition_Size, A);
+
+        if ((LB_now + comboL3) >= UB) {
+            GL4_bound += comboL3;
+            return GL4_bound;
+        }
+
+        if (GL3_on) {
+
+            int GL3 = GL3_bound(Matched, visited, Partial_Status, A, Partition_Size, states);
+
+            int max3 = std::max(comboL3, GL3);
+
+            GL4_bound += max3;
+        }
+    }
+
+
+    return GL4_bound;
+}

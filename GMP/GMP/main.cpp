@@ -195,7 +195,7 @@ int main(int argc, char* argv[])
   Symmetry_processors Symm = Symmetry_processors();
 
   //Initialize the bipartite graph necessary for the local L4 bound
-  Bi_Graph graph(&A.M, &A.N);
+  Bi_Graph_FIX graph(&A.M, &A.N);
 
   int count_rondes = 0;
   float UB_factor = 1.25;

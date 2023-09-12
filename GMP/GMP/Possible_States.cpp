@@ -638,9 +638,9 @@ bool Check_Load_Bal(std::vector<bool> Possible_Status_rc, int rowcol, std::vecto
  //This function updates; the Partition_size, the color_count for each rowcol, 
 // the lowerbound for the partial partition given by "The_States", and the information for Lowerbound_2.
 std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, int, std::vector<std::pair<int, std::vector<bool>>> , std::array<std::vector<std::vector<int>>, 2> , int , 
-    std::vector<int>, Bi_Graph > Update(int rowcol, std::vector<bool> Status_rowcol, matrix * A, std::vector<std::vector<bool>> The_States, std::vector<int> Vector_Freenz,
+    std::vector<int>, Bi_Graph_FIX > Update(int rowcol, std::vector<bool> Status_rowcol, matrix * A, std::vector<std::vector<bool>> The_States, std::vector<int> Vector_Freenz,
     std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,int LB, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols,  
-        std::array<std::vector<std::vector<int>>, 2> Packing_Sets2, int max_L3_L4, std::vector<int>Value_Partial_status , Bi_Graph bigraph) {
+        std::array<std::vector<std::vector<int>>, 2> Packing_Sets2, int max_L3_L4, std::vector<int>Value_Partial_status , Bi_Graph_FIX bigraph) {
 
     LB -= max_L3_L4;
     //
@@ -1001,7 +1001,7 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, in
   int lowerbound = LB ;
   int GL4 = 0;
   if (GL4_on) {
-      GL4 = BFS_Global_L4(Value_Partial_status,  A,  Partition_size, lowerbound, The_States, Packing_Sets2, color_count);
+      GL4 = BFS_Global_L4_Fix(Value_Partial_status,  A,  Partition_size, lowerbound, The_States, Packing_Sets2, color_count);
   }
 
   //Determine max of L3 , L5, and sum(GL4+ max(GL3, L3))=GL5 bound
@@ -1116,7 +1116,7 @@ int Aant_aborted=0;
 void Partition(std::vector<std::vector<bool>> The_States,  std::vector<int> &Order_rows_columns,
     int a, matrix * Info, std::vector<int> Vrije_NZ, std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
     int lowerbound, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols,  std::array<std::vector<std::vector<int>>, 2> Packing_Sets2,
-    int maxval_pm, std::vector<int> value_partialstatus, Bi_Graph bigraph, Symmetry_processors Symm) {
+    int maxval_pm, std::vector<int> value_partialstatus, Bi_Graph_FIX bigraph, Symmetry_processors Symm) {
 
 
     //Open the file n which we store all new ub and corresponding partitions for the matrix
@@ -1354,7 +1354,7 @@ void Partition(std::vector<std::vector<bool>> The_States,  std::vector<int> &Ord
           
            //Update all information regarding partition_sizes and Lowerbounds.
             std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, int, std::vector<std::pair<int, std::vector<bool>>>, 
-                std::array<std::vector<std::vector<int>>, 2> ,int , std::vector<int>, Bi_Graph> updatecolor = Update(i,
+                std::array<std::vector<std::vector<int>>, 2> ,int , std::vector<int>, Bi_Graph_FIX> updatecolor = Update(i,
                     *k, Info, The_States,Vrije_NZ, Partition_size, color_count,  lowerbound, Partial_Status_rowcols,Packing_Sets2, maxval_pm, value_partialstatus ,  bigraph);
 
             //This rowcol=rowcol i, is now assigned state Chosen_State.
@@ -1371,7 +1371,7 @@ void Partition(std::vector<std::vector<bool>> The_States,  std::vector<int> &Ord
            
             int new_maxval_pm;
             std::vector<int> new_val_partstatus;
-            Bi_Graph New_bigrph(&(Info->M), &(Info->N));
+            Bi_Graph_FIX New_bigrph(&(Info->M), &(Info->N));
             std::array<std::vector<std::vector<int>>, 2> new_Packing_sets2;
             
            

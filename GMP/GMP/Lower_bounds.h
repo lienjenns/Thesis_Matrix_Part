@@ -31,6 +31,8 @@ extern std::vector<int> Info_L3;
 //that are partial one color, consequently it  only takes into account partition sizes of  single processors.
 int L3bound_improved(std::array<std::vector<std::vector<int>>, 2> &Packing_Sets, std::vector<int> &Partition_Size, matrix* A);
 
+
+/*
 //A struct that contains all the information necessary for the Local L4 bound.
 //It is essntially a bipartite graph, with a matching
 class Bi_Graph
@@ -76,13 +78,66 @@ public:
 
     
 };
+*/
 
+//A struct that contains all the information necessary for the Local L4 bound.
+//It is essntially a bipartite graph, with a matching
+class Bi_Graph_FIX
+{
+public:
+    //Adjacency list of the vertices
+    std::vector<std::vector<int>>  adj;
+
+    //This vector keeps track of which rowcols are in the graph
+    //In_graph[i]=1 means rowcol i is in the graph.
+    std::vector<bool> In_graph;
+
+
+    //Match of the vertices, if vertex i is unmatched Match[i]=[i], if i is matched to j (and j to i)
+    // then Match[i]=j & Match[j]=i;
+    std::vector<int> Match;
+
+    //Size of the matching in the bipartite graph
+    int no_Matched;
+
+    //Value of L3 bound, local packing bound, after calculation of mathcing bound l4.
+    int L4_combL3;
+
+    //Max number of vertices possible in the graph (will never happen)
+    int Max_V;
+
+
+    //Constructor Bigraph  
+    Bi_Graph_FIX(int* M, int* N);
+
+    //This function adds the vertex corresponding to rowcol "index_rc" to the graph.
+    void add_vertex(int index_rc, std::vector<int> intersect_rc, int* M, int* N, std::vector<int> PartialStatus);
+
+    //This function  removes the vertex corresponding to rowcol "rc_i" to the graph.
+    void remove_vertex(int rc_i, int* M, int* N);
+
+    //Determines if there is an augmenting path in the graph starting from vertex v_i. If this is the case the matching will increase by 1.
+    void Augment_Path(int v_i);
+
+    //This function updates the graph after assigning rowcol "rc_i" a state.
+    void Set_rowcol(int rc_i, std::vector<int> add_rc, std::vector<int> remove_rc, matrix* info, std::vector<int> PartialStatus,
+        std::vector<int> Partition_Size, std::array<std::vector<std::vector<int>>, 2>  Packing_Sets2, std::vector<std::vector<int>>& color_count);
+};
+
+
+//Function that determines the Global L4 bond, tries to find paths form  partially assigned rowcols to other different partially assigned rowcols.
+//After detrmining the GL4 bound it computes (after removing the paths used in the GL4 bound), the L3  and GL3 bound and adds the maximum of these two to the gL4 bound
+int BFS_Global_L4_Fix(std::vector<int> Partial_Status, matrix* A,
+    std::vector<int> Partition_Size, int lowerbound, std::vector<std::vector<bool>> states, std::array<std::vector<std::vector<int>>, 2> Packing_Sets2, std::vector<std::vector<int>>& color_count);
+
+/*
 
 //Function that determines the Global L4 bond, tries to find paths form  partially assigned rowcols to other different partially assigned rowcols.
 //After detrmining the GL4 bound it computes (after removing the paths used in the GL4 bound), the L3  and GL3 bound and adds the maximum of these two to the gL4 bound
 int BFS_Global_L4( std::vector<int> Partial_Status,  matrix * A,  
     std::vector<int> Partition_Size, int lowerbound, std::vector<std::vector<bool>> states, std::array<std::vector<std::vector<int>>, 2> Packing_Sets2, std::vector<std::vector<int>> &color_count);
 
+*/
 
 //Function for Global L4 bond, starts with the solution of the local L4 bound and uses bfs to find remaining matches,
 //via paths of length at maximum of length_path.

@@ -1,12 +1,12 @@
 ﻿  main.cpp
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\GMP\GMP\main.cpp(152,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\GMP\GMP\main.cpp(153,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\GMP\GMP\main.cpp(154,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\GMP\GMP\main.cpp(165,16): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\GMP\GMP\main.cpp(209,22): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\clone\Thesis_Matrix_Part\GMP\GMP\main.cpp(152,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\clone\Thesis_Matrix_Part\GMP\GMP\main.cpp(153,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\clone\Thesis_Matrix_Part\GMP\GMP\main.cpp(154,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\clone\Thesis_Matrix_Part\GMP\GMP\main.cpp(165,16): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\clone\Thesis_Matrix_Part\GMP\GMP\main.cpp(209,22): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
   Generating code
   1 of 1849 functions (<0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
     2 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
-  GMP.vcxproj -> C:\Users\E.L.Jenneskens\Documents\git\Thesis_Matrix_Part\GMP\x64\Release\GMP.exe
+  GMP.vcxproj -> C:\Users\E.L.Jenneskens\Documents\git\clone\Thesis_Matrix_Part\GMP\x64\Release\GMP.exe

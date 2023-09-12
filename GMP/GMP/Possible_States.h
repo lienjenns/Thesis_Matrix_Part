@@ -36,7 +36,7 @@ int LowerBound1(std::vector < std::vector<bool>>The_Partition);
 //This function makes the B&B tree, (DFS).
 void Partition(std::vector<std::vector<bool>> The_States, std::vector<int> &Order_rows_columns, int a, matrix * Info, std::vector<int> Vrije_NZ, std::vector<int> Partition_size, std::vector<std::vector<int>> color_count,
 	int lowerbound, std::vector<std::pair<int, std::vector<bool>>>  Partial_Status_rowcols, std::array<std::vector<std::vector<int>>, 2> Packing_Sets2,
-	int max_L4_L3, std::vector<int>Value_Partial_status, Bi_Graph bigraph, Symmetry_processors Symm);
+	int max_L4_L3, std::vector<int>Value_Partial_status, Bi_Graph_FIX bigraph, Symmetry_processors Symm);
 
 
 //This fucntion gives the number of partial partitions that were aborted, beacause LB>=UB.

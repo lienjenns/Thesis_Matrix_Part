@@ -1,0 +1,8 @@
+﻿  main.cpp
+C:\Users\E.L.Jenneskens\Documents\git\clone\Thesis_Matrix_Part\GMP\GMP\main.cpp(152,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\clone\Thesis_Matrix_Part\GMP\GMP\main.cpp(153,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\clone\Thesis_Matrix_Part\GMP\GMP\main.cpp(154,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\clone\Thesis_Matrix_Part\GMP\GMP\main.cpp(165,16): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\clone\Thesis_Matrix_Part\GMP\GMP\main.cpp(209,22): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\E.L.Jenneskens\Documents\git\clone\Thesis_Matrix_Part\GMP\GMP\main.cpp(277,138): warning C4129: 'h': unrecognized character escape sequence
+  GMP.vcxproj -> C:\Users\E.L.Jenneskens\Documents\git\clone\Thesis_Matrix_Part\GMP\x64\Debug\GMP.exe
